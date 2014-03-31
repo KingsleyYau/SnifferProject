@@ -1,0 +1,473 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CA25394518BAD04F0082DA61 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA25394418BAD04F0082DA61 /* Cocoa.framework */; };
+		CA25394F18BAD04F0082DA61 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CA25394D18BAD04F0082DA61 /* InfoPlist.strings */; };
+		CA25395118BAD04F0082DA61 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CA25395018BAD04F0082DA61 /* main.m */; };
+		CA25395518BAD04F0082DA61 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = CA25395318BAD04F0082DA61 /* Credits.rtf */; };
+		CA25395818BAD04F0082DA61 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CA25395718BAD04F0082DA61 /* AppDelegate.m */; };
+		CA25395B18BAD04F0082DA61 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = CA25395918BAD04F0082DA61 /* MainMenu.xib */; };
+		CA25395D18BAD04F0082DA61 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA25395C18BAD04F0082DA61 /* Images.xcassets */; };
+		CA907CC518DA9ACA007A101E /* Android.mk in Resources */ = {isa = PBXBuildFile; fileRef = CA907CB318DA9ACA007A101E /* Android.mk */; };
+		CA907CC618DA9ACA007A101E /* json_internalarray.inl in Resources */ = {isa = PBXBuildFile; fileRef = CA907CBE18DA9ACA007A101E /* json_internalarray.inl */; };
+		CA907CC718DA9ACA007A101E /* json_internalmap.inl in Resources */ = {isa = PBXBuildFile; fileRef = CA907CBF18DA9ACA007A101E /* json_internalmap.inl */; };
+		CA907CC818DA9ACA007A101E /* json_reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA907CC018DA9ACA007A101E /* json_reader.cpp */; };
+		CA907CC918DA9ACA007A101E /* json_value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA907CC118DA9ACA007A101E /* json_value.cpp */; };
+		CA907CCA18DA9ACA007A101E /* json_valueiterator.inl in Resources */ = {isa = PBXBuildFile; fileRef = CA907CC218DA9ACA007A101E /* json_valueiterator.inl */; };
+		CA907CCB18DA9ACA007A101E /* json_writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CA907CC318DA9ACA007A101E /* json_writer.cpp */; };
+		CA907CCC18DA9ACA007A101E /* sconscript in Resources */ = {isa = PBXBuildFile; fileRef = CA907CC418DA9ACA007A101E /* sconscript */; };
+		CAA7EE0B18BAD80C00CEAE66 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA25394918BAD04F0082DA61 /* Foundation.framework */; };
+		CAA7EE0D18BAD81900CEAE66 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAA7EE0C18BAD81900CEAE66 /* SystemConfiguration.framework */; };
+		CAC7703D18D6F45D0039EEB7 /* Arithmetic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC7701F18D6F45D0039EEB7 /* Arithmetic.cpp */; };
+		CAC7703E18D6F45D0039EEB7 /* DrSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC7702618D6F45D0039EEB7 /* DrSocket.cpp */; };
+		CAC7703F18D6F45D0039EEB7 /* DrTcpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC7702818D6F45D0039EEB7 /* DrTcpSocket.cpp */; };
+		CAC7704018D6F45D0039EEB7 /* DrThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC7702A18D6F45D0039EEB7 /* DrThread.cpp */; };
+		CAC7704118D6F45D0039EEB7 /* DrUdpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC7702C18D6F45D0039EEB7 /* DrUdpSocket.cpp */; };
+		CAC7704718D6F45D0039EEB7 /* DrSnifferServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAC7703A18D6F45D0039EEB7 /* DrSnifferServer.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		CA10608118D96B04005C5E97 /* DrSnifferCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrSnifferCallback.h; sourceTree = "<group>"; };
+		CA25394118BAD04F0082DA61 /* SimpleLogServer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleLogServer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA25394418BAD04F0082DA61 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		CA25394718BAD04F0082DA61 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		CA25394818BAD04F0082DA61 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		CA25394918BAD04F0082DA61 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		CA25394C18BAD04F0082DA61 /* SimpleLogServer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SimpleLogServer-Info.plist"; sourceTree = "<group>"; };
+		CA25394E18BAD04F0082DA61 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CA25395018BAD04F0082DA61 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		CA25395218BAD04F0082DA61 /* SimpleLogServer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimpleLogServer-Prefix.pch"; sourceTree = "<group>"; };
+		CA25395418BAD04F0082DA61 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		CA25395618BAD04F0082DA61 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		CA25395718BAD04F0082DA61 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		CA25395A18BAD04F0082DA61 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		CA25395C18BAD04F0082DA61 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		CA25396318BAD04F0082DA61 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		CA907CB318DA9ACA007A101E /* Android.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Android.mk; sourceTree = "<group>"; };
+		CA907CB518DA9ACA007A101E /* autolink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autolink.h; sourceTree = "<group>"; };
+		CA907CB618DA9ACA007A101E /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		CA907CB718DA9ACA007A101E /* features.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = features.h; sourceTree = "<group>"; };
+		CA907CB818DA9ACA007A101E /* forwards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = forwards.h; sourceTree = "<group>"; };
+		CA907CB918DA9ACA007A101E /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
+		CA907CBA18DA9ACA007A101E /* reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reader.h; sourceTree = "<group>"; };
+		CA907CBB18DA9ACA007A101E /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = value.h; sourceTree = "<group>"; };
+		CA907CBC18DA9ACA007A101E /* writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = writer.h; sourceTree = "<group>"; };
+		CA907CBD18DA9ACA007A101E /* json_batchallocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json_batchallocator.h; sourceTree = "<group>"; };
+		CA907CBE18DA9ACA007A101E /* json_internalarray.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = json_internalarray.inl; sourceTree = "<group>"; };
+		CA907CBF18DA9ACA007A101E /* json_internalmap.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = json_internalmap.inl; sourceTree = "<group>"; };
+		CA907CC018DA9ACA007A101E /* json_reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_reader.cpp; sourceTree = "<group>"; };
+		CA907CC118DA9ACA007A101E /* json_value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_value.cpp; sourceTree = "<group>"; };
+		CA907CC218DA9ACA007A101E /* json_valueiterator.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = json_valueiterator.inl; sourceTree = "<group>"; };
+		CA907CC318DA9ACA007A101E /* json_writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_writer.cpp; sourceTree = "<group>"; };
+		CA907CC418DA9ACA007A101E /* sconscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sconscript; sourceTree = "<group>"; };
+		CAA7EE0C18BAD81900CEAE66 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		CAC7701F18D6F45D0039EEB7 /* Arithmetic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Arithmetic.cpp; sourceTree = "<group>"; };
+		CAC7702018D6F45D0039EEB7 /* Arithmetic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Arithmetic.h; sourceTree = "<group>"; };
+		CAC7702118D6F45D0039EEB7 /* command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = command.h; sourceTree = "<group>"; };
+		CAC7702218D6F45D0039EEB7 /* DrCond.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrCond.h; sourceTree = "<group>"; };
+		CAC7702318D6F45D0039EEB7 /* DrLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrLog.h; sourceTree = "<group>"; };
+		CAC7702418D6F45D0039EEB7 /* DrMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrMutex.h; sourceTree = "<group>"; };
+		CAC7702518D6F45D0039EEB7 /* DrRunnable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrRunnable.h; sourceTree = "<group>"; };
+		CAC7702618D6F45D0039EEB7 /* DrSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DrSocket.cpp; sourceTree = "<group>"; };
+		CAC7702718D6F45D0039EEB7 /* DrSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrSocket.h; sourceTree = "<group>"; };
+		CAC7702818D6F45D0039EEB7 /* DrTcpSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DrTcpSocket.cpp; sourceTree = "<group>"; };
+		CAC7702918D6F45D0039EEB7 /* DrTcpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrTcpSocket.h; sourceTree = "<group>"; };
+		CAC7702A18D6F45D0039EEB7 /* DrThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DrThread.cpp; sourceTree = "<group>"; };
+		CAC7702B18D6F45D0039EEB7 /* DrThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrThread.h; sourceTree = "<group>"; };
+		CAC7702C18D6F45D0039EEB7 /* DrUdpSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DrUdpSocket.cpp; sourceTree = "<group>"; };
+		CAC7702D18D6F45D0039EEB7 /* DrUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrUdpSocket.h; sourceTree = "<group>"; };
+		CAC7703218D6F45D0039EEB7 /* DrCommandDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrCommandDef.h; sourceTree = "<group>"; };
+		CAC7703A18D6F45D0039EEB7 /* DrSnifferServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DrSnifferServer.cpp; sourceTree = "<group>"; };
+		CAC7703B18D6F45D0039EEB7 /* DrSnifferServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrSnifferServer.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CA25393E18BAD04F0082DA61 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAA7EE0D18BAD81900CEAE66 /* SystemConfiguration.framework in Frameworks */,
+				CAA7EE0B18BAD80C00CEAE66 /* Foundation.framework in Frameworks */,
+				CA25394518BAD04F0082DA61 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CA25393818BAD04F0082DA61 = {
+			isa = PBXGroup;
+			children = (
+				CA25394A18BAD04F0082DA61 /* SimpleLogServer */,
+				CA25394318BAD04F0082DA61 /* Frameworks */,
+				CA25394218BAD04F0082DA61 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CA25394218BAD04F0082DA61 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CA25394118BAD04F0082DA61 /* SimpleLogServer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CA25394318BAD04F0082DA61 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CAA7EE0C18BAD81900CEAE66 /* SystemConfiguration.framework */,
+				CA25394418BAD04F0082DA61 /* Cocoa.framework */,
+				CA25396318BAD04F0082DA61 /* XCTest.framework */,
+				CA25394618BAD04F0082DA61 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CA25394618BAD04F0082DA61 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CA25394718BAD04F0082DA61 /* AppKit.framework */,
+				CA25394818BAD04F0082DA61 /* CoreData.framework */,
+				CA25394918BAD04F0082DA61 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		CA25394A18BAD04F0082DA61 /* SimpleLogServer */ = {
+			isa = PBXGroup;
+			children = (
+				CA907CB218DA9ACA007A101E /* json */,
+				CA25395618BAD04F0082DA61 /* AppDelegate.h */,
+				CA25395718BAD04F0082DA61 /* AppDelegate.m */,
+				CAC7701D18D6F45D0039EEB7 /* common */,
+				CAC7703018D6F45D0039EEB7 /* drsniffer */,
+				CA25395C18BAD04F0082DA61 /* Images.xcassets */,
+				CA25395918BAD04F0082DA61 /* MainMenu.xib */,
+				CA25394B18BAD04F0082DA61 /* Supporting Files */,
+			);
+			path = SimpleLogServer;
+			sourceTree = "<group>";
+		};
+		CA25394B18BAD04F0082DA61 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CA25394C18BAD04F0082DA61 /* SimpleLogServer-Info.plist */,
+				CA25394D18BAD04F0082DA61 /* InfoPlist.strings */,
+				CA25395018BAD04F0082DA61 /* main.m */,
+				CA25395218BAD04F0082DA61 /* SimpleLogServer-Prefix.pch */,
+				CA25395318BAD04F0082DA61 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CA907CB218DA9ACA007A101E /* json */ = {
+			isa = PBXGroup;
+			children = (
+				CA907CB318DA9ACA007A101E /* Android.mk */,
+				CA907CB418DA9ACA007A101E /* json */,
+				CA907CBD18DA9ACA007A101E /* json_batchallocator.h */,
+				CA907CBE18DA9ACA007A101E /* json_internalarray.inl */,
+				CA907CBF18DA9ACA007A101E /* json_internalmap.inl */,
+				CA907CC018DA9ACA007A101E /* json_reader.cpp */,
+				CA907CC118DA9ACA007A101E /* json_value.cpp */,
+				CA907CC218DA9ACA007A101E /* json_valueiterator.inl */,
+				CA907CC318DA9ACA007A101E /* json_writer.cpp */,
+				CA907CC418DA9ACA007A101E /* sconscript */,
+			);
+			path = json;
+			sourceTree = "<group>";
+		};
+		CA907CB418DA9ACA007A101E /* json */ = {
+			isa = PBXGroup;
+			children = (
+				CA907CB518DA9ACA007A101E /* autolink.h */,
+				CA907CB618DA9ACA007A101E /* config.h */,
+				CA907CB718DA9ACA007A101E /* features.h */,
+				CA907CB818DA9ACA007A101E /* forwards.h */,
+				CA907CB918DA9ACA007A101E /* json.h */,
+				CA907CBA18DA9ACA007A101E /* reader.h */,
+				CA907CBB18DA9ACA007A101E /* value.h */,
+				CA907CBC18DA9ACA007A101E /* writer.h */,
+			);
+			path = json;
+			sourceTree = "<group>";
+		};
+		CAC7701D18D6F45D0039EEB7 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				CAC7701F18D6F45D0039EEB7 /* Arithmetic.cpp */,
+				CAC7702018D6F45D0039EEB7 /* Arithmetic.h */,
+				CAC7702118D6F45D0039EEB7 /* command.h */,
+				CAC7702218D6F45D0039EEB7 /* DrCond.h */,
+				CAC7702318D6F45D0039EEB7 /* DrLog.h */,
+				CAC7702418D6F45D0039EEB7 /* DrMutex.h */,
+				CAC7702518D6F45D0039EEB7 /* DrRunnable.h */,
+				CAC7702618D6F45D0039EEB7 /* DrSocket.cpp */,
+				CAC7702718D6F45D0039EEB7 /* DrSocket.h */,
+				CAC7702818D6F45D0039EEB7 /* DrTcpSocket.cpp */,
+				CAC7702918D6F45D0039EEB7 /* DrTcpSocket.h */,
+				CAC7702A18D6F45D0039EEB7 /* DrThread.cpp */,
+				CAC7702B18D6F45D0039EEB7 /* DrThread.h */,
+				CAC7702C18D6F45D0039EEB7 /* DrUdpSocket.cpp */,
+				CAC7702D18D6F45D0039EEB7 /* DrUdpSocket.h */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		CAC7703018D6F45D0039EEB7 /* drsniffer */ = {
+			isa = PBXGroup;
+			children = (
+				CA10608118D96B04005C5E97 /* DrSnifferCallback.h */,
+				CAC7703218D6F45D0039EEB7 /* DrCommandDef.h */,
+				CAC7703A18D6F45D0039EEB7 /* DrSnifferServer.cpp */,
+				CAC7703B18D6F45D0039EEB7 /* DrSnifferServer.h */,
+			);
+			path = drsniffer;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CA25394018BAD04F0082DA61 /* SimpleLogServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA25397218BAD04F0082DA61 /* Build configuration list for PBXNativeTarget "SimpleLogServer" */;
+			buildPhases = (
+				CA25393D18BAD04F0082DA61 /* Sources */,
+				CA25393E18BAD04F0082DA61 /* Frameworks */,
+				CA25393F18BAD04F0082DA61 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SimpleLogServer;
+			productName = SimpleLogServer;
+			productReference = CA25394118BAD04F0082DA61 /* SimpleLogServer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CA25393918BAD04F0082DA61 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = KingsleyYau;
+			};
+			buildConfigurationList = CA25393C18BAD04F0082DA61 /* Build configuration list for PBXProject "SimpleLogServer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CA25393818BAD04F0082DA61;
+			productRefGroup = CA25394218BAD04F0082DA61 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CA25394018BAD04F0082DA61 /* SimpleLogServer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CA25393F18BAD04F0082DA61 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA907CC718DA9ACA007A101E /* json_internalmap.inl in Resources */,
+				CA907CC518DA9ACA007A101E /* Android.mk in Resources */,
+				CA25394F18BAD04F0082DA61 /* InfoPlist.strings in Resources */,
+				CA907CCC18DA9ACA007A101E /* sconscript in Resources */,
+				CA25395D18BAD04F0082DA61 /* Images.xcassets in Resources */,
+				CA25395518BAD04F0082DA61 /* Credits.rtf in Resources */,
+				CA907CC618DA9ACA007A101E /* json_internalarray.inl in Resources */,
+				CA25395B18BAD04F0082DA61 /* MainMenu.xib in Resources */,
+				CA907CCA18DA9ACA007A101E /* json_valueiterator.inl in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CA25393D18BAD04F0082DA61 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA907CCB18DA9ACA007A101E /* json_writer.cpp in Sources */,
+				CAC7704118D6F45D0039EEB7 /* DrUdpSocket.cpp in Sources */,
+				CA907CC818DA9ACA007A101E /* json_reader.cpp in Sources */,
+				CAC7704718D6F45D0039EEB7 /* DrSnifferServer.cpp in Sources */,
+				CAC7703E18D6F45D0039EEB7 /* DrSocket.cpp in Sources */,
+				CAC7703D18D6F45D0039EEB7 /* Arithmetic.cpp in Sources */,
+				CAC7703F18D6F45D0039EEB7 /* DrTcpSocket.cpp in Sources */,
+				CA25395818BAD04F0082DA61 /* AppDelegate.m in Sources */,
+				CA907CC918DA9ACA007A101E /* json_value.cpp in Sources */,
+				CA25395118BAD04F0082DA61 /* main.m in Sources */,
+				CAC7704018D6F45D0039EEB7 /* DrThread.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		CA25394D18BAD04F0082DA61 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CA25394E18BAD04F0082DA61 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		CA25395318BAD04F0082DA61 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CA25395418BAD04F0082DA61 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		CA25395918BAD04F0082DA61 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CA25395A18BAD04F0082DA61 /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		CA25397018BAD04F0082DA61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		CA25397118BAD04F0082DA61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		CA25397318BAD04F0082DA61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SimpleLogServer/SimpleLogServer-Prefix.pch";
+				INFOPLIST_FILE = "SimpleLogServer/SimpleLogServer-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		CA25397418BAD04F0082DA61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SimpleLogServer/SimpleLogServer-Prefix.pch";
+				INFOPLIST_FILE = "SimpleLogServer/SimpleLogServer-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CA25393C18BAD04F0082DA61 /* Build configuration list for PBXProject "SimpleLogServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA25397018BAD04F0082DA61 /* Debug */,
+				CA25397118BAD04F0082DA61 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA25397218BAD04F0082DA61 /* Build configuration list for PBXNativeTarget "SimpleLogServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA25397318BAD04F0082DA61 /* Debug */,
+				CA25397418BAD04F0082DA61 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CA25393918BAD04F0082DA61 /* Project object */;
+}
