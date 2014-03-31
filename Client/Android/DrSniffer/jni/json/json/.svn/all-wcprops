@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json
+END
+json.h
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/json.h
+END
+value.h
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/value.h
+END
+writer.h
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/writer.h
+END
+features.h
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/features.h
+END
+reader.h
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/reader.h
+END
+config.h
+K 25
+svn:wc:ra_dav:version-url
+V 124
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/config.h
+END
+autolink.h
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/autolink.h
+END
+forwards.h
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/DrPalm/!svn/ver/9405/source/branches/Android/%E5%85%AC%E7%94%A8%E6%A8%A1%E5%9D%97/PushJarProject/jni/json/json/forwards.h
+END
