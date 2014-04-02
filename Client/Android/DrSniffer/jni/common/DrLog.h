@@ -16,24 +16,26 @@ using namespace std;
 #include <dirent.h>
 #include <sys/stat.h>
 
-#ifdef PRINT_JNI_LOG
+#ifdef PRINT_JNI_LOG /* logcat输出 */
 #include <android/log.h>
-#define showLog(tag, format, ...) __android_log_print(ANDROID_LOG_INFO, tag, format, ## __VA_ARGS__)
+
 #define DLog(tag, format, ...) __android_log_print(ANDROID_LOG_DEBUG, tag, format, ## __VA_ARGS__)
 #define ILog(tag, format, ...) __android_log_print(ANDROID_LOG_INFO, tag, format, ## __VA_ARGS__)
 #define ELog(tag, format, ...) __android_log_print(ANDROID_LOG_ERROR, tag, format, ## __VA_ARGS__)
-#define PLog(tag, format, ...) printf(format, ## __VA_ARGS__);printf("\r\n")
-#define FileLog(fileNamePre, format, ...) ILog("jni", format,  ## __VA_ARGS__);
-#else
-#define FileLog(fileNamePre, format, ...)
-#ifdef FILE_JNI_LOG
+
+#if	defined(FILE_JNI_LOG) /* 日志文件输出 */
 #define FileLog(fileNamePre, format, ...) LogToFile(fileNamePre, 1, format,  ## __VA_ARGS__)
+#elif defined(CONSLE_JNI_LOG) /* 命令行终端输出 */
+#define FileLog(fileNamePre, format, ...) printf(format, ## __VA_ARGS__)
+#else
+#define FileLog(fileNamePre, format, ...) ILog("jni", format,  ## __VA_ARGS__) /* logcat输出 */
 #endif /* FILE_JNI_LOG */
-#define showLog(tag, format, ...)
+
+#else /* 不输出 */
+#define FileLog(fileNamePre, format, ...)
 #define DLog(tag, format, ...)
-#define ILog(tag, format, ...)
-#define ELog(tag, format, ...)
-#define PLog(tag, format, ...)
+#define ILog DLog
+#define ELog DLog
 #endif /* PRINT_JNI_LOG */
 
 static inline int LogToFile(const char *fileNamePre, int level, const char *fmt, ...) {

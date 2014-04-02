@@ -35,18 +35,22 @@ JNIEXPORT jboolean JNICALL Java_com_drcom_drsniffer_DrSnifferJni_IsRoot
 /*
  * Class:     com_drcom_drsniffer_DrSnifferJni
  * Method:    ReleaseDrSniffer
- * Signature: (Ljava/lang/String;)Z
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_drcom_drsniffer_DrSnifferJni_ReleaseDrSniffer
-  (JNIEnv *env, jobject thiz, jstring sdcardPath) {
+  (JNIEnv *env, jobject thiz, jstring packageName, jstring sdcardPath) {
 	jboolean jbFlag = false;
+
+	const char *pPackage = env->GetStringUTFChars(packageName, 0);
+	string packageNameString = pPackage;
+	env->ReleaseStringUTFChars(packageName, pPackage);
 
 	const char *pPath = env->GetStringUTFChars(sdcardPath, 0);
 	string filePath = pPath;
 	env->ReleaseStringUTFChars(sdcardPath, pPath);
 
 	// 安装DrSniffer
-	jbFlag = InstallDrSniffer(filePath);
+	jbFlag = InstallDrSniffer(packageNameString, filePath);
 
 	return jbFlag;
 }

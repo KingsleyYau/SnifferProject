@@ -8,10 +8,7 @@
 
 #include "DrTcpSocket.h"
 #include "Arithmetic.h"
-
-#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)
-#define TCP_KEEPIDLE TCP_KEEPALIVE
-#endif /* !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)  for iOS */
+#include "config.h"
 
 DrTcpSocket::DrTcpSocket() {
 	// TODO Auto-generated constructor stub
@@ -96,63 +93,89 @@ int DrTcpSocket::Connect(string strAddress, unsigned int uiPort, bool bBlocking)
 		iFlag = 1;
 		setsockopt(m_Socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&iFlag, sizeof(iFlag));
 
-		if(setBlocking(true)) {
-			// 设置阻塞
+		if(setBlocking(false)) {
+			// 设置非阻塞
 		}
 		else {
 			iRet = -1;
-			ELog("jni.DrTcpSocket::Connect()", "Connect前设置socket阻塞失败！");
+			ELog("jni.DrTcpSocket::Connect()", "Connect前设置socket非阻塞失败！");
 			goto EXIT_ERROR_TCP;
 		}
 
 		DLog("jni.DrTcpSocket::Connect()", "开始连接(%s:%d)", m_sAddress.c_str(), uiPort);
 		if (connect(m_Socket, (struct sockaddr *)&dest, sizeof(dest)) != -1) {
-			DLog("jni.DrTcpSocket::Connect()", "连接成功，开始设置socket属性...");
-			if(setBlocking(bBlocking)) {
-				// 设置阻塞
-			}
-			else {
-				iRet = -1;
-				ELog("jni.DrTcpSocket::Connect()", "Connect后设置socket阻塞属性失败!");
-				goto EXIT_ERROR_TCP;
-			}
-
-			// 设置心跳检测
-		    /*deal with the tcp keepalive
-		      iKeepAlive = 1 (check keepalive)
-		      iKeepIdle = 600 (active keepalive after socket has idled for 10 minutes)
-		      KeepInt = 60 (send keepalive every 1 minute after keepalive was actived)
-		      iKeepCount = 3 (send keepalive 3 times before disconnect from peer)
-		     */
-		    int iKeepAlive = 1, iKeepIdle = 15, KeepInt = 15, iKeepCount = 2;
-		    if (setsockopt(m_Socket, SOL_SOCKET, SO_KEEPALIVE, (void*)&iKeepAlive, sizeof(iKeepAlive)) < 0) {
-		    	iRet = -1;
-		    	ELog("jni.DrTcpSocket::Connect()", "设置iKeepAlive失败！");
-		    	goto EXIT_ERROR_TCP;
-		    }
-		    if (setsockopt(m_Socket, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&iKeepIdle, sizeof(iKeepIdle)) < 0) {
-		    	iRet = -1;
-		    	ELog("jni.DrTcpSocket::Connect()", "设置iKeepIdle失败！");
-		    	goto EXIT_ERROR_TCP;
-		    }
-		    if (setsockopt(m_Socket, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&KeepInt, sizeof(KeepInt)) < 0) {
-		    	iRet = -1;
-		    	ELog("jni.DrTcpSocket::Connect()", "设置KeepInt失败！");
-		    	goto EXIT_ERROR_TCP;
-		    }
-		    if (setsockopt(m_Socket, IPPROTO_TCP, TCP_KEEPCNT, (void *)&iKeepCount, sizeof(iKeepCount)) < 0) {
-		    	iRet = -1;
-		    	ELog("jni.DrTcpSocket::Connect()", "设置iKeepCount失败！");
-		    	goto EXIT_ERROR_TCP;
-		    }
-		    DLog("jni.DrTcpSocket::Connect()", "设置tcp心跳检测成功，每次%d秒检测一次，连续%d次没有收到心跳则断开，连接成功后%d秒开始心跳检测！", \
-		    		KeepInt, iKeepCount, iKeepIdle);
-
-		    iRet = 1;
+			// 成功
+			iRet = 1;
 		}
 		else {
-			ELog("jni.DrTcpSocket::Connect()", "连接失败！");
+			fd_set wset;
+			struct timeval tout;
+			tout.tv_sec = 20;
+			tout.tv_usec = 0;
+			FD_ZERO(&wset);
+			FD_SET(m_Socket, &wset);
+			int iRetS = select(m_Socket + 1, NULL, &wset, NULL, &tout);
+			if (iRetS > 0) {
+				int error, len;
+				getsockopt(m_Socket, SOL_SOCKET, SO_ERROR, &error, (socklen_t *)&len);
+				if(error == 0) {
+					iRet = 1;
+				}
+				else {
+					iRet = -1;
+					ELog("jni.DrTcpSocket::Connect()", "Connect超时失败！");
+					goto EXIT_ERROR_TCP;
+				}
+
+			} else {
+				ELog("jni.DrTcpSocket::Connect()", "Connect超时失败！");
+				iRet = -1;
+				goto EXIT_ERROR_TCP;
+			}
 		}
+
+		DLog("jni.DrTcpSocket::Connect()", "连接成功，开始设置socket属性...");
+		if(setBlocking(bBlocking)) {
+			// 设置阻塞
+		}
+		else {
+			iRet = -1;
+			ELog("jni.DrTcpSocket::Connect()", "Connect后设置socket阻塞属性失败!");
+			goto EXIT_ERROR_TCP;
+		}
+
+		// 设置心跳检测
+	    /*deal with the tcp keepalive
+	      iKeepAlive = 1 (check keepalive)
+	      iKeepIdle = 600 (active keepalive after socket has idled for 10 minutes)
+	      KeepInt = 60 (send keepalive every 1 minute after keepalive was actived)
+	      iKeepCount = 3 (send keepalive 3 times before disconnect from peer)
+	     */
+	    int iKeepAlive = 1, iKeepIdle = 15, KeepInt = 15, iKeepCount = 2;
+	    if (setsockopt(m_Socket, SOL_SOCKET, SO_KEEPALIVE, (void*)&iKeepAlive, sizeof(iKeepAlive)) < 0) {
+	    	iRet = -1;
+	    	ELog("jni.DrTcpSocket::Connect()", "设置iKeepAlive失败！");
+	    	goto EXIT_ERROR_TCP;
+	    }
+	    if (setsockopt(m_Socket, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&iKeepIdle, sizeof(iKeepIdle)) < 0) {
+	    	iRet = -1;
+	    	ELog("jni.DrTcpSocket::Connect()", "设置iKeepIdle失败！");
+	    	goto EXIT_ERROR_TCP;
+	    }
+	    if (setsockopt(m_Socket, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&KeepInt, sizeof(KeepInt)) < 0) {
+	    	iRet = -1;
+	    	ELog("jni.DrTcpSocket::Connect()", "设置KeepInt失败！");
+	    	goto EXIT_ERROR_TCP;
+	    }
+	    if (setsockopt(m_Socket, IPPROTO_TCP, TCP_KEEPCNT, (void *)&iKeepCount, sizeof(iKeepCount)) < 0) {
+	    	iRet = -1;
+	    	ELog("jni.DrTcpSocket::Connect()", "设置iKeepCount失败！");
+	    	goto EXIT_ERROR_TCP;
+	    }
+	    DLog("jni.DrTcpSocket::Connect()", "设置tcp心跳检测成功，每次%d秒检测一次，连续%d次没有收到心跳则断开，连接成功后%d秒开始心跳检测！", \
+	    		KeepInt, iKeepCount, iKeepIdle);
+
+	    iRet = 1;
 	}
 	else {
 		ELog("jni.DrTcpSocket::Connect()", "创建socket失败！");
@@ -161,6 +184,7 @@ int DrTcpSocket::Connect(string strAddress, unsigned int uiPort, bool bBlocking)
 EXIT_ERROR_TCP:
 	if (iRet != 1) {
 		Close();
+		ELog("jni.DrTcpSocket::Connect()", "连接失败！");
 	}
 	else {
 		m_bConnected = true;

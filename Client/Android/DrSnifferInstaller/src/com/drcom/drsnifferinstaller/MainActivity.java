@@ -3,6 +3,7 @@ package com.drcom.drsnifferinstaller;
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.view.Menu;
 
 import com.drcom.drsniffer.DrSnifferJni;
@@ -16,11 +17,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        final String packageName = this.getPackageName(); 
+
         new Thread() {
         	@Override
 			public void run(){
             	String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        		jni.ReleaseDrSniffer(sdcardPath);
+        		jni.ReleaseDrSniffer(packageName, sdcardPath);
         	}
         }.start();
     }

@@ -26,18 +26,17 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	if(!MountSystem()) {
+	int uid = 0, gid = 0;
+	if(setgid(gid) || setuid(uid)) {
+		ELog("jni.DrSniffer.main", "权限不够,请提升至管理员权限再运行程序!");
+		return 0;
+	}
 
+	if(!MountSystem()) {
+		ELog("jni.DrSniffer.main", "重新挂载/system失败, 日志文件可能无法保存!");
 	}
 
 	FileLog(DrSnifferLogFileName, "drsniffer启动!");
-	int uid = 0, gid = 0;
-	if(setgid(gid) || setuid(uid)) {
-		FileLog(DrSnifferLogFileName, "权限不够,请提升至管理员权限再运行程序!");
-	}
-
-//	// 直接开始监听
-//	g_DrSniffer.StartSniffer();
 
 	while(1) {
 		FileLog(DrSnifferLogFileName, "等待连接服务端...");

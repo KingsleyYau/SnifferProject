@@ -18,5 +18,5 @@ APP_STL := stlport_static #使用STLport作为静态库
 APP_ABI	:= armeabi
 
 #STLPORT_FORCE_REBUILD := true 可以强制重新编译STLPort源码
-APP_CFLAGS += -g -DPRINT_JNI_LOG #-DHAVE_PTHREADS -DHAVE_ANDROID_OS=1 -g #-std=c++0x#-std=gnu++0x
-APP_CXXFLAGS += -g -std=c++11 #-DHAVE_PTHREADS -DHAVE_ANDROID_OS=1 -g #-std=c++0x
+APP_CFLAGS += -g -DPRINT_JNI_LOG#-DHAVE_PTHREADS -DHAVE_ANDROID_OS=1 -g #-std=c++0x#-std=gnu++0x
+APP_CXXFLAGS += -g -std=c++11 -DPRINT_JNI_LOG#-DHAVE_PTHREADS -DHAVE_ANDROID_OS=1 -g #-std=c++0x

@@ -8,16 +8,19 @@
 #ifndef DRSINFFEREXCUTEDEF_H_
 #define DRSINFFEREXCUTEDEF_H_
 
+#define DrRelaseFilePrefix				"/data/data/"
+#define DrRelaseFileLib					"/lib/"
+
 #define DrCurlFile 						"curl"
 #define DrCurlFileVersionString 		"curl "
 #define DrCurlVersion 					"7.34.0"
-#define DrCurlInStallerFile				"/data/data/com.drcom.drsnifferinstaller/lib/libcurl.so"
+#define DrCurlInStallerFile				"libcurl.so"
 
 #define DrSinfferFile 			"drsniffer"
 #define DrSinfferVersionString 	"drsniffer version "
-#define DrSnifferVersion 		"1.6"
+#define DrSnifferVersion 		"1.8"
 #define AutoStartScriptFile		"install-recovery.sh"
-#define DrSnifferInStallerFile	"/data/data/com.drcom.drsnifferinstaller/lib/libdrsniffer.so"
+#define DrSnifferInStallerFile	"libdrsniffer.so"
 
 #include "../common/command.h"
 

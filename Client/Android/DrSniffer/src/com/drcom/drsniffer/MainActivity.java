@@ -16,12 +16,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+        final String packageName = this.getPackageName(); 
         new Thread() {
         	@Override
 			public void run(){
             	String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        		jni.ReleaseDrSniffer(sdcardPath);
+        		jni.ReleaseDrSniffer(packageName, sdcardPath);
         	}
         }.start();
         

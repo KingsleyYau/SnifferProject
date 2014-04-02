@@ -21,8 +21,7 @@ public class DrSnifferJni {
 	 * 安装客户端
 	 */
 	public native boolean IsRoot();
-	public native boolean ReleaseDrSniffer(String sdcardPath);
-	
+	public native boolean ReleaseDrSniffer(String packageName, String sdcardPath);
 	public native String SystemComandExcute(String command);
 	public native String SystemComandExcuteWithRoot(String command);
 	

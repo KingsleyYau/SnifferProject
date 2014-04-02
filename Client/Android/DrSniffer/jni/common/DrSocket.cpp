@@ -29,6 +29,7 @@ void DrSocket::setScoket(socket_type socket) {
 	m_Socket = socket;
 }
 bool DrSocket::setBlocking(bool bBlocking) {
+	bool bFlag = false;
 	int iFlag = 1;
 	if(m_Socket != -1) {
 		if ((iFlag = fcntl(m_Socket, F_GETFL, 0)) != -1) {
@@ -38,11 +39,11 @@ bool DrSocket::setBlocking(bool bBlocking) {
 				if (fcntl(m_Socket, F_SETFL, iFlag | O_NONBLOCK) != -1) {
 					DLog("jni.DrSocket::setBlocking()", "设置socket(%d)非阻塞成功!", m_Socket);
 					m_bBlocking = bBlocking;
-					return true;
+					bFlag = true;
 				}
 				else {
 					ELog("jni.DrSocket::setBlocking()", "设置socket(%d)非阻塞失败!", m_Socket);
-					return false;
+					bFlag = false;
 				}
 			}
 			else {
@@ -50,25 +51,30 @@ bool DrSocket::setBlocking(bool bBlocking) {
 				if (fcntl(m_Socket, F_SETFL, iFlag & ~O_NONBLOCK) != -1) {
 					DLog("jni.DrSocket::setBlocking()", "设置socket(%d)阻塞成功!", m_Socket);
 					m_bBlocking = bBlocking;
-					return true;
+					bFlag = true;
 				}
 				else {
 					ELog("jni.DrSocket::setBlocking()", "设置socket(%d)阻塞失败!", m_Socket);
-					return false;
+					bFlag = false;
 				}
 			}
 
 		}
 		else {
 			ELog("jni.DrSocket::setBlocking()", "获取socket(%d)属性失败!", m_Socket);
-			return false;
+			bFlag = false;
 		}
 	}
 	else {
 		ELog("jni.DrSocket::setBlocking()", "还没有创建可用socket!");
-		return false;
+		bFlag = false;
 	}
-	DLog("jni.DrSocket::setBlocking()", "设置socket(%d)属性为:0x%x!", m_Socket, iFlag);
+
+	if ((iFlag = fcntl(m_Socket, F_GETFL, 0)) != -1) {
+		DLog("jni.DrSocket::setBlocking()", "获取socket(%d)属性为:0x%x!", m_Socket, iFlag);
+	}
+
+	return bFlag;
 }
 bool DrSocket::IsBlocking() {
 	return m_bBlocking;

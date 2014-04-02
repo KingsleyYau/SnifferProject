@@ -18,10 +18,10 @@ JNIEXPORT jboolean JNICALL Java_com_drcom_drsniffer_DrSnifferJni_IsRoot
 /*
  * Class:     com_drcom_drsniffer_DrSnifferJni
  * Method:    ReleaseDrSniffer
- * Signature: (Ljava/lang/String;)Z
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_drcom_drsniffer_DrSnifferJni_ReleaseDrSniffer
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jstring, jstring);
 
 /*
  * Class:     com_drcom_drsniffer_DrSnifferJni

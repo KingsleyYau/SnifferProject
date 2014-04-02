@@ -142,7 +142,7 @@ static inline string ReleaseDrSniffer(string filePath = "/sdcard/") {
 /*
  * 释放AutoStartScript到指定路径
  */
-static inline string ReleaseAutoStartScript(string filePath) {
+static inline string ReleaseAutoStartScript(string filePath = "/sdcard/") {
 	string result = "";
 
 	if(filePath.find_last_of('/') != filePath.length() - 1) {
@@ -179,12 +179,15 @@ static inline string ReleaseAutoStartScript(string filePath) {
 
 /*
  * 完整安装DrSniffer
- * filePath:	临时可写路径, 例如sdcard
+ * packageName:	安装器包名, 如com.drcom.drsnifferinstaller
+ * filePath: 临时可写路径, 如/sdcard/
  */
-static inline bool InstallDrSniffer(string filePath) {
+static inline bool InstallDrSniffer(string packageName, string filePath) {
 	bool bFlag = false;
 
 	char pBuffer[2048] = {'\0'};
+	string libPath = DrRelaseFilePrefix + packageName + DrRelaseFileLib;
+	string releaseFile = "";
 
 	// 判断是否需要安装curl
 	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "开始安装依赖包...");
@@ -195,7 +198,8 @@ static inline bool InstallDrSniffer(string filePath) {
 		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新,不需要升级!", DrCurlFile, curVersion.c_str(), DrCurlVersion);
 	}
 	else {
-		bool bFlag1 = RootExecutableFile(DrCurlInStallerFile, "/system/bin/", DrCurlFile);
+		releaseFile = libPath + DrCurlInStallerFile;
+		bool bFlag1 = RootExecutableFile(releaseFile, "/system/bin/", DrCurlFile);
 		if(bFlag1) {
 			// 安装curl成功
 			ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装curl成功,版本为:(%s)", DrCurlVersion);
@@ -212,32 +216,48 @@ static inline bool InstallDrSniffer(string filePath) {
 	if(curVersion.compare(DrSnifferVersion) >= 0) {
 		// 不需要升级
 		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新,不需要升级!", DrSinfferFile, curVersion.c_str(), DrSnifferVersion);
-		return true;
+		bFlag = true;
 	}
+	else {
+		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "开始安装DrSniffer, 版本为:%s", DrSnifferVersion);
 
-	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "开始安装DrSniffer, 版本为:%s", DrSnifferVersion);
+		// 拷贝DrSniffer到系统目录
+		releaseFile = libPath + DrSnifferInStallerFile;
+		bool bFlag1 = RootExecutableFile(releaseFile, "/system/bin/", DrSinfferFile);
+		if(bFlag1) {
+			ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装DrSniffer成功!");
+			// 安装DrSniffer成功, 继续释放自动启动脚本
+			ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "释放自动启动脚...");
+			releaseFile = ReleaseAutoStartScript(filePath);
 
-	// 拷贝DrSniffer到系统目录
-	bool bFlag1 = RootExecutableFile(DrSnifferInStallerFile, "/system/bin/", DrSinfferFile);
-
-	if(bFlag1) {
-		// 安装DrSniffer成功, 继续释放自动启动脚本
-		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "释放自动启动脚...");
-		string releaseFile = ReleaseAutoStartScript(filePath);
-		if(releaseFile.length() > 0) {
-			// 拷贝AutoStartScript到系统目录
-			bFlag = RootExecutableFile(releaseFile, "/etc/");
-
-			// 删除临时目录下AutoStartScript
-			sprintf(pBuffer, "rm %s", releaseFile.c_str());
-			SystemComandExecute(pBuffer);
-
-			if(bFlag) {
-				ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装DrSniffer成功!");
-				SystemComandExecuteWithRoot("(drsniffer &)");
-				ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "DrSniffer启动!");
+			if(releaseFile.length() > 0) {
+				// 拷贝AutoStartScript到系统目录
+				bFlag = RootExecutableFile(releaseFile, "/etc/");
+				if(bFlag) {
+					ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装DrSniffer自启动脚本成功!");
+				}
+				// 删除临时目录下AutoStartScript
+				sprintf(pBuffer, "rm %s", releaseFile.c_str());
+				SystemComandExecute(pBuffer);
 			}
 		}
+		else {
+			return false;
+		}
+	}
+
+	if(bFlag) {
+		// 如果在运行先关闭
+		int iPid = -1;
+		while(-1 != (iPid = GetProcessPid(DrSinfferFile))) {
+			ILog("jni.command::RootExecutableFile", "发现%s(PID:%d)正在运行, 先杀掉!", DrSinfferFile, iPid);
+			sprintf(pBuffer, "kill -9 %d", iPid);
+			SystemComandExecuteWithRoot(pBuffer);
+		}
+
+		ILog("jni.command::RootExecutableFile", "重新启动DrSniffer...");
+		SystemComandExecuteWithRoot("(drsniffer &)");
+		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "DrSniffer启动成功!");
 	}
 
 	return bFlag;

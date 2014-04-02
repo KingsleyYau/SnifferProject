@@ -39,7 +39,7 @@ static inline string GetPhoneInfo(string param) {
 			string reslut = buffer;
 			if(string::npos != reslut.find(param)) {
 				model = reslut.substr(param.length(), reslut.length() - param.length() - 1);
-				DLog("jni.command::GetPhoneInfo()", "找到设备信息:%s", model.c_str());
+//				DLog("jni.command::GetPhoneInfo()", "找到设备信息:%s", model.c_str());
 			}
 		}
 		pclose(ptr);
