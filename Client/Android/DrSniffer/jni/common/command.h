@@ -86,6 +86,7 @@ static inline string GetPhoneBuildVersion() {
  * 获取进程名的Pid
  */
 static inline int GetProcessPid(string name) {
+	DLog("jni.command::GetProcessPid", "正在获取进程(%s)Pid...", name.c_str());
 	int iPid = -1;
 
 	string findName = " ";
@@ -122,7 +123,7 @@ static inline int GetProcessPid(string name) {
 						if(i == iColumn) {
 							// 找到进程pid
 							iPid = atoi(p);
-							DLog("jni.command::GetProcessPid", "在找到进程Pid:%s", p);
+							DLog("jni.command::GetProcessPid", "找到进程Pid:%s", p);
 							break;
 						}
 						p = strtok(NULL, " ");

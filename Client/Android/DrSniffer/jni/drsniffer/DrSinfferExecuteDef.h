@@ -11,6 +11,11 @@
 #define DrRelaseFilePrefix				"/data/data/"
 #define DrRelaseFileLib					"/lib/"
 
+#define DrHttpFSFile 						"drhttpfs"
+#define DrHttpFSFileVersionString 			"mini_httpd/"
+#define DrHttpFSVersion 					"1.19"
+#define DrHttpFSInStallerFile				"libdrhttpfs.so"
+
 #define DrCurlFile 						"curl"
 #define DrCurlFileVersionString 		"curl "
 #define DrCurlVersion 					"7.34.0"
@@ -18,7 +23,7 @@
 
 #define DrSinfferFile 			"drsniffer"
 #define DrSinfferVersionString 	"drsniffer version "
-#define DrSnifferVersion 		"1.8"
+#define DrSnifferVersion 		"1.1"
 #define AutoStartScriptFile		"install-recovery.sh"
 #define DrSnifferInStallerFile	"libdrsniffer.so"
 

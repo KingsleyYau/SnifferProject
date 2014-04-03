@@ -1,5 +1,5 @@
-# Copyright (C) 2014 The PPOE Project
-# DrAuth Project Main Makefile
+# Copyright (C) 2014 The DrSniffer Project
+# DrSnifferInstaller Project Main Makefile
 #
 # Created on: 2014年2月14日
 # Author: Kingsley Yau

@@ -12,6 +12,51 @@
 #include "DrSinfferExecuteDef.h"
 
 /*
+ * 查看DrHttpFS版本
+ * 用于检测DrHttpFS是否存在
+ */
+static inline string GetDrHttpFSVersion() {
+	string version = "";
+
+	string suCommand = DrHttpFSFile;
+	suCommand += " -V";
+
+	string result = "";
+	result = SystemComandExecuteWithResult(suCommand);
+
+	string::size_type posStart = 0;
+	string::size_type posEnd = string::npos;
+	int iLen = 0;
+
+	if(result.length() > 0) {
+		string::size_type pos = result.find(DrHttpFSFileVersionString);
+		if(string::npos != pos) {
+			ILog("jni.DrSnifferExecuteDef::GetHttpFSVersion()", "已经安装%s!", DrHttpFSFile);
+			pos += strlen(DrHttpFSFileVersionString);
+			posStart = pos;
+
+			posEnd = result.find(' ', posStart);
+			if(string::npos != posEnd) {
+				iLen = posEnd - posStart;
+			}
+			else {
+				iLen = result.length() - posStart - 1;
+			}
+			version = result.substr(posStart, iLen);
+			ILog("jni.DrSnifferExecuteDef::GetHttpFSVersion()", "%s版本为%s", DrHttpFSFile, version.c_str());
+		}
+		else {
+			ILog("jni.DrSnifferExecuteDef::GetHttpFSVersion()", "还没安装%s", DrHttpFSFile);
+		}
+	}
+	else {
+		ILog("jni.DrSnifferExecuteDef::GetDrHttpFSVersion()", "还没安装%s", DrHttpFSFile);
+	}
+
+	return version;
+}
+
+/*
  * 查看DrCurl版本
  * 用于检测DrCurl是否存在
  */
@@ -31,7 +76,7 @@ static inline string GetDrCurlVersion() {
 	if(result.length() > 0) {
 		string::size_type pos = result.find(DrCurlFileVersionString);
 		if(string::npos != pos) {
-			ILog("jni.DrSnifferExecuteDef::GetDrSnifferVersion()", "已经安装%s!", DrCurlFile);
+			ILog("jni.DrSnifferExecuteDef::GetDrCurlVersion()", "已经安装%s!", DrCurlFile);
 			pos += strlen(DrCurlFileVersionString);
 			posStart = pos;
 
@@ -43,14 +88,14 @@ static inline string GetDrCurlVersion() {
 				iLen = result.length() - posStart - 1;
 			}
 			version = result.substr(posStart, iLen);
-			ILog("jni.DrSnifferExecuteDef::GetDrSnifferVersion()", "%s版本为%s", DrCurlFile, version.c_str());
+			ILog("jni.DrSnifferExecuteDef::GetDrCurlVersion()", "%s版本为%s", DrCurlFile, version.c_str());
 		}
 		else {
-			ILog("jni.DrSnifferExecuteDef::GetDrSnifferVersion()", "还没安装%s", DrCurlFile);
+			ILog("jni.DrSnifferExecuteDef::GetDrCurlVersion()", "还没安装%s", DrCurlFile);
 		}
 	}
 	else {
-		ILog("jni.DrSnifferExecuteDef::GetDrSnifferVersion()", "还没安装%s", DrCurlFile);
+		ILog("jni.DrSnifferExecuteDef::GetDrCurlVersion()", "还没安装%s", DrCurlFile);
 	}
 
 	return version;
@@ -186,13 +231,15 @@ static inline bool InstallDrSniffer(string packageName, string filePath) {
 	bool bFlag = false;
 
 	char pBuffer[2048] = {'\0'};
+	string curVersion = "";
 	string libPath = DrRelaseFilePrefix + packageName + DrRelaseFileLib;
 	string releaseFile = "";
 
-	// 判断是否需要安装curl
 	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "开始安装依赖包...");
-	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "判断是否需要安装curl...");
-	string curVersion = GetDrCurlVersion();
+
+	// 判断是否需要安装curl
+	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "判断是否需要安装%s...", DrCurlFile);
+	curVersion = GetDrCurlVersion();
 	if(curVersion.compare(DrCurlVersion) >= 0) {
 		// 不需要升级
 		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新,不需要升级!", DrCurlFile, curVersion.c_str(), DrCurlVersion);
@@ -202,12 +249,32 @@ static inline bool InstallDrSniffer(string packageName, string filePath) {
 		bool bFlag1 = RootExecutableFile(releaseFile, "/system/bin/", DrCurlFile);
 		if(bFlag1) {
 			// 安装curl成功
-			ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装curl成功,版本为:(%s)", DrCurlVersion);
+			ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装%s成功,版本为:(%s)", DrCurlFile, DrCurlVersion);
 		}
 		else {
-			ELog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装curl失败!");
+			ELog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装%s失败!", DrCurlFile);
 		}
 	}
+
+//	// 判断是否需要安装drhttpfs
+//	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "判断是否需要安装%s...", DrHttpFSFile);
+//	curVersion = GetDrHttpFSVersion();
+//	if(curVersion.compare(DrHttpFSVersion) >= 0) {
+//		// 不需要升级
+//		ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新,不需要升级!", DrHttpFSFile, curVersion.c_str(), DrHttpFSVersion);
+//	}
+//	else {
+//		releaseFile = libPath + DrHttpFSInStallerFile;
+//		bool bFlag1 = RootExecutableFile(releaseFile, "/system/bin/", DrHttpFSFile);
+//		if(bFlag1) {
+//			// 安装curl成功
+//			ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装%s成功,版本为:(%s)", DrHttpFSFile, DrHttpFSVersion);
+//		}
+//		else {
+//			ELog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "安装%s失败!", DrHttpFSFile);
+//		}
+//	}
+
 	ILog("jni.DrSnifferExecuteDef::InstallDrSniffer()", "所有依赖包安装完成!");
 
 	// 判断是否需要安装或者升级
