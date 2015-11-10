@@ -53,6 +53,14 @@ private:
 	int HandleTimeoutMessage(Message *m, Message *sm);
 	int HandleInsideRecvMessage(Message *m, Message *sm);
 
+	/**
+	 * 获取在线客户端
+	 */
+	int GetOnlineList(
+			Json::Value& listNode,
+			Message *m
+			);
+
 	TcpServer mClientTcpServer;
 	TcpServer mClientTcpInsideServer;
 

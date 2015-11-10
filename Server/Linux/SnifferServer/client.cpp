@@ -6,6 +6,7 @@
  */
 
 #include "Client.h"
+#include "LogManager.h"
 
 Client::Client() {
 	// TODO Auto-generated constructor stub
@@ -31,8 +32,20 @@ int Client::ParseData(char* buffer, int len)  {
 	if( recvLen > 0 ) {
 		memcpy(message.buffer + message.len, buffer, recvLen);
 		message.len += recvLen;
-		message.buffer[message.len + 1] = '\0';
+		message.buffer[message.len] = '\0';
 	}
+
+	LogManager::GetLogManager()->Log(
+			LOG_MSG,
+			"Client::ParseData( "
+			"tid : %d, "
+			"message.len : %d, "
+			"message.buffer : %s "
+			")",
+			(int)syscall(SYS_gettid),
+			message.len,
+			message.buffer
+			);
 
 	// 接收命令头
 	if(message.len >= sizeof(SCMDH)) {
@@ -40,7 +53,7 @@ int Client::ParseData(char* buffer, int len)  {
 		memcpy(&sscmd.header, message.buffer, sizeof(SCMDH));
 
 		int iLen = message.len - sizeof(SCMDH);
-		if( iLen == sscmd.header.iLen ) {
+		if( iLen >= sscmd.header.iLen ) {
 			// 接收命令完成
 			// 接收类型
 			memcpy(&sscmd.scmdt, message.buffer + sizeof(SCMDH), sizeof(SSCMDT));

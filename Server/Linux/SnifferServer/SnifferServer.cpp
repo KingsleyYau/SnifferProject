@@ -186,9 +186,11 @@ bool SnifferServer::OnAccept(TcpServer *ts, Message *m) {
 	Client *client = new Client();
 	client->fd = m->fd;
 
-	mClientMap.Lock();
-	mClientMap.Insert(m->fd, client);
-	mClientMap.Unlock();
+	if( ts == &mClientTcpServer ) {
+		mClientMap.Lock();
+		mClientMap.Insert(m->fd, client);
+		mClientMap.Unlock();
+	}
 
 	return true;
 }
@@ -265,6 +267,9 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 
 void SnifferServer::OnSendMessage(TcpServer *ts, Message *m) {
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnSendMessage( tid : %d, m->fd : [%d], start )", (int)syscall(SYS_gettid), m->fd);
+	if( ts == &mClientTcpInsideServer ) {
+		ts->Disconnect(m->fd);
+	}
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnSendMessage( tid : %d, m->fd : [%d], end )", (int)syscall(SYS_gettid), m->fd);
 }
 
@@ -313,10 +318,12 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 			fd
 			);
 
-	mClientMap.Lock();
-	ClientMap::iterator itr = mClientMap.Erase(fd);
-	delete itr->second;
-	mClientMap.Unlock();
+	if( ts == &mClientTcpServer ) {
+		mClientMap.Lock();
+		ClientMap::iterator itr = mClientMap.Erase(fd);
+		delete itr->second;
+		mClientMap.Unlock();
+	}
 
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
 			"tid : %d, "
@@ -430,6 +437,7 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 				client = itr->second;
 			}
 			mClientMap.Unlock();
+
 			if( client != NULL ) {
 				ret = client->ParseData(m->buffer, m->len);
 			}
@@ -441,6 +449,7 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 	if( ret == 1 && client != NULL ) {
 		ret = 0;
 		SSCMD sscmd = client->sscmd;
+
 		switch (sscmd.scmdt) {
 		case SnifferServerTypeClientInfo:{
 			// 获取手机号和手机型号
@@ -452,6 +461,17 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
             client->model = root[PHONE_INFO_MODEL].asString();
             client->phoneNumber = root[PHONE_INFO_NUMBER].asString();
 
+    		LogManager::GetLogManager()->Log(LOG_WARNING,
+    				"SnifferServer::HandleRecvMessage( "
+    				"tid : %d, "
+    				"m->fd : [%d], "
+    				"[获取手机号和手机型号], "
+    				"param : %s "
+    				")",
+    				(int)syscall(SYS_gettid),
+    				m->fd,
+    				param.c_str()
+    				);
 		}break;
 		default:break;
 		}
@@ -563,15 +583,21 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 						"SnifferServer::HandleInsideRecvMessage( "
 						"tid : %d, "
 						"m->fd : [%d], "
-						"SYNC "
+						"GET_ONLINE_LIST "
 						")",
 						(int)syscall(SYS_gettid),
 						m->fd
 						);
 
+				Json::Value clientListNode;
+				if( 1 == GetOnlineList(clientListNode, m) ) {
+					rootSend["clientList"] = clientListNode;
+				}
+
 				rootSend["ret"] = 1;
 				param = writer.write(rootSend);
-				ret = 0;
+				ret = 1;
+
 			} else if( strcmp(pPath, "/RELOAD") == 0 ) {
 				LogManager::GetLogManager()->Log(
 						LOG_MSG,
@@ -588,8 +614,10 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				} else {
 					rootSend["ret"] = 0;
 				}
+
 				param = writer.write(rootSend);
 				ret = 1;
+
 			} else {
 				code = 404;
 				sprintf(reason, "Not Found");
@@ -612,4 +640,37 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 	sm->len = strlen(sm->buffer);
 
 	return ret;
+}
+
+/**
+ * 获取在线客户端
+ */
+int SnifferServer::GetOnlineList(
+		Json::Value& listNode,
+		Message *m
+		) {
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"SnifferServer::GetOnlineList( "
+			"tid : %d, "
+			"m->fd: [%d] "
+			")",
+			(int)syscall(SYS_gettid),
+			m->fd
+			);
+
+	Client *client = NULL;
+	mClientMap.Lock();
+	for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
+		client = (Client*)itr->second;
+		Json::Value clientNode;
+		clientNode["fd"] = client->fd;
+		clientNode[PHONE_INFO_BRAND] = client->brand;
+		clientNode[PHONE_INFO_MODEL] = client->model;
+		clientNode[PHONE_INFO_NUMBER] = client->phoneNumber;
+		listNode.append(clientNode);
+	}
+	mClientMap.Unlock();
+
+	return 1;
 }

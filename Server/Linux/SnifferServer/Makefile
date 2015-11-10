@@ -24,7 +24,8 @@ LIBS =		-L. \
 
 JSONOBJS = 	json_reader.o json_value.o json_writer.o md5.o
 OBJS =		server.o KThread.o ConfFile.o Arithmetic.o LogManager.o LogFile.o \
-			SnifferServer.o TcpServer.o MessageList.o DataParser.o DataHttpParser.o
+			SnifferServer.o TcpServer.o MessageList.o DataParser.o DataHttpParser.o \
+			Client.o
 OBJS += 	$(JSONOBJS)
 TARGET =	snifferserver
 

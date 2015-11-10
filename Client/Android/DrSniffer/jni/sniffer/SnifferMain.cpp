@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 
 	int uid = 0, gid = 0;
 	if(setgid(gid) || setuid(uid)) {
-		ELog("sniffer", "权限不够,请提升至管理员权限再运行程序!");
+		ELog("sniffer", "权限不够, 请提升至管理员权限再运行程序!");
 		return 0;
 	}
 
