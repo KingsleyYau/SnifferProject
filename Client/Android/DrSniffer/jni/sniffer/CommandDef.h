@@ -12,7 +12,7 @@
 #include <string>
 using namespace std;
 
-#define ServerAdess "172.25.10.105"//"sniffer.wicp.net"
+#define ServerAdess "192.168.8.140"//"sniffer.wicp.net"
 #define ServerPort 8765
 
 /*

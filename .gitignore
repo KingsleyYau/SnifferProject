@@ -3,6 +3,8 @@
 *.ap_
 *.so
 *.o
+*.a
+*.o.d
 
 # files for the dex VM
 *.dex

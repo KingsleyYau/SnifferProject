@@ -13,11 +13,16 @@
 #include "TcpServer.h"
 #include "ConfFile.hpp"
 #include "DataHttpParser.h"
+#include "Client.h"
+
 #include "json/json.h"
+#include "KSafeMap.h"
 
 #include <map>
+#include <list>
 using namespace std;
-typedef map<int, Message*> SyncMessageMap;
+
+typedef KSafeMap<int, Client*> ClientMap;
 
 class StateRunnable;
 class SnifferServer : public TcpServerObserver {
@@ -99,6 +104,8 @@ private:
 	 * 监听线程输出间隔
 	 */
 	unsigned int miStateTime;
+
+	ClientMap mClientMap;
 };
 
 #endif /* SNIFFERSERVER_H_ */

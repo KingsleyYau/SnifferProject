@@ -183,6 +183,13 @@ bool SnifferServer::IsRunning() {
  * New request
  */
 bool SnifferServer::OnAccept(TcpServer *ts, Message *m) {
+	Client *client = new Client();
+	client->fd = m->fd;
+
+	mClientMap.Lock();
+	mClientMap.Insert(m->fd, client);
+	mClientMap.Unlock();
+
 	return true;
 }
 
@@ -258,8 +265,6 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 
 void SnifferServer::OnSendMessage(TcpServer *ts, Message *m) {
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnSendMessage( tid : %d, m->fd : [%d], start )", (int)syscall(SYS_gettid), m->fd);
-	// 发送成功，断开连接
-	ts->Disconnect(m->fd);
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnSendMessage( tid : %d, m->fd : [%d], end )", (int)syscall(SYS_gettid), m->fd);
 }
 
@@ -307,6 +312,11 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 			(int)syscall(SYS_gettid),
 			fd
 			);
+
+	mClientMap.Lock();
+	ClientMap::iterator itr = mClientMap.Erase(fd);
+	delete itr->second;
+	mClientMap.Unlock();
 
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
 			"tid : %d, "
@@ -411,18 +421,40 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 		return ret;
 	}
 
-//	DataHttpParser dataHttpParser;
-//	if ( DiffGetTickCount(m->starttime, GetTickCount()) < miTimeout * 1000 ) {
-//		if( m->buffer != NULL ) {
-//			ret = dataHttpParser.ParseData(m->buffer, m->len);
-//		}
-//	} else {
-//		param = writer.write(rootSend);
-//	}
+	Client *client = NULL;
+	if ( DiffGetTickCount(m->starttime, GetTickCount()) < miTimeout * 1000 ) {
+		if( m->buffer != NULL ) {
+			mClientMap.Lock();
+			ClientMap::iterator itr = mClientMap.Find(m->fd);
+			if( itr != mClientMap.End() ) {
+				client = itr->second;
+			}
+			mClientMap.Unlock();
+			if( client != NULL ) {
+				ret = client->ParseData(m->buffer, m->len);
+			}
+		}
+	} else {
+		param = writer.write(rootSend);
+	}
 
-	ret = 0;
-	if( ret == 1 ) {
-		ret = -1;
+	if( ret == 1 && client != NULL ) {
+		ret = 0;
+		SSCMD sscmd = client->sscmd;
+		switch (sscmd.scmdt) {
+		case SnifferServerTypeClientInfo:{
+			// 获取手机号和手机型号
+            Json::Value root;
+            Json::Reader reader;
+            reader.parse(sscmd.param, root);
+
+            client->brand = root[PHONE_INFO_BRAND].asString();
+            client->model = root[PHONE_INFO_MODEL].asString();
+            client->phoneNumber = root[PHONE_INFO_NUMBER].asString();
+
+		}break;
+		default:break;
+		}
 	}
 
 	sm->totaltime = GetTickCount() - m->starttime;
@@ -439,11 +471,11 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 			sm->totaltime,
 			ret
 			);
-
-	snprintf(sm->buffer, MAXLEN - 1, "%s",
-			param.c_str()
-			);
-	sm->len = strlen(sm->buffer);
+//
+//	snprintf(sm->buffer, MAXLEN - 1, "%s",
+//			param.c_str()
+//			);
+//	sm->len = strlen(sm->buffer);
 
 	return ret;
 }
