@@ -40,3 +40,9 @@ Client/Android/DrSniffer/.cproject
 
 Client/Android/DrSniffer/libs/x86/libsniffer
 
+
+Client/Android/DrSniffer/.cproject
+
+*.so
+
+Client/Android/DrSniffer/.cproject
