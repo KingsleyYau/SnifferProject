@@ -31,19 +31,18 @@ static inline string GetSnifferVersion() {
 	int iLen = 0;
 
 	if(result.length() > 0) {
+		DLog("SnifferInstaller::GetSnifferVersion()", "result : %s", result.c_str());
 		string::size_type pos = result.find(SinfferVersionString);
 		if(string::npos != pos) {
 			ILog("SnifferInstaller::GetSnifferVersion()", "已经安装%s!", SinfferFile);
 			pos += strlen(SinfferVersionString);
 			posStart = pos;
 
-			posEnd = result.find(' ', posStart);
+			posEnd = result.find(SnifferVersionEnd, posStart);
 			if(string::npos != posEnd) {
 				iLen = posEnd - posStart;
 			}
-			else {
-				iLen = result.length() - posStart - 1;
-			}
+
 			version = result.substr(posStart, iLen);
 			ILog("SnifferInstaller::GetSnifferVersion()", "%s版本为%s", SinfferFile, version.c_str());
 		}
@@ -121,12 +120,24 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 		bFlag = true;
 	}
 	else {
+		// 如果在运行先关闭
+		int iPid = -1;
+		while(-1 != (iPid = GetProcessPid(SinfferFile))) {
+			ILog("SnifferInstaller::RootExecutableFile", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
+			sprintf(pBuffer, "kill -9 %d", iPid);
+			SystemComandExecuteWithRoot(pBuffer);
+		}
+
 		ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 版本为:%s", SnifferVersion);
 
-		// 拷贝Sniffer到系统目录
+		// 删除旧文件
 		releaseFile = libPath + SnifferInStallerFile;
-		bool bFlag1 = RootExecutableFile(releaseFile, "/system/bin/", SinfferFile);
-		if(bFlag1) {
+		sprintf(pBuffer, "rm /system/bin/%s", SinfferFile);
+		SystemComandExecuteWithRoot(pBuffer);
+
+		// 拷贝Sniffer到系统目录
+		bFlag = RootExecutableFile(releaseFile, "/system/bin/", SinfferFile);
+		if( bFlag ) {
 			ILog("SnifferInstaller::InstallSniffer()", "安装Sniffer成功!");
 			// 安装Sniffer成功, 继续释放自动启动脚本
 			ILog("SnifferInstaller::InstallSniffer()", "释放自动启动脚...");
@@ -141,10 +152,9 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 				// 删除临时目录下AutoStartScript
 				sprintf(pBuffer, "rm %s", releaseFile.c_str());
 				SystemComandExecute(pBuffer);
+
+				bFlag = true;
 			}
-		}
-		else {
-			return false;
 		}
 	}
 
@@ -159,7 +169,6 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 
 		ILog("SnifferInstaller::RootExecutableFile", "重新启动Sniffer...");
 		SystemComandExecuteWithRoot("(sniffer &)");
-//		ILog("SnifferInstaller::InstallSniffer()", "Sniffer启动成功!");
 	}
 
 	return bFlag;

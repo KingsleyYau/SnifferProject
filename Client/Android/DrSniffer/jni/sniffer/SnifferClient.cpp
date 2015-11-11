@@ -10,7 +10,7 @@
 
 SnifferClient::SnifferClient() {
 	// TODO Auto-generated constructor stub
-	mServerAdess = ServerAdess;
+	mServerAddress = ServerAdess;
 	miServerPort = ServerPort;
 }
 
@@ -30,71 +30,55 @@ void StopWakeThread() {
  * 连接服务器
  */
 bool SnifferClient::ConnectServer() {
+	FileLog(SnifferLogFileName, "SnifferClient::ConnectServer( %s:%d )",
+			mServerAddress.c_str(),
+			miServerPort
+			);
 	bool bFlag = false;
-	int iRet = mTcpSocket.Connect(mServerAdess, miServerPort, true);
+	int iRet = mTcpSocket.Connect(mServerAddress, miServerPort, true);
 	if(iRet > 0) {
 		bFlag = true;
 	}
+	FileLog(SnifferLogFileName, "SnifferClient::ConnectServer( iRet : %d )", iRet);
 	return bFlag;
 }
 
 /*
  * 接收服务器命令
  */
-SCCMD SnifferClient::RecvCommand() {
-	SCCMD sccmd;
-	sccmd.scmdt = SinfferClientTypeNone;
+SCMD SnifferClient::RecvCommand() {
+	FileLog(SnifferLogFileName, "SnifferClient::RecvCommand()");
+	SCMD scmd;
+	scmd.header.scmdt = SinfferTypeNone;
 
 	// 接收命令头
 	char HeadBuffer[sizeof(SCMDH) + 1] = {'\0'};
-	int iLen = mTcpSocket.RecvData(HeadBuffer, sizeof(SCMDH));
-	if(iLen == sizeof(SCMDH)) {
+	int len = mTcpSocket.RecvData(HeadBuffer, sizeof(SCMDH));
+	if(len == sizeof(SCMDH)) {
 		// 接收头成功
-		memcpy(&sccmd.header, HeadBuffer, sizeof(SCMDH));
+		memcpy(&scmd.header, HeadBuffer, sizeof(SCMDH));
 
-		char *pBuffer = new char[sccmd.header.iLen + 1];
-		memset(pBuffer, '\0', sccmd.header.iLen + 1);
-		iLen = mTcpSocket.RecvData(pBuffer, sccmd.header.iLen);
-		if(iLen == sccmd.header.iLen) {
-			// 接收类型
-			memcpy(&sccmd.scmdt, pBuffer, sizeof(SCCMDT));
+		len = mTcpSocket.RecvData(scmd.param, scmd.header.len);
+		if( len == scmd.header.len ) {
 
-			// 接收参数
-			sccmd.param = pBuffer + sizeof(SCCMDT);
 		}
-		delete[] pBuffer;
+		scmd.param[len] = '\0';
 	}
-	return sccmd;
+	return scmd;
 }
 
 /*
  * 发送命令到服务器
  */
-bool SnifferClient::SendCommand(SSCMD sscmd) {
+bool SnifferClient::SendCommand(SCMD scmd) {
+	FileLog(SnifferLogFileName, "SnifferClient::SendCommand()");
 	bool bFlag = false;
 
-	// 发送命令头
-	sscmd.header.iLen = sizeof(SSCMDT) + sscmd.param.length();
-	int iLen = mTcpSocket.SendData((char *)&sscmd.header, sizeof(SCMDH));
-	if(iLen == sizeof(SCMDH)) {
-		// 类型
-		char *pBuffer = new char[sscmd.header.iLen + 1];
-		memset(pBuffer, '\0', sscmd.header.iLen + 1);
-
-		char *p = pBuffer;
-		memcpy(p, (char *)&sscmd.scmdt, sizeof(SSCMDT));
-		p += sizeof(SSCMDT);
-
-		// 参数
-		memcpy(p, sscmd.param.c_str(), sscmd.param.length());
-
-		// 发送类型和参数
-		iLen = mTcpSocket.SendData(pBuffer, sscmd.header.iLen);
-		if(iLen == sscmd.header.iLen) {
-			bFlag = true;
-		}
-
-		delete[] pBuffer;
+	// 发送命令
+	int iLen = sizeof(SCMDH) + scmd.header.len;
+	int iSend = mTcpSocket.SendData((char *)&scmd, iLen);
+	if( iSend == iLen ) {
+		bFlag = true;
 	}
 
 	return bFlag;

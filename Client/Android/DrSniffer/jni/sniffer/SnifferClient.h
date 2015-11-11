@@ -22,9 +22,9 @@ public:
 	// 连接服务器
 	bool ConnectServer();
 	// 接收服务器命令
-	SCCMD RecvCommand();
+	SCMD RecvCommand();
 	// 发送命令到服务器
-	bool SendCommand(SSCMD sscmd);
+	bool SendCommand(SCMD scmd);
 
 	// 保持唤醒线程
 	bool StartWakeKThread();
@@ -32,7 +32,7 @@ public:
 
 private:
 	KTcpSocket mTcpSocket;
-	string mServerAdess;
+	string mServerAddress;
 	int miServerPort;
 
 	KThread* mpWakeKThread;		// 唤醒设备线程

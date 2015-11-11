@@ -15,6 +15,12 @@ using namespace std;
 #include "DataParser.h"
 #include "CommandDef.h"
 
+#include "KSafeList.h"
+#include "KSafeMap.h"
+
+typedef KSafeList<SCMD*> CMDLIST;
+typedef KSafeMap<int, SCMD*> CMDMAP;
+
 class Client : public DataParser {
 public:
 	Client();
@@ -28,7 +34,9 @@ public:
     string model;
     string phoneNumber;
 
-    SSCMD sscmd;
+    CMDLIST cmdListRecv;
+    CMDMAP cmdMapSend;
+
 private:
 	int type;
     Message message;

@@ -18,15 +18,18 @@ Client::Client() {
 
 	type = 0;
 	message.Reset();
-    sscmd.scmdt = SinfferServerTypeNone;
 }
 
 Client::~Client() {
 	// TODO Auto-generated destructor stub
+	while( !cmdListRecv.Empty() ) {
+		SCMD *scmd = cmdListRecv.PopFront();
+		delete scmd;
+	}
 }
 
 int Client::ParseData(char* buffer, int len)  {
-	int ret = 0;
+	int ret = -1;
 
 	int recvLen = (len < (MAXLEN - 1) - message.len)?len:(MAXLEN - 1) - message.len;
 	if( recvLen > 0 ) {
@@ -47,22 +50,25 @@ int Client::ParseData(char* buffer, int len)  {
 			message.buffer
 			);
 
-	// 接收命令头
-	if(message.len >= sizeof(SCMDH)) {
-		// 接收头成功
-		memcpy(&sscmd.header, message.buffer, sizeof(SCMDH));
+	// 解析命令头
+	while(message.len > sizeof(SCMDH)) {
+		SCMDH *header = (SCMDH*)message.buffer;
 
 		int iLen = message.len - sizeof(SCMDH);
-		if( iLen >= sscmd.header.iLen ) {
-			// 接收命令完成
-			// 接收类型
-			memcpy(&sscmd.scmdt, message.buffer + sizeof(SCMDH), sizeof(SSCMDT));
+		if( iLen >= header->len ) {
+			// 接收命令
+			SCMD *scmd = new SCMD();
+			cmdListRecv.PushBack(scmd);
+			memcpy(scmd, message.buffer, sizeof(SCMDH) + header->len);
+			scmd->param[header->len] = '\0';
 
-			// 接收参数
-			sscmd.param = message.buffer + sizeof(SCMDH) + sizeof(SSCMDT);
+			// 替换数据
+			message.len -= sizeof(SCMDH) + header->len;
+			memcpy(message.buffer, message.buffer + sizeof(SCMDH) + header->len, message.len);
 
-			message.len = 0;
 			ret = 1;
+		} else {
+			break;
 		}
 	}
 

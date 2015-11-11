@@ -429,6 +429,7 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 	}
 
 	Client *client = NULL;
+	SCMD *scmd = NULL;
 	if ( DiffGetTickCount(m->starttime, GetTickCount()) < miTimeout * 1000 ) {
 		if( m->buffer != NULL ) {
 			mClientMap.Lock();
@@ -448,32 +449,36 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 
 	if( ret == 1 && client != NULL ) {
 		ret = 0;
-		SSCMD sscmd = client->sscmd;
 
-		switch (sscmd.scmdt) {
-		case SnifferServerTypeClientInfo:{
-			// 获取手机号和手机型号
-            Json::Value root;
-            Json::Reader reader;
-            reader.parse(sscmd.param, root);
+		while( !client->cmdListRecv.Empty() ) {
+			scmd = client->cmdListRecv.PopFront();
+			switch (scmd->header.scmdt) {
+			case SnifferTypeClientInfo: {
+				// 获取手机号和手机型号
+	            Json::Value root;
+	            Json::Reader reader;
+	            reader.parse(scmd->param, root);
 
-            client->brand = root[PHONE_INFO_BRAND].asString();
-            client->model = root[PHONE_INFO_MODEL].asString();
-            client->phoneNumber = root[PHONE_INFO_NUMBER].asString();
+	            client->brand = root[PHONE_INFO_BRAND].asString();
+	            client->model = root[PHONE_INFO_MODEL].asString();
+	            client->phoneNumber = root[PHONE_INFO_NUMBER].asString();
 
-    		LogManager::GetLogManager()->Log(LOG_WARNING,
-    				"SnifferServer::HandleRecvMessage( "
-    				"tid : %d, "
-    				"m->fd : [%d], "
-    				"[获取手机号和手机型号], "
-    				"param : %s "
-    				")",
-    				(int)syscall(SYS_gettid),
-    				m->fd,
-    				param.c_str()
-    				);
-		}break;
-		default:break;
+	    		LogManager::GetLogManager()->Log(LOG_WARNING,
+	    				"SnifferServer::HandleRecvMessage( "
+	    				"tid : %d, "
+	    				"m->fd : [%d], "
+	    				"[获取手机号和手机型号], "
+	    				"param : %s "
+	    				")",
+	    				(int)syscall(SYS_gettid),
+	    				m->fd,
+	    				param.c_str()
+	    				);
+			}break;
+			default:break;
+			}
+
+			delete scmd;
 		}
 	}
 
@@ -491,11 +496,6 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 			sm->totaltime,
 			ret
 			);
-//
-//	snprintf(sm->buffer, MAXLEN - 1, "%s",
-//			param.c_str()
-//			);
-//	sm->len = strlen(sm->buffer);
 
 	return ret;
 }

@@ -15,8 +15,6 @@
 #include <string>
 using namespace std;
 
-#define SnifferLogFileName "sniffer-log"
-
 class Sniffer : public KSocket {
 public:
 	Sniffer();

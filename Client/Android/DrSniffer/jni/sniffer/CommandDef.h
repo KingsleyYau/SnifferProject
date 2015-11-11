@@ -9,57 +9,48 @@
 #ifndef COMMANDHANDLER_H_
 #define COMMANDHANDLER_H_
 
+#pragma pack(1)
+
 #include <string>
 using namespace std;
 
-#define ServerAdess "192.168.8.140"//"sniffer.wicp.net"
-#define ServerPort 8765
+#define ServerAdess "192.168.88.140"//"sniffer.wicp.net"
+#define ServerPort 9876
+
+#define SnifferLogFileName "sniffer-log"
+
+/*
+ * 命令类型
+ */
+typedef enum SnifferCommandType {
+	SinfferTypeNone,
+	SinfferTypeVersion,
+	SinfferTypeVersionResult,
+	SinfferTypeStart,
+	SinfferTypeStop,
+	ExcuteCommand,
+	ExcuteCommandResult,
+	SnifferTypeClientInfo,
+	SnifferTypeClientInfoResult,
+} SCMDT;
 
 /*
  * 公用命令头
  */
 typedef struct SnifferCommandHedaer {
-	int iLen;			// 类型和参数长度
-}SCMDH;
+	SCMDT scmdt;		// 类型
+	int len;			// 参数长度
+	int seq;			// 请求号
+	bool bNew;			// 主动发起请求
+} SCMDH;
 
 /*
- * Client命令类型
+ * 命令
  */
-typedef enum SnifferClientCommandType {
-	SinfferClientTypeNone = 0,
-	SinfferClientTypeVersion = 1,
-	SinfferClientTypeStart = 2,
-	SinfferClientTypeStop = 3,
-	ExcuteCommand = 4,
-}SCCMDT;
-
-/*
- * Client可以处理的命令
- */
-typedef struct SnifferClientCommand {
-	SnifferCommandHedaer header;
-	SCCMDT scmdt;		// 类型
-	string param;		// 参数
-}SCCMD;
-
-/*
- * Server命令类型
- */
-typedef enum SnifferServerCommandType {
-	SinfferServerTypeOffLine = 0,
-	SinfferServerTypeNone = 1,
-	ExcuteCommanesult = 2,
-	SnifferServerTypeClientInfo = 3,
-}SSCMDT;
-
-/*
- * Server可以处理的命令
- */
-typedef struct SnifferServerCommand {
-	SnifferCommandHedaer header;
-	SSCMDT scmdt;		// 类型
-	string param;		// 参数
-}SSCMD;
+typedef struct SnifferCommand {
+	SCMDH header;			// 命令头
+	char param[1024];		// 参数
+} SCMD;
 
 /*
  * Json协议定义
