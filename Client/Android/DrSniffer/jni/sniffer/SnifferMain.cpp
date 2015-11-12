@@ -7,9 +7,9 @@
  */
 
 #include "Sniffer.h"
+#include "SinfferExecuteDef.h"
 #include "SnifferClient.h"
 
-#include <common/command.h>
 #include <json/json/json.h>
 
 Sniffer gSniffer;

