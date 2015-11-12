@@ -9,8 +9,18 @@
 #ifndef SNIFFER_H_
 #define SNIFFER_H_
 
+#include "SnifferCommandDef.h"
+#include "SinfferExecuteDef.h"
+
+#include <linux/ip.h>
+#include <linux/tcp.h>
+#include <linux/udp.h>
+
 #include <common/KThread.h>
 #include <common/KSocket.h>
+#include <common/IPAddress.h>
+#include <common/Arithmetic.h>
+#include <common/KLog.h>
 
 #include <string>
 using namespace std;
