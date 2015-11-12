@@ -7,15 +7,7 @@
  */
 
 #include "Sniffer.h"
-#include "CommandDef.h"
-
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-
-#include <common/IPAddress.h>
-#include <common/Arithmetic.h>
-#include <common/KLog.h>
+#include "SinfferExecuteDef.h"
 
 /*
  * 监听线程
@@ -64,9 +56,9 @@ bool Sniffer::StartSniffer(string deviceName) {
 	}
 
 	// 抓取数据链路层数据
-	if((m_Socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
+	if((mSocket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
 //	 抓取传输层数据
-//	if((m_Socket = socket(PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0) {
+//	if((mSocket = socket(PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0) {
 
 		FileLog(SnifferLogFileName, "create socket error!");
 	    return false;
@@ -74,11 +66,11 @@ bool Sniffer::StartSniffer(string deviceName) {
 
 	// set to nonblocking
 	int iFlag = 1;
-	if ((iFlag = fcntl(m_Socket, F_GETFL, 0)) == -1) {
+	if ((iFlag = fcntl(mSocket, F_GETFL, 0)) == -1) {
 		FileLog(SnifferLogFileName, "fcntl F_GETFL socket error");
 		return false;
 	}
-	if (fcntl(m_Socket, F_SETFL, iFlag | O_NONBLOCK) == -1) {
+	if (fcntl(mSocket, F_SETFL, iFlag | O_NONBLOCK) == -1) {
 		FileLog(SnifferLogFileName, "fcntl F_SETFL socket error");
 		return false;
 	}
@@ -93,7 +85,7 @@ bool Sniffer::StartSniffer(string deviceName) {
 			// 设置监听为混杂模式
 			strcpy(ifr_ip.ifr_name, device.name.c_str());
 			ifr_ip.ifr_flags = IFF_UP | IFF_PROMISC | IFF_BROADCAST | IFF_RUNNING;
-			if (!(ioctl(m_Socket, SIOCSIFFLAGS, (char *) &ifr_ip))) {
+			if (!(ioctl(mSocket, SIOCSIFFLAGS, (char *) &ifr_ip))) {
 				FileLog(SnifferLogFileName, "ioctl %s flag:0x%x success!", device.name.c_str(), ifr_ip.ifr_flags);
 			}
 			else {
@@ -106,7 +98,7 @@ bool Sniffer::StartSniffer(string deviceName) {
 		// 设置监听为混杂模式
 		strcpy(ifr_ip.ifr_name, deviceName.c_str());
 		ifr_ip.ifr_flags = IFF_UP | IFF_PROMISC | IFF_BROADCAST | IFF_RUNNING;
-		if (!(ioctl(m_Socket, SIOCSIFFLAGS, (char *) &ifr_ip))) {
+		if (!(ioctl(mSocket, SIOCSIFFLAGS, (char *) &ifr_ip))) {
 			FileLog(SnifferLogFileName, "ioctl %s flag:0x%x success!", deviceName.c_str(), ifr_ip.ifr_flags);
 		}
 		else {
@@ -147,7 +139,7 @@ int Sniffer::SinfferData() {
 	unsigned char buff[2048];
 	memset(buff, '\0', sizeof(buff));
 
-	iRet = recvfrom(m_Socket, buff, sizeof(buff), 0, (struct sockaddr *)&remoteAd, &iRemoteAdLen);
+	iRet = recvfrom(mSocket, buff, sizeof(buff), 0, (struct sockaddr *)&remoteAd, &iRemoteAdLen);
 
 	timeval tout;
 	tout.tv_sec = 3;
@@ -155,11 +147,11 @@ int Sniffer::SinfferData() {
 
 	fd_set rset;
 	FD_ZERO(&rset);
-	FD_SET(m_Socket, &rset);
-	int iRetS = select(m_Socket + 1, &rset, NULL, NULL, &tout);
+	FD_SET(mSocket, &rset);
+	int iRetS = select(mSocket + 1, &rset, NULL, NULL, &tout);
 
 	if(iRetS > 0) {
-		iRet = recvfrom(m_Socket, buff, sizeof(buff), 0, (struct sockaddr *)&remoteAd, &iRemoteAdLen);
+		iRet = recvfrom(mSocket, buff, sizeof(buff), 0, (struct sockaddr *)&remoteAd, &iRemoteAdLen);
 
 		if(iRet > 0) {
 			AnalyseData(buff, iRet);
