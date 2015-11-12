@@ -6,7 +6,7 @@
 # Email: Kingsleyyau@gmail.com
 #
 
-APP_PLATFORM := android-8
+APP_PLATFORM := android-9
 APP_STL := stlport_static #使用STLport作为静态库
 #APP_STL := stlport_shared #使用STLport作为动态库，这个可能产生兼容性和部分低版本的Android固件
 #APP_STL := gnustl_static #使用 GNU libstdc++ 作为静态库
