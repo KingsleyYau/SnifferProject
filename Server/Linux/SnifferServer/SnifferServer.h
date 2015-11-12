@@ -24,6 +24,8 @@ using namespace std;
 
 typedef KSafeMap<int, Client*> ClientMap;
 
+typedef KSafeMap<int, int> Client2RequestMap;
+
 class StateRunnable;
 class SnifferServer : public TcpServerObserver {
 public:
@@ -56,8 +58,26 @@ private:
 	/**
 	 * 获取在线客户端
 	 */
-	int GetOnlineList(
+	int GetClientList(
 			Json::Value& listNode,
+			Message *m
+			);
+
+	/**
+	 * 获取在线客户端详细信息
+	 */
+	int GetClientInfo(
+			Json::Value& clientNode,
+			const char* clientId,
+			Message *m
+			);
+
+	/**
+	 * 对指定客户端运行命令
+	 */
+	int SetClientCmd(
+			const char* clientId,
+			const char* command,
 			Message *m
 			);
 
@@ -114,6 +134,8 @@ private:
 	unsigned int miStateTime;
 
 	ClientMap mClientMap;
+
+	Client2RequestMap mClient2RequestMap;
 };
 
 #endif /* SNIFFERSERVER_H_ */

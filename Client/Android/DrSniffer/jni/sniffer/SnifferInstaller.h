@@ -68,13 +68,13 @@ static inline string ReleaseAutoStartScript(string filePath = "/sdcard/") {
 	}
 
 	filePath += AutoStartScriptFile;
-	ILog("SnifferInstaller::ReleaseAutoStartScript()", "准备释放释放AutoStartScript到:%s", filePath.c_str());
+	ILog("SnifferInstaller::ReleaseAutoStartScript()", "准备释放AutoStartScript到:%s", filePath.c_str());
 
 	FILE* file = fopen(filePath.c_str(), "wb+");
 	if(NULL != file) {
 		char *p = (char *)AutoStartScript;
 		int iLen = sizeof(AutoStartScript);
-		ILog("SnifferInstaller::ReleaseAutoStartScript()", "文件大小:(%d)byte", iLen);
+//		ILog("SnifferInstaller::ReleaseAutoStartScript()", "文件大小:(%d)byte", iLen);
 		int iWrite = 0;
 		do {
 			int iNeedWrite = (4096 > iLen)?iLen:4096;
@@ -114,7 +114,9 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 	// 判断是否需要安装或者升级
 	ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 判断是否需要安装或者升级...");
 	curVersion = GetSnifferVersion();
-	if(curVersion.compare(SnifferVersion) >= 0) {
+	bool bUpdate = curVersion.compare(SnifferVersion) >= 0;
+	bUpdate = false;
+	if( bUpdate ) {
 		// 不需要升级
 		ILog("SnifferInstaller::InstallSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新, 不需要升级!", SinfferFile, curVersion.c_str(), SnifferVersion);
 		bFlag = true;
@@ -127,13 +129,13 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			sprintf(pBuffer, "kill -9 %d", iPid);
 			SystemComandExecuteWithRoot(pBuffer);
 		}
-
 		ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 版本为:%s", SnifferVersion);
 
 		// 删除旧文件
 		releaseFile = libPath + SnifferInStallerFile;
 		sprintf(pBuffer, "rm /system/bin/%s", SinfferFile);
 		SystemComandExecuteWithRoot(pBuffer);
+		ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
 
 		// 拷贝Sniffer到系统目录
 		bFlag = RootExecutableFile(releaseFile, "/system/bin/", SinfferFile);

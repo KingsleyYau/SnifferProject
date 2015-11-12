@@ -22,22 +22,17 @@ public:
 
 	// 连接服务器
 	bool ConnectServer();
-	// 接收服务器命令
-	SCMD RecvCommand();
-	// 发送命令到服务器
-	bool SendCommand(SCMD scmd);
 
-	// 保持唤醒线程
-	bool StartWakeKThread();
-	void StopWakeKThread();
+	// 接收服务器命令
+	bool RecvCommand(SCMD &scmd);
+
+	// 发送命令到服务器
+	bool SendCommand(const SCMD &scmd);
 
 private:
 	KTcpSocket mTcpSocket;
 	string mServerAddress;
 	int miServerPort;
-
-	KThread* mpWakeKThread;		// 唤醒设备线程
-	KCond mCondWake;			// 唤醒设备线程信号
 };
 
 #endif /* SNIFFERCLIENT_H_ */

@@ -66,5 +66,11 @@ typedef struct SnifferCommand {
 #define PHONE_INFO_MODEL 		"PHONE_INFO_MODEL"
 #define PHONE_INFO_NUMBER 		"PHONE_INFO_NUMBER"
 
+/**
+ * 对指定客户端运行命令
+ */
+#define SET_CLIENT_CMD			"/SET_CLIENT_CMD"
+#define CLIENT_INFO				"CLIENT_INFO"
+#define COMMAND					"COMMAND"
 
 #endif /* SNIFFERCOMMANDDEF_H_ */

@@ -450,3 +450,15 @@ size_t Arithmetic::ChangeCharset(char* outbuf, size_t outbytes, const char* inbu
 
     return (outbytes - 2 - outlen);
 }
+
+string Arithmetic::AsciiToHexWithSep(const char* data, int i_in_len) {
+    string result = "";
+    const char* p = data;
+    for (int i = 0; i < i_in_len; i++){
+    	result += hex[p[i] >> 4];
+    	result += hex[p[i] & (16 - 1)];
+        result += ':';
+    }
+    result = result.substr(0, result.length() -1);
+    return result;
+}

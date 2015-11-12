@@ -6,7 +6,6 @@
  */
 
 #include "Client.h"
-#include "LogManager.h"
 
 Client::Client() {
 	// TODO Auto-generated constructor stub
@@ -39,28 +38,54 @@ int Client::ParseData(char* buffer, int len)  {
 	}
 
 	LogManager::GetLogManager()->Log(
-			LOG_MSG,
+			LOG_STAT,
 			"Client::ParseData( "
 			"tid : %d, "
-			"message.len : %d, "
-			"message.buffer : %s "
+			"message.len : %d "
 			")",
 			(int)syscall(SYS_gettid),
-			message.len,
-			message.buffer
+			message.len
 			);
 
 	// 解析命令头
 	while(message.len > sizeof(SCMDH)) {
 		SCMDH *header = (SCMDH*)message.buffer;
 
+		LogManager::GetLogManager()->Log(
+				LOG_STAT,
+				"Client::ParseData( "
+				"tid : %d, "
+				"header->scmdt : %d, "
+				"header->len : %d, "
+				"header->bNew : %s, "
+				"header->seq : %d "
+				")",
+				(int)syscall(SYS_gettid),
+				header->scmdt,
+				header->len,
+				header->bNew?"true":"false",
+				header->seq
+				);
+
 		int iLen = message.len - sizeof(SCMDH);
 		if( iLen >= header->len ) {
-			// 接收命令
-			SCMD *scmd = new SCMD();
-			cmdListRecv.PushBack(scmd);
-			memcpy(scmd, message.buffer, sizeof(SCMDH) + header->len);
-			scmd->param[header->len] = '\0';
+			if( header->len > 0 ) {
+				// 接收参数
+				SCMD *scmd = new SCMD();
+				cmdListRecv.PushBack(scmd);
+				memcpy(scmd, message.buffer, sizeof(SCMDH) + header->len);
+				scmd->param[header->len] = '\0';
+
+				LogManager::GetLogManager()->Log(
+						LOG_STAT,
+						"Client::ParseData( "
+						"tid : %d, "
+						"scmd->param : %s "
+						")",
+						(int)syscall(SYS_gettid),
+						scmd->param
+						);
+			}
 
 			// 替换数据
 			message.len -= sizeof(SCMDH) + header->len;

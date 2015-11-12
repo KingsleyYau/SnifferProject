@@ -181,7 +181,7 @@ void DataHttpParser::ParseParameters(char* buffer) {
 			case 1:{
 				// value
 				value = p;
-				transform(value.begin(), value.end(), value.begin(), ::toupper);
+//				transform(value.begin(), value.end(), value.begin(), ::toupper);
 				mParameters.insert(Parameters::value_type(key, value));
 			}break;
 			default:break;

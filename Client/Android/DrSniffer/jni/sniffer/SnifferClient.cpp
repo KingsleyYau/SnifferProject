@@ -18,37 +18,29 @@ SnifferClient::~SnifferClient() {
 	// TODO Auto-generated destructor stub
 }
 
-// 保持唤醒线程
-bool StartWakeThread() {
-	bool bFlag = false;
-	return bFlag;
-}
-void StopWakeThread() {
-
-}
 /*
  * 连接服务器
  */
 bool SnifferClient::ConnectServer() {
-	FileLog(SnifferLogFileName, "SnifferClient::ConnectServer( %s:%d )",
-			mServerAddress.c_str(),
-			miServerPort
-			);
 	bool bFlag = false;
+
+	mServerAddress = ServerAdess;
+	miServerPort = ServerPort;
+
 	int iRet = mTcpSocket.Connect(mServerAddress, miServerPort, true);
 	if(iRet > 0) {
 		bFlag = true;
 	}
-	FileLog(SnifferLogFileName, "SnifferClient::ConnectServer( iRet : %d )", iRet);
+
 	return bFlag;
 }
 
 /*
  * 接收服务器命令
  */
-SCMD SnifferClient::RecvCommand() {
-	FileLog(SnifferLogFileName, "SnifferClient::RecvCommand()");
-	SCMD scmd;
+bool SnifferClient::RecvCommand(SCMD &scmd) {
+	bool bFlag = false;
+	bzero(&scmd, sizeof(SCMD));
 	scmd.header.scmdt = SinfferTypeNone;
 
 	// 接收命令头
@@ -58,20 +50,57 @@ SCMD SnifferClient::RecvCommand() {
 		// 接收头成功
 		memcpy(&scmd.header, HeadBuffer, sizeof(SCMDH));
 
-		len = mTcpSocket.RecvData(scmd.param, scmd.header.len);
-		if( len == scmd.header.len ) {
-
+		if( scmd.header.len > 0 ) {
+			len = mTcpSocket.RecvData(scmd.param, scmd.header.len);
+			if( len == scmd.header.len ) {
+				// 接收参数成功
+				scmd.param[scmd.header.len] = '\0';
+				bFlag = true;
+			} else {
+				// 接收参数失败
+				scmd.header.scmdt = SinfferTypeNone;
+			}
+		} else {
+			// 没有参数
+			bFlag = true;
 		}
-		scmd.param[len] = '\0';
 	}
-	return scmd;
+
+	FileLog(SnifferLogFileName, "收到服务器命令, ["
+			"scmd.header.scmdt : %d, "
+			"scmd.header.seq : %d, "
+			"scmd.header.bNew : %s, "
+			"scmd.header.len : %d, "
+			"scmd.param : %s "
+			"]",
+			scmd.header.scmdt,
+			scmd.header.seq,
+			scmd.header.bNew?"true":"false",
+			scmd.header.len,
+			scmd.param
+			);
+
+	return bFlag;
 }
 
 /*
  * 发送命令到服务器
  */
-bool SnifferClient::SendCommand(SCMD scmd) {
-	FileLog(SnifferLogFileName, "SnifferClient::SendCommand()");
+bool SnifferClient::SendCommand(const SCMD &scmd) {
+	FileLog(SnifferLogFileName, "发送命令到服务器, ["
+			"scmd.header.scmdt : %d, "
+			"scmd.header.seq : %d, "
+			"scmd.header.bNew : %s, "
+			"scmd.header.len : %d, "
+			"scmd.param : %s "
+			"]",
+			scmd.header.scmdt,
+			scmd.header.seq,
+			scmd.header.bNew?"true":"false",
+			scmd.header.len,
+			scmd.param
+			);
+
 	bool bFlag = false;
 
 	// 发送命令

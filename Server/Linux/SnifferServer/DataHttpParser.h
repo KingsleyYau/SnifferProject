@@ -49,7 +49,7 @@ private:
 	string mPath;
 
 	char mHeaderBuffer[MAXLEN + 1];
-	int mHeaderIndex;
+	int m->len;
 	bool mbReceiveHeaderFinish;
 
 	bool ParseFirstLine(char* buffer);
