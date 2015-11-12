@@ -35,8 +35,3 @@ proguard/
 *.ipr
 *.iws
 .idea/
-
-Client/Android/DrSniffer/.cproject
-
-Client/Android/DrSniffer/libs/x86/libsniffer
-
