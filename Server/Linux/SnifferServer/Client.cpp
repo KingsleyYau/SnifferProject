@@ -48,7 +48,7 @@ int Client::ParseData(char* buffer, int len)  {
 			);
 
 	// 解析命令头
-	while(message.len > sizeof(SCMDH)) {
+	while(message.len >= sizeof(SCMDH)) {
 		SCMDH *header = (SCMDH*)message.buffer;
 
 		LogManager::GetLogManager()->Log(
@@ -69,23 +69,20 @@ int Client::ParseData(char* buffer, int len)  {
 
 		int iLen = message.len - sizeof(SCMDH);
 		if( iLen >= header->len ) {
-			if( header->len > 0 ) {
-				// 接收参数
-				SCMD *scmd = new SCMD();
-				cmdListRecv.PushBack(scmd);
-				memcpy(scmd, message.buffer, sizeof(SCMDH) + header->len);
-				scmd->param[header->len] = '\0';
+			SCMD *scmd = new SCMD();
+			cmdListRecv.PushBack(scmd);
+			memcpy(scmd, message.buffer, sizeof(SCMDH) + header->len);
+			scmd->param[header->len] = '\0';
 
-				LogManager::GetLogManager()->Log(
-						LOG_STAT,
-						"Client::ParseData( "
-						"tid : %d, "
-						"scmd->param : %s "
-						")",
-						(int)syscall(SYS_gettid),
-						scmd->param
-						);
-			}
+			LogManager::GetLogManager()->Log(
+					LOG_STAT,
+					"Client::ParseData( "
+					"tid : %d, "
+					"scmd->param : %s "
+					")",
+					(int)syscall(SYS_gettid),
+					scmd->param
+					);
 
 			// 替换数据
 			message.len -= sizeof(SCMDH) + header->len;

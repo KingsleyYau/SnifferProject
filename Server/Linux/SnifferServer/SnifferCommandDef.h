@@ -14,6 +14,8 @@
 #include <string>
 using namespace std;
 
+#define MAX_PARAM_LEN 1024
+
 /*
  * 命令类型
  */
@@ -43,13 +45,16 @@ typedef struct SnifferCommandHedaer {
  * 命令
  */
 typedef struct SnifferCommand {
-	SCMDH header;			// 命令头
-	char param[1024];		// 参数
+	SCMDH header;					// 命令头
+	char param[MAX_PARAM_LEN];		// 参数
 } SCMD;
 
 /*
  * Json协议定义
  */
+
+#define COMMON_RET				"ret"
+
 /**
  * 获取在线列表
  */
@@ -70,7 +75,7 @@ typedef struct SnifferCommand {
  * 对指定客户端运行命令
  */
 #define SET_CLIENT_CMD			"/SET_CLIENT_CMD"
-#define CLIENT_INFO				"CLIENT_INFO"
 #define COMMAND					"COMMAND"
+#define COMMAND_RESULT			"RESULT"
 
 #endif /* SNIFFERCOMMANDDEF_H_ */

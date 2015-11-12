@@ -11,12 +11,12 @@
 
 #include "MessageList.h"
 #include "TcpServer.h"
-#include "ConfFile.hpp"
 #include "DataHttpParser.h"
 #include "Client.h"
 
-#include "json/json.h"
-#include "KSafeMap.h"
+#include <json/json.h>
+#include <common/ConfFile.hpp>
+#include <common/KSafeMap.h>
 
 #include <map>
 #include <list>
@@ -25,6 +25,7 @@ using namespace std;
 typedef KSafeMap<int, Client*> ClientMap;
 
 typedef KSafeMap<int, int> Client2RequestMap;
+typedef KSafeMap<int, int> Request2ClientMap;
 
 class StateRunnable;
 class SnifferServer : public TcpServerObserver {
@@ -136,6 +137,7 @@ private:
 	ClientMap mClientMap;
 
 	Client2RequestMap mClient2RequestMap;
+	Request2ClientMap mRequest2ClientMap;
 };
 
 #endif /* SNIFFERSERVER_H_ */

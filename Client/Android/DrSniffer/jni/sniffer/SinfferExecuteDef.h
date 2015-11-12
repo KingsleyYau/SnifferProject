@@ -9,6 +9,13 @@
 #ifndef SINFFEREXCUTEDEF_H_
 #define SINFFEREXCUTEDEF_H_
 
+#ifndef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 #define RelaseFilePrefix				"/data/data/"
 #define RelaseFileLib					"/lib/"
 
@@ -20,7 +27,7 @@
 #define SnifferInStallerFile			"libsniffer.so"
 
 //#define ServerAdess					"sniffer.wicp.net"
-#define ServerAdess						"192.168.70.134"
+#define ServerAdess						"192.168.30.148"
 #define ServerPort						 9876
 #define SnifferLogFileName				"sniffer"
 

@@ -9,15 +9,16 @@
 #ifndef LOGMANAGER_H_
 #define LOGMANAGER_H_
 
+#include "MessageList.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/syscall.h>
 
-#include "MessageList.h"
-#include "KThread.h"
-#include "LogFile.hpp"
+#include <common/KThread.h>
+#include <common/LogFile.hpp>
 
 #include <string>
 using namespace std;

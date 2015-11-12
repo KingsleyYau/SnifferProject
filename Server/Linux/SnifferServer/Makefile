@@ -16,17 +16,19 @@ CXXFLAGS = -O2 -g
 endif
 
 CXXFLAGS +=	-Wall -fmessage-length=0 -Wunused-variable
-CXXFLAGS +=	-I. -Ilibev
+CXXFLAGS +=	-I. -Ilibev -Ijson
 
 LIBS =		-L. \
 			-Wl,-Bstatic -Llibev/.libs -lev \
 			-Wl,-Bdynamic -ldl -lz -lpthread 
 
-JSONOBJS = 	json_reader.o json_value.o json_writer.o md5.o
-OBJS =		server.o KThread.o ConfFile.o Arithmetic.o LogManager.o LogFile.o \
-			SnifferServer.o TcpServer.o MessageList.o DataParser.o DataHttpParser.o \
-			Client.o
+COMMONOBJ =	common/LogFile.o common/md5.o common/KThread.o \
+			common/ConfFile.o common/Arithmetic.o
+JSONOBJS = 	json/json_reader.o json/json_value.o json/json_writer.o
+OBJS =		server.o SnifferServer.o TcpServer.o MessageList.o LogManager.o \
+			DataParser.o DataHttpParser.o Client.o
 OBJS += 	$(JSONOBJS)
+OBJS +=		$(COMMONOBJ)
 TARGET =	snifferserver
 
 DEPDIRS	:= libev

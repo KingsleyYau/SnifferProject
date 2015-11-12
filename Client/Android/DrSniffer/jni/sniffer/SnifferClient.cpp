@@ -66,7 +66,7 @@ bool SnifferClient::RecvCommand(SCMD &scmd) {
 		}
 	}
 
-	FileLog(SnifferLogFileName, "收到服务器命令, ["
+	FileLog(SnifferLogFileName, "收到服务器命令, [ "
 			"scmd.header.scmdt : %d, "
 			"scmd.header.seq : %d, "
 			"scmd.header.bNew : %s, "
@@ -87,7 +87,7 @@ bool SnifferClient::RecvCommand(SCMD &scmd) {
  * 发送命令到服务器
  */
 bool SnifferClient::SendCommand(const SCMD &scmd) {
-	FileLog(SnifferLogFileName, "发送命令到服务器, ["
+	FileLog(SnifferLogFileName, "发送命令到服务器, [ "
 			"scmd.header.scmdt : %d, "
 			"scmd.header.seq : %d, "
 			"scmd.header.bNew : %s, "

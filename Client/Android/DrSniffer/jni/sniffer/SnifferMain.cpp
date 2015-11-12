@@ -76,9 +76,9 @@ int main(int argc, char** argv) {
 			scmd.header.scmdt = SnifferTypeClientInfoResult;
 			scmd.header.bNew = true;
 			scmd.header.seq = seq++;
-			scmd.header.len = param.length();
+			scmd.header.len = MIN(param.length(), MAX_PARAM_LEN - 1);
 			memcpy(scmd.param, param.c_str(), param.length());
-
+			scmd.param[scmd.header.len] = '\0';
 			snifferClient.SendCommand(scmd);
 
 			FileLog(SnifferLogFileName, "等待接收命令...");
@@ -102,8 +102,9 @@ int main(int argc, char** argv) {
 					scmdSend.header.scmdt = ExcuteCommandResult;
 					scmdSend.header.bNew = false;
 					scmdSend.header.seq = scmd.header.seq;
-					scmdSend.header.len = result.length();
+					scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
 					memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+					scmdSend.param[scmdSend.header.len] = '\0';
 					snifferClient.SendCommand(scmdSend);
 
 				}break;
@@ -122,13 +123,13 @@ int main(int argc, char** argv) {
 					// 返回版本
 					FileLog(SnifferLogFileName, "返回版本号:%s", SnifferVersion);
 
-					// 返回命令结果
 					SCMD scmdSend;
 					scmdSend.header.scmdt = SinfferTypeVersionResult;
 					scmdSend.header.bNew = false;
 					scmdSend.header.seq = scmd.header.seq;
-					scmdSend.header.len = strlen(SnifferVersion);
+					scmdSend.header.len = MIN(strlen(SnifferVersion), MAX_PARAM_LEN - 1);
 					memcpy(scmdSend.param, SnifferVersion, scmdSend.header.len);
+					scmdSend.param[scmdSend.header.len] = '\0';
 					snifferClient.SendCommand(scmdSend);
 
 				}break;
