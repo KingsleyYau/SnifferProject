@@ -1,10 +1,6 @@
-DrSnifferProject
-================
-
-DrSnifferProject, CS模式远程管理软件
+#SnifferProject, CS模式远程管理软件
 
 Autor:  Kingsley Yau
 
-1.支持Android和iOS2种客户端
-2.服务端为MacOSX
-3.必须越狱才能使用
+1.支持Android客户端, 必须root才能使用</bar>
+2.服务端为Linux, 提供http外部接口</br>
