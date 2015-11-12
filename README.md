@@ -1,4 +1,4 @@
-#SnifferProject, CS模式远程管理软件
+#SnifferProject
 
 Autor:  Kingsley Yau
 
