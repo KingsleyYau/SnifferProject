@@ -29,6 +29,8 @@ typedef enum SnifferCommandType {
 	ExcuteCommandResult = 6,
 	SnifferTypeClientInfo = 7,
 	SnifferTypeClientInfoResult = 8,
+	SnifferListDir = 9,
+	SnifferListDirResult = 10,
 } SCMDT;
 
 /*
@@ -67,6 +69,7 @@ typedef struct SnifferCommand {
  */
 #define GET_CLIENT_INFO			"/GET_CLIENT_INFO"
 #define CLIENT_INFO				"CLIENT_INFO"
+#define DEVICE_ID				"DEVICE_ID"
 #define PHONE_INFO_BRAND 		"PHONE_INFO_BRAND"
 #define PHONE_INFO_MODEL 		"PHONE_INFO_MODEL"
 #define PHONE_INFO_NUMBER 		"PHONE_INFO_NUMBER"
@@ -76,6 +79,11 @@ typedef struct SnifferCommand {
  */
 #define SET_CLIENT_CMD			"/SET_CLIENT_CMD"
 #define COMMAND					"COMMAND"
-#define COMMAND_RESULT			"RESULT"
+
+/**
+ * 列目录
+ */
+#define LS_CLIENT_DIR			"/LS_CLIENT_DIR"
+#define DIRECTORY				"DIRECTORY"
 
 #endif /* SNIFFERCOMMANDDEF_H_ */

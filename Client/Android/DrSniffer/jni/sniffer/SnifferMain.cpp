@@ -10,6 +10,7 @@
 #include "SnifferClient.h"
 
 #include <common/command.h>
+#include <common/md5.h>
 #include <json/json/json.h>
 
 int main(int argc, char** argv) {
@@ -53,20 +54,31 @@ int main(int argc, char** argv) {
 		FileLog(SnifferLogFileName, "等待连接服务端...");
 
 		if( snifferClient.ConnectServer() ) {
+			char deviceId[128] = {'\0'};
+			memset(deviceId, '\0', sizeof(deviceId));
+			list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
+			if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
+				IpAddressNetworkInfo info = *(infoList.begin());
+				GetMD5String(info.mac.c_str(), deviceId);
+			}
+
 			// 连接上服务端, 发送手机型号/手机号
 			FileLog(
 					SnifferLogFileName,
 					"已经连接上服务端, 发送手机信息, [ "
+					"DeviceId : %s, "
 					"厂商 : %s, "
 					"型号 : %s, "
 					"手机号 : %s "
 					"]",
+					deviceId,
 					GetPhoneBrand().c_str(),
 					GetPhoneModel().c_str(),
 					""
 					);
 
 			root.clear();
+			root[DEVICE_ID] = deviceId;
 			root[PHONE_INFO_BRAND] = GetPhoneBrand();
 			root[PHONE_INFO_MODEL] = GetPhoneModel();
 			root[PHONE_INFO_NUMBER] = "";

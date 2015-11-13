@@ -15,41 +15,47 @@ Client::Client() {
     model = "";
     phoneNumber = "";
 
-	type = 0;
-	message.Reset();
+    mSeq = 0;
+	mBuffer.Reset();
 }
 
 Client::~Client() {
 	// TODO Auto-generated destructor stub
-	while( !cmdListRecv.Empty() ) {
-		SCMD *scmd = cmdListRecv.PopFront();
-		delete scmd;
-	}
+//	while( !cmdListRecv.Empty() ) {
+//		SCMD *scmd = cmdListRecv.PopFront();
+//		delete scmd;
+//	}
+}
+
+void Client::SetClientCallback(ClientCallback* pClientCallback) {
+	mpClientCallback = pClientCallback;
 }
 
 int Client::ParseData(char* buffer, int len)  {
-	int ret = -1;
+	int ret = 0;
 
-	int recvLen = (len < (MAXLEN - 1) - message.len)?len:(MAXLEN - 1) - message.len;
+	mKMutex.lock();
+
+	int recvLen = (len < (MAXLEN - 1) - mBuffer.len)?len:(MAXLEN - 1) - mBuffer.len;
 	if( recvLen > 0 ) {
-		memcpy(message.buffer + message.len, buffer, recvLen);
-		message.len += recvLen;
-		message.buffer[message.len] = '\0';
+		memcpy(mBuffer.buffer + mBuffer.len, buffer, recvLen);
+		mBuffer.len += recvLen;
+		mBuffer.buffer[mBuffer.len] = '\0';
 	}
 
 	LogManager::GetLogManager()->Log(
 			LOG_STAT,
 			"Client::ParseData( "
 			"tid : %d, "
-			"message.len : %d "
+			"mBuffer.len : %d "
 			")",
 			(int)syscall(SYS_gettid),
-			message.len
+			mBuffer.len
 			);
 
 	// 解析命令头
-	while(message.len >= sizeof(SCMDH)) {
-		SCMDH *header = (SCMDH*)message.buffer;
+	while(mBuffer.len >= sizeof(SCMDH)) {
+		SCMDH *header = (SCMDH*)mBuffer.buffer;
 
 		LogManager::GetLogManager()->Log(
 				LOG_STAT,
@@ -67,12 +73,11 @@ int Client::ParseData(char* buffer, int len)  {
 				header->seq
 				);
 
-		int iLen = message.len - sizeof(SCMDH);
+		int iLen = mBuffer.len - sizeof(SCMDH);
 		if( iLen >= header->len ) {
-			SCMD *scmd = new SCMD();
-			cmdListRecv.PushBack(scmd);
-			memcpy(scmd, message.buffer, sizeof(SCMDH) + header->len);
-			scmd->param[header->len] = '\0';
+			SCMD scmd;
+			memcpy(&scmd, mBuffer.buffer, sizeof(SCMDH) + header->len);
+			scmd.param[header->len] = '\0';
 
 			LogManager::GetLogManager()->Log(
 					LOG_STAT,
@@ -81,12 +86,16 @@ int Client::ParseData(char* buffer, int len)  {
 					"scmd->param : %s "
 					")",
 					(int)syscall(SYS_gettid),
-					scmd->param
+					scmd.param
 					);
 
+			if( mpClientCallback != NULL ) {
+				mpClientCallback->OnParseCmd(this, &scmd);
+			}
+
 			// 替换数据
-			message.len -= sizeof(SCMDH) + header->len;
-			memcpy(message.buffer, message.buffer + sizeof(SCMDH) + header->len, message.len);
+			mBuffer.len -= sizeof(SCMDH) + header->len;
+			memcpy(mBuffer.buffer, mBuffer.buffer + sizeof(SCMDH) + header->len, mBuffer.len);
 
 			ret = 1;
 		} else {
@@ -94,5 +103,26 @@ int Client::ParseData(char* buffer, int len)  {
 		}
 	}
 
+	mKMutex.unlock();
+
 	return ret;
+}
+
+/**
+ * 发送命令
+ */
+bool Client::SendCmd(SCMD* scmd, int seq, bool bNew) {
+	bool bFlag = false;
+
+	scmd->header.bNew = bNew;
+	if( scmd->header.bNew ) {
+		mKMutex.lock();
+		scmd->header.seq = mSeq++;
+		mKMutex.unlock();
+	} else {
+		scmd->header.seq = seq;
+	}
+
+
+	return bFlag;
 }

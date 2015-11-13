@@ -27,7 +27,7 @@
 #define SnifferInStallerFile			"libsniffer.so"
 
 //#define ServerAdess					"sniffer.wicp.net"
-#define ServerAdess						"192.168.30.148"
+#define ServerAdess						"192.168.70.134"
 #define ServerPort						 9876
 #define SnifferLogFileName				"sniffer"
 

@@ -28,7 +28,7 @@ typedef KSafeMap<int, int> Client2RequestMap;
 typedef KSafeMap<int, int> Request2ClientMap;
 
 class StateRunnable;
-class SnifferServer : public TcpServerObserver {
+class SnifferServer : public TcpServerObserver, ClientCallback {
 public:
 	SnifferServer();
 	virtual ~SnifferServer();
@@ -47,6 +47,11 @@ public:
 
 	void StateRunnableHandle();
 
+	/**
+	 * Implement from ClientCallback
+	 */
+	void OnParseCmd(Client* client, SCMD* scmd);
+
 private:
 	/*
 	 *	请求解析函数
@@ -55,6 +60,35 @@ private:
 	int HandleRecvMessage(Message *m, Message *sm);
 	int HandleTimeoutMessage(Message *m, Message *sm);
 	int HandleInsideRecvMessage(Message *m, Message *sm);
+
+	/**
+	 * 内部服务器主动发起的交互请求
+	 */
+	bool SendRequestMsg2Client(
+			const int& request,
+			const int& client,
+			const SnifferCommandType& type,
+			const char* buffer,
+			const int& len
+			);
+
+	bool ReturnClientMsg2Request(
+			const int& client,
+			const int& code,
+			const char* reason,
+			const char* buffer,
+			const int& len
+			);
+
+	/**
+	 * 客户端主动发起的交互请求
+	 */
+	bool ReturnRequestMsg2Client(
+			const int& request,
+			const SnifferCommandType& type,
+			const char* buffer,
+			const int& len
+			);
 
 	/**
 	 * 获取在线客户端

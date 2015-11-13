@@ -1,13 +1,14 @@
-﻿内部服务接口
-同步接口(http get)
-路径		http://127.0.0.1:9877/SYNC
+﻿http服务接口
+获取在线客户端接口(http get)
+路径		http://127.0.0.1:9877/GET_CLIENT_LIST
 返回json
 {
     "ret":1
+    "CLIENT_LIST":[{"CLIENT_ID":1}]
 }
 
-重新加载配置接口(http get)
-路径		http://127.0.0.1:9877/RELOAD
+获取在线客户详细信息接口(http get)
+路径		http://127.0.0.1:9877/GET_CLIENT_INFO
 返回json
 {
     "ret":1

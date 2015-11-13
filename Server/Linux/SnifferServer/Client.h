@@ -11,38 +11,48 @@
 #include <string>
 using namespace std;
 
-#include "MessageList.h"
 #include "DataParser.h"
 #include "SnifferCommandDef.h"
 
 #include "LogManager.h"
-#include <common/KSafeList.h>
-#include <common/KSafeMap.h>
 #include <common/Arithmetic.hpp>
+#include <common/Buffer.h>
 
-typedef KSafeList<SCMD*> CMDLIST;
-typedef KSafeMap<int, SCMD*> CMDMAP;
+class Client;
+class ClientCallback {
+public:
+	virtual ~ClientCallback(){};
+	virtual void OnParseCmd(Client* client, SCMD* scmd) = 0;
+};
 
 class Client : public DataParser {
 public:
 	Client();
 	virtual ~Client();
 
+	void SetClientCallback(ClientCallback* pClientCallback);
+
+	/**
+	 * 解析数据
+	 */
 	int ParseData(char* buffer, int len);
 
-	int fd;
+	/**
+	 * 发送命令
+	 */
+	bool SendCmd(SCMD* scmd, int seq = 0, bool bNew = true);
 
+	int fd;
+	string deviceId;
     string brand;
     string model;
     string phoneNumber;
 
-    CMDLIST cmdListRecv;
-    CMDMAP cmdMapSend;
-
 private:
-	int type;
-    Message message;
-
+    Buffer mBuffer;
+    int mSeq;
+    KMutex mKMutex;
+    ClientCallback* mpClientCallback;
 };
 
 #endif /* CLIENT_H_ */
