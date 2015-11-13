@@ -12,10 +12,17 @@ SnifferClient::SnifferClient() {
 	// TODO Auto-generated constructor stub
 	mServerAddress = ServerAdess;
 	miServerPort = ServerPort;
+
+	mHttpRequestHostManager.SetWebSite(ServerAdess);
+	mHttpRequestManager.SetHostManager(&mHttpRequestHostManager);
 }
 
 SnifferClient::~SnifferClient() {
 	// TODO Auto-generated destructor stub
+}
+
+void SnifferClient::OnTaskFinish(ITask* pTask) {
+	delete pTask;
 }
 
 /*
@@ -66,13 +73,13 @@ bool SnifferClient::RecvCommand(SCMD &scmd) {
 		}
 	}
 
-	FileLog(SnifferLogFileName, "收到服务器命令, [ "
+	FileLog(SnifferLogFileName, "RecvCommand( "
 			"scmd.header.scmdt : %d, "
 			"scmd.header.seq : %d, "
 			"scmd.header.bNew : %s, "
 			"scmd.header.len : %d, "
 			"scmd.param : %s "
-			"]",
+			")",
 			scmd.header.scmdt,
 			scmd.header.seq,
 			scmd.header.bNew?"true":"false",
@@ -87,13 +94,13 @@ bool SnifferClient::RecvCommand(SCMD &scmd) {
  * 发送命令到服务器
  */
 bool SnifferClient::SendCommand(const SCMD &scmd) {
-	FileLog(SnifferLogFileName, "发送命令到服务器, [ "
+	FileLog(SnifferLogFileName, "SendCommand( "
 			"scmd.header.scmdt : %d, "
 			"scmd.header.seq : %d, "
 			"scmd.header.bNew : %s, "
 			"scmd.header.len : %d, "
 			"scmd.param : %s "
-			"]",
+			")",
 			scmd.header.scmdt,
 			scmd.header.seq,
 			scmd.header.bNew?"true":"false",
@@ -109,6 +116,25 @@ bool SnifferClient::SendCommand(const SCMD &scmd) {
 	if( iSend == iLen ) {
 		bFlag = true;
 	}
+
+	return bFlag;
+}
+
+// 上传文件到服务器
+bool SnifferClient::UploadFile(const string& filePath) {
+	FileLog(SnifferLogFileName, "UploadFile( "
+			"filePath : %s "
+			")",
+			filePath.c_str()
+			);
+
+	bool bFlag = false;
+
+	RequestUploadTask* task = new RequestUploadTask();
+	task->SetTaskCallback(this);
+	task->Init(&mHttpRequestManager);
+	task->SetParam(filePath);
+	task->Start();
 
 	return bFlag;
 }

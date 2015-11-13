@@ -21,9 +21,12 @@ LOCAL_C_INCLUDES += $(LIBRARY_THIRDY_PARTY_PATH)/curl/include
 LOCAL_CFLAGS = -fpermissive -Wno-write-strings
 
 LOCAL_LDLIBS += -llog
+LOCAL_LDFLAGS += -L$(LIBRARY_THIRDY_PARTY_PATH)/openssl/lib/$(TARGET_ARCH)
+LOCAL_LDLIBS += -lz -lssl -lcrypto
 
 LOCAL_STATIC_LIBRARIES += common
 LOCAL_STATIC_LIBRARIES += json
+LOCAL_STATIC_LIBRARIES += httpclient
 
 LOCAL_CPPFLAGS  := -std=c++11
 LOCAL_CPPFLAGS	+= -fpermissive

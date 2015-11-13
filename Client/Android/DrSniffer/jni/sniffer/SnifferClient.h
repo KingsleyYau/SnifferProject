@@ -11,14 +11,23 @@
 
 #include "SnifferCommandDef.h"
 #include "SinfferExecuteDef.h"
+#include "RequestUploadTask.h"
 
 #include <common/KTcpSocket.h>
 #include <common/KThread.h>
 
-class SnifferClient {
+#include <httpclient/HttpRequestHostManager.h>
+#include <httpclient/HttpRequestManager.h>
+
+class SnifferClient : public ITaskCallback {
 public:
 	SnifferClient();
 	virtual ~SnifferClient();
+
+	/**
+	 * Implement from ITaskCallback
+	 */
+	void OnTaskFinish(ITask* pTask);
 
 	// 连接服务器
 	bool ConnectServer();
@@ -29,10 +38,16 @@ public:
 	// 发送命令到服务器
 	bool SendCommand(const SCMD &scmd);
 
+	// 上传文件到服务器
+	bool UploadFile(const string& filePath);
+
 private:
 	KTcpSocket mTcpSocket;
 	string mServerAddress;
 	int miServerPort;
+
+	HttpRequestHostManager mHttpRequestHostManager;
+	HttpRequestManager mHttpRequestManager;
 };
 
 #endif /* SNIFFERCLIENT_H_ */
