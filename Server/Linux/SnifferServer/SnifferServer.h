@@ -17,6 +17,8 @@
 #include <json/json.h>
 #include <common/ConfFile.hpp>
 #include <common/KSafeMap.h>
+#include <common/TimeProc.hpp>
+#include <common/StringHandle.h>
 
 #include <map>
 #include <list>
@@ -24,8 +26,12 @@ using namespace std;
 
 typedef KSafeMap<int, Client*> ClientMap;
 
+// 外/内部服务交互
 typedef KSafeMap<int, int> Client2RequestMap;
 typedef KSafeMap<int, int> Request2ClientMap;
+
+// 内部服务交互
+typedef KSafeMap<int, SCMDH> ClientCmdMap;
 
 class StateRunnable;
 class SnifferServer : public TcpServerObserver, ClientCallback {
@@ -91,7 +97,10 @@ private:
 			);
 
 	/**
-	 * 获取在线客户端
+	 * 外部服务器接口处理
+	 */
+	/**
+	 * 获取在线客户端列表
 	 */
 	int GetClientList(
 			Json::Value& listNode,
@@ -108,11 +117,20 @@ private:
 			);
 
 	/**
-	 * 对指定客户端运行命令
+	 * 执行客户端命令
 	 */
 	int SetClientCmd(
 			const char* clientId,
 			const char* command,
+			Message *m
+			);
+
+	/**
+	 * 获取客户端目录
+	 */
+	int GetClientDir(
+			const char* clientId,
+			const char* directory,
 			Message *m
 			);
 
@@ -168,10 +186,21 @@ private:
 	 */
 	unsigned int miStateTime;
 
+	/*
+	 * 在线客户端
+	 */
 	ClientMap mClientMap;
 
+	/*
+	 * 外/内部服务交互会话
+	 */
 	Client2RequestMap mClient2RequestMap;
 	Request2ClientMap mRequest2ClientMap;
+
+	/**
+	 * 内部服务交互会话
+	 */
+	ClientCmdMap
 };
 
 #endif /* SNIFFERSERVER_H_ */

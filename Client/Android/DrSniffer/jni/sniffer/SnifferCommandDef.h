@@ -83,7 +83,7 @@ typedef struct SnifferCommand {
 /**
  * 列目录
  */
-#define LS_CLIENT_DIR			"/LS_CLIENT_DIR"
+#define GET_CLIENT_DIR			"/GET_CLIENT_DIR"
 #define DIRECTORY				"DIRECTORY"
 
 #endif /* SNIFFERCOMMANDDEF_H_ */

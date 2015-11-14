@@ -15,15 +15,36 @@
 
 #include <common/KTcpSocket.h>
 #include <common/KThread.h>
+#include <common/IPAddress.h>
+#include <common/command.h>
+#include <common/md5.h>
+#include <json/json/json.h>
 
 #include <httpclient/HttpRequestHostManager.h>
 #include <httpclient/HttpRequestManager.h>
 
+class SnifferClient;
+class SnifferClientCallback {
+public:
+	virtual ~SnifferClientCallback(){};
+	virtual void OnRecvCommand(SnifferClient* client, const SCMD &scmd) = 0;
+};
+class SnifferClientRunnable;
 class SnifferClient : public ITaskCallback {
 public:
 	SnifferClient();
 	virtual ~SnifferClient();
 
+	void SetSnifferClientCallback(SnifferClientCallback *pSnifferClientCallback);
+	bool Start();
+	void Stop();
+
+	// 发送命令到服务器
+	bool SendCommand(const SCMD &scmd);
+
+	void HandleSnifferClientRunnable();
+
+private:
 	/**
 	 * Implement from ITaskCallback
 	 */
@@ -35,13 +56,15 @@ public:
 	// 接收服务器命令
 	bool RecvCommand(SCMD &scmd);
 
-	// 发送命令到服务器
-	bool SendCommand(const SCMD &scmd);
-
 	// 上传文件到服务器
 	bool UploadFile(const string& filePath);
 
-private:
+	SnifferClientCallback* mpSnifferClientCallback;
+	bool mbRunning;
+
+	KThread mKThread;
+	SnifferClientRunnable* mpSnifferClientRunnable;
+
 	KTcpSocket mTcpSocket;
 	string mServerAddress;
 	int miServerPort;
