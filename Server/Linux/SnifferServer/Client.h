@@ -37,10 +37,7 @@ public:
 	 */
 	int ParseData(char* buffer, int len);
 
-	/**
-	 * 发送命令
-	 */
-	bool SendCmd(SCMD* scmd, int seq = 0, bool bNew = true);
+	int AddSeq();
 
 	int fd;
 	string deviceId;

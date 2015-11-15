@@ -11,20 +11,18 @@ Client::Client() {
 	// TODO Auto-generated constructor stub
 	fd = -1;
 
+	deviceId = "";
     brand = "";
     model = "";
     phoneNumber = "";
 
     mSeq = 0;
 	mBuffer.Reset();
+	mpClientCallback = NULL;
 }
 
 Client::~Client() {
 	// TODO Auto-generated destructor stub
-//	while( !cmdListRecv.Empty() ) {
-//		SCMD *scmd = cmdListRecv.PopFront();
-//		delete scmd;
-//	}
 }
 
 void Client::SetClientCallback(ClientCallback* pClientCallback) {
@@ -108,21 +106,10 @@ int Client::ParseData(char* buffer, int len)  {
 	return ret;
 }
 
-/**
- * 发送命令
- */
-bool Client::SendCmd(SCMD* scmd, int seq, bool bNew) {
-	bool bFlag = false;
-
-	scmd->header.bNew = bNew;
-	if( scmd->header.bNew ) {
-		mKMutex.lock();
-		scmd->header.seq = mSeq++;
-		mKMutex.unlock();
-	} else {
-		scmd->header.seq = seq;
-	}
-
-
-	return bFlag;
+int Client::AddSeq() {
+	int seq;
+	mKMutex.lock();
+	seq = mSeq++;
+	mKMutex.unlock();
+	return seq;
 }

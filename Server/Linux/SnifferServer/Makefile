@@ -16,7 +16,7 @@ CXXFLAGS = -O2 -g
 endif
 
 CXXFLAGS +=	-Wall -fmessage-length=0 -Wunused-variable
-CXXFLAGS +=	-I. -Ilibev -Ijson
+CXXFLAGS +=	-I. -Ilibev -Ijson -Iinclude
 
 LIBS =		-L. \
 			-Wl,-Bstatic -Llibev/.libs -lev \
@@ -25,10 +25,12 @@ LIBS =		-L. \
 COMMONOBJ =	common/LogFile.o common/md5.o common/KThread.o \
 			common/ConfFile.o common/Arithmetic.o
 JSONOBJS = 	json/json_reader.o json/json_value.o json/json_writer.o
+TASKOBJ = 	task/SetClientCmdTask.o task/GetClientDirTask.o
 OBJS =		server.o SnifferServer.o TcpServer.o MessageList.o LogManager.o \
-			DataParser.o DataHttpParser.o Client.o
-OBJS += 	$(JSONOBJS)
+			DataParser.o DataHttpParser.o Client.o Session.o
 OBJS +=		$(COMMONOBJ)
+OBJS += 	$(JSONOBJS)
+OBJS +=		$(TASKOBJ)
 TARGET =	snifferserver
 
 DEPDIRS	:= libev

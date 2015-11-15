@@ -145,7 +145,7 @@ void SnifferClient::HandleSnifferClientRunnable() {
 				}
 			}
 		}
-		sleep(30);
+		sleep(10);
 	}
 }
 

@@ -13,6 +13,7 @@
 #include "TcpServer.h"
 #include "DataHttpParser.h"
 #include "Client.h"
+#include "Session.h"
 
 #include <json/json.h>
 #include <common/ConfFile.hpp>
@@ -26,12 +27,9 @@ using namespace std;
 
 typedef KSafeMap<int, Client*> ClientMap;
 
-// 外/内部服务交互
-typedef KSafeMap<int, int> Client2RequestMap;
-typedef KSafeMap<int, int> Request2ClientMap;
-
-// 内部服务交互
-typedef KSafeMap<int, SCMDH> ClientCmdMap;
+// 外/内部服务交互会话
+typedef KSafeMap<int, Session*> Client2RequestMap;
+typedef KSafeMap<int, Session*> Request2ClientMap;
 
 class StateRunnable;
 class SnifferServer : public TcpServerObserver, ClientCallback {
@@ -68,37 +66,40 @@ private:
 	int HandleInsideRecvMessage(Message *m, Message *sm);
 
 	/**
-	 * 内部服务器主动发起的交互请求
+	 * 外部服务发起交互请求
+	 * @param request	请求号
+	 * @param client	客户端号
+	 * @param task		任务
 	 */
 	bool SendRequestMsg2Client(
 			const int& request,
-			const int& client,
-			const SnifferCommandType& type,
-			const char* buffer,
-			const int& len
-			);
-
-	bool ReturnClientMsg2Request(
-			const int& client,
-			const int& code,
-			const char* reason,
-			const char* buffer,
-			const int& len
+			Client* client,
+			ITask* task
 			);
 
 	/**
-	 * 客户端主动发起的交互请求
+	 * 内部服务返回交互请求
 	 */
-	bool ReturnRequestMsg2Client(
-			const int& request,
-			const SnifferCommandType& type,
-			const char* buffer,
-			const int& len
+	bool ReturnClientMsg2Request(
+			Client* client,
+			SCMD* scmd
 			);
 
 	/**
+	 * 外部服务器关闭会话
+	 */
+	bool CloseSessionByRequest(const int& request);
+
+	/**
+	 * 内部服务器关闭会话
+	 */
+	bool CloseSessionByClient(Client* client);
+
+	/**
+	 * ###################################################
 	 * 外部服务器接口处理
 	 */
+
 	/**
 	 * 获取在线客户端列表
 	 */
@@ -197,10 +198,6 @@ private:
 	Client2RequestMap mClient2RequestMap;
 	Request2ClientMap mRequest2ClientMap;
 
-	/**
-	 * 内部服务交互会话
-	 */
-	ClientCmdMap
 };
 
 #endif /* SNIFFERSERVER_H_ */
