@@ -8,14 +8,13 @@
 #ifndef SESSION_H_
 #define SESSION_H_
 
-#include "Client.h"
 #include "task/ITask.h"
+#include "Client.h"
 
 #include <map>
 using namespace std;
 
 typedef map<int, ITask*> TaskMap;
-
 class Session {
 public:
 	Session(int request, Client* client);

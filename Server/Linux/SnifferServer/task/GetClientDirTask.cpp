@@ -9,7 +9,7 @@
 
 GetClientDirTask::GetClientDirTask() {
 	// TODO Auto-generated constructor stub
-
+	mDir = "/";
 }
 
 GetClientDirTask::~GetClientDirTask() {
@@ -17,12 +17,11 @@ GetClientDirTask::~GetClientDirTask() {
 }
 
 void GetClientDirTask::GetSendCmd(SCMD* scmd) {
-	string command = "ls -al";
-	if( strlen(mDir) > 0 ) {
-		command += " ";
-		command += mDir;
-	}
-
+	printf("# GetClientDirTask::GetSendCmd(SCMD* scmd) \n");
+	string command = "ls";
+	command += " ";
+	command += mDir;
+	printf("# GetClientDirTask::GetSendCmd( command : %s ) \n", command.c_str());
 	scmd->header.scmdt = ExcuteCommand;
 	scmd->header.bNew = true;
 	scmd->header.len = command.length();
@@ -31,13 +30,20 @@ void GetClientDirTask::GetSendCmd(SCMD* scmd) {
 }
 
 bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
-	sprintf(buffer,
-			"<html>\n<body>\n"
-			"%s"
-			"</body>\n</html>\n",
-			scmd->param
-			);
-	return true;
+	bool bFalg = false;
+	if( buffer != NULL ) {
+		snprintf(buffer,
+				MAXLEN - 1,
+				"<html>\n<body>\n"
+				"%s"
+				"</body>\n</html>\n",
+				StringHandle::replace(scmd->param, "\n", "\n</br>").c_str()
+				);
+		len = strlen(buffer);
+		bFalg = true;
+	}
+
+	return bFalg;
 //	param = "<html>\n<body>\n";
 //	string herf = " <a href=\"";
 //	herf += GET_CLIENT_DIR;
@@ -53,5 +59,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 }
 
 void GetClientDirTask::SetDir(const char* dir) {
-	snprintf(mDir, 1023, "%s", dir);
+	if( dir != NULL ) {
+		mDir = dir;
+	}
 }

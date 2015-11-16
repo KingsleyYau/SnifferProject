@@ -156,9 +156,6 @@ void SnifferClient::OnTaskFinish(ITask* pTask) {
 bool SnifferClient::ConnectServer() {
 	bool bFlag = false;
 
-	mServerAddress = ServerAdess;
-	miServerPort = ServerPort;
-
 	int iRet = mTcpSocket.Connect(mServerAddress.c_str(), miServerPort, true);
 	if(iRet > 0) {
 		bFlag = true;

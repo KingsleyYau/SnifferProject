@@ -9,10 +9,7 @@
 #ifndef SNIFFERCOMMANDDEF_H_
 #define SNIFFERCOMMANDDEF_H_
 
-#pragma pack(1)
-
-#include <string>
-using namespace std;
+#pragma pack(push,1)
 
 #define MAX_PARAM_LEN 1024
 
@@ -86,4 +83,5 @@ typedef struct SnifferCommand {
 #define GET_CLIENT_DIR			"/GET_CLIENT_DIR"
 #define DIRECTORY				"DIRECTORY"
 
+#pragma pack(pop)
 #endif /* SNIFFERCOMMANDDEF_H_ */

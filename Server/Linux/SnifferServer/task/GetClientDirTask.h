@@ -10,8 +10,8 @@
 
 #include "ITask.h"
 
-#include <string>
-using namespace std;
+#include <common/Buffer.h>
+#include <common/StringHandle.h>
 
 class GetClientDirTask {
 public:
@@ -24,7 +24,7 @@ public:
 	void SetDir(const char* dir);
 
 private:
-	char mDir[1024];
+	string mDir;
 };
 
 #endif /* GETCLIENTDIRTASK_H_ */

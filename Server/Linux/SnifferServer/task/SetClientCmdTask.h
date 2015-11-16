@@ -10,6 +10,9 @@
 
 #include "ITask.h"
 
+#include <common/Buffer.h>
+#include <common/StringHandle.h>
+
 class SetClientCmdTask : public ITask {
 public:
 	SetClientCmdTask();
@@ -21,7 +24,7 @@ public:
 	void SetCommand(const char* command);
 
 private:
-	char mCommand[1024];
+	string mCommand;
 };
 
 #endif /* SETCLIENTCMDTASK_H_ */

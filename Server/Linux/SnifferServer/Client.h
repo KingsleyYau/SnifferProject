@@ -8,15 +8,15 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
-#include <string>
-using namespace std;
-
-#include "DataParser.h"
 #include "SnifferCommandDef.h"
-
+#include "DataParser.h"
 #include "LogManager.h"
+
 #include <common/Arithmetic.hpp>
 #include <common/Buffer.h>
+
+#include <string>
+using namespace std;
 
 class Client;
 class ClientCallback {

@@ -9,11 +9,11 @@
 #ifndef SNIFFERSERVER_H_
 #define SNIFFERSERVER_H_
 
+#include "Client.h"
+#include "Session.h"
 #include "MessageList.h"
 #include "TcpServer.h"
 #include "DataHttpParser.h"
-#include "Client.h"
-#include "Session.h"
 
 #include <json/json.h>
 #include <common/ConfFile.hpp>

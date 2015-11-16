@@ -9,12 +9,9 @@
 #ifndef SNIFFERCOMMANDDEF_H_
 #define SNIFFERCOMMANDDEF_H_
 
-#pragma pack(1)
+#pragma pack(push,1)
 
-#include <string>
-using namespace std;
-
-#define MAX_PARAM_LEN 1024
+#define MAX_PARAM_LEN 2048
 
 /*
  * 命令类型
@@ -75,15 +72,16 @@ typedef struct SnifferCommand {
 #define PHONE_INFO_NUMBER 		"PHONE_INFO_NUMBER"
 
 /**
- * 对指定客户端运行命令
+ * 执行客户端命令
  */
 #define SET_CLIENT_CMD			"/SET_CLIENT_CMD"
 #define COMMAND					"COMMAND"
 
 /**
- * 列目录
+ * 获取客户端目录
  */
 #define GET_CLIENT_DIR			"/GET_CLIENT_DIR"
 #define DIRECTORY				"DIRECTORY"
 
+#pragma pack(pop)
 #endif /* SNIFFERCOMMANDDEF_H_ */

@@ -34,11 +34,10 @@ int Client::ParseData(char* buffer, int len)  {
 
 	mKMutex.lock();
 
-	int recvLen = (len < (MAXLEN - 1) - mBuffer.len)?len:(MAXLEN - 1) - mBuffer.len;
+	int recvLen = (len < MAXLEN - mBuffer.len)?len:(MAXLEN - mBuffer.len);
 	if( recvLen > 0 ) {
 		memcpy(mBuffer.buffer + mBuffer.len, buffer, recvLen);
 		mBuffer.len += recvLen;
-		mBuffer.buffer[mBuffer.len] = '\0';
 	}
 
 	LogManager::GetLogManager()->Log(
@@ -93,13 +92,36 @@ int Client::ParseData(char* buffer, int len)  {
 
 			// 替换数据
 			mBuffer.len -= sizeof(SCMDH) + header->len;
-			memcpy(mBuffer.buffer, mBuffer.buffer + sizeof(SCMDH) + header->len, mBuffer.len);
+
+			LogManager::GetLogManager()->Log(
+					LOG_STAT,
+					"Client::ParseData( "
+					"tid : %d, "
+					"mBuffer.len : %d "
+					")",
+					(int)syscall(SYS_gettid),
+					mBuffer.len
+					);
+
+			if( mBuffer.len > 0 ) {
+				memcpy(mBuffer.buffer, mBuffer.buffer + sizeof(SCMDH) + header->len, mBuffer.len);
+			}
 
 			ret = 1;
 		} else {
 			break;
 		}
 	}
+
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"Client::ParseData( "
+			"tid : %d, "
+			"ret : %d "
+			")",
+			(int)syscall(SYS_gettid),
+			ret
+			);
 
 	mKMutex.unlock();
 

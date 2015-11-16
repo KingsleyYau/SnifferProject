@@ -9,7 +9,7 @@
 
 SetClientCmdTask::SetClientCmdTask() {
 	// TODO Auto-generated constructor stub
-	mCommand = {'\0'};
+	mCommand = "";
 }
 
 SetClientCmdTask::~SetClientCmdTask() {
@@ -19,20 +19,21 @@ SetClientCmdTask::~SetClientCmdTask() {
 void SetClientCmdTask::GetSendCmd(SCMD* scmd) {
 	scmd->header.scmdt = ExcuteCommand;
 	scmd->header.bNew = true;
-	scmd->header.len = strlen(mCommand);
-	memcpy(scmd->param, mCommand, scmd->header.len);
+	scmd->header.len = mCommand.length();
+	memcpy(scmd->param, mCommand.c_str(), scmd->header.len);
 }
 
 bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	bool bFalg = false;
 	if( buffer != NULL ) {
-		sprintf(buffer,
+		snprintf(buffer,
+				MAXLEN - 1,
 				"<html>\n<body>\n"
 				"%s"
 				"</body>\n</html>\n",
-				scmd->param
+				StringHandle::replace(scmd->param, "\n", "\n</br>").c_str()
 				);
-		len = strlen(scmd->param);
+		len = strlen(buffer);
 		bFalg = true;
 	}
 
@@ -40,5 +41,7 @@ bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 }
 
 void SetClientCmdTask::SetCommand(const char* command) {
-	snprintf(mCommand, 1023, "%s", command);
+	if( command != NULL ) {
+		mCommand = command;
+	}
 }

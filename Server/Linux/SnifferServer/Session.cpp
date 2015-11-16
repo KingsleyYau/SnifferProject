@@ -25,7 +25,8 @@ Session::~Session() {
 
 bool Session::InsertRequestTask(int seq, ITask* task) {
 	bool bFlag = false;
-	if( mRequestTaskMap.find(seq) == mRequestTaskMap.end() ) {
+	TaskMap::iterator itr = mRequestTaskMap.find(seq);
+	if( itr == mRequestTaskMap.end() ) {
 		mRequestTaskMap.insert(TaskMap::value_type(seq, task));
 		bFlag = true;
 	}
@@ -34,12 +35,10 @@ bool Session::InsertRequestTask(int seq, ITask* task) {
 
 ITask* Session::EraseRequestTask(int seq) {
 	ITask* task = NULL;
-	printf("#Session::EraseRequestTask( mRequestTaskMap : %p, seq: %d ) \n", mRequestTaskMap, seq);
 	TaskMap::iterator itr = mRequestTaskMap.find(seq);
-	printf("#Session::EraseRequestTask( mRequestTaskMap : %p, seq: %d ) after\n", mRequestTaskMap, seq);
-//	if( itr != mRequestTaskMap.end() ) {
-//		task = itr->second;
-//		mRequestTaskMap.erase(itr);
-//	}
+	if( itr != mRequestTaskMap.end() ) {
+		task = itr->second;
+		mRequestTaskMap.erase(itr);
+	}
 	return task;
 }

@@ -8,7 +8,7 @@
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
-#define MAXLEN 2048
+#define MAXLEN 4096
 typedef struct Buffer {
 	int		len;
 	char	buffer[MAXLEN];

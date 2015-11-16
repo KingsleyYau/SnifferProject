@@ -56,7 +56,7 @@ void SnifferServer::Run(const string& config) {
 
 			Run();
 		} else {
-			printf("# Match Server can not load config file exit. \n");
+			printf("# Snifer Server can not load config file exit. \n");
 		}
 
 	} else {
@@ -587,15 +587,16 @@ bool SnifferServer::ReturnClientMsg2Request(
 
 				Message* sm = mClientTcpInsideServer.GetIdleMessageList()->PopFront();
 				if( sm != NULL ) {
-					SCMD* sendCmd = (SCMD*)sm->buffer;
-					task->GetReturnData(scmd, sendCmd->param, sendCmd->header.len);
+					char buffer[MAXLEN] = {'\0'};
+					int len;
+					task->GetReturnData(scmd, buffer, len);
 
 					snprintf(
 							sm->buffer,
 							MAXLEN - 1,
 							"HTTP/1.1 200 OK\r\nContext-Length:%d\r\n\r\n%s",
-							sendCmd->header.len,
-							sendCmd->param
+							len,
+							buffer
 							);
 
 					sm->fd = session->request;
@@ -846,7 +847,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 			LOG_STAT,
 			"SnifferServer::OnParseCmd( "
 			"tid : %d, "
-			"bFlag : %s, "
+			"bFlag : %s "
 			")",
 			(int)syscall(SYS_gettid),
 			bFlag?"true":"false"
@@ -929,6 +930,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 
 		if( type == GET ) {
 			if( strcmp(pPath, GET_CLIENT_LIST) == 0 ) {
+				// 获取在线客户端列表
 				Json::Value clientListNode;
 				if( 1 == GetClientList(clientListNode, m) ) {
 					rootSend[CLIENT_LIST] = clientListNode;
@@ -939,6 +941,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				param = writer.write(rootSend);
 
 			} else if( strcmp(pPath, GET_CLIENT_INFO) == 0 ) {
+				// 获取在线客户端详细信息
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				if( (pClientId != NULL) ) {
 					Json::Value clientNode;
@@ -952,6 +955,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				param = writer.write(rootSend);
 
 			} else if( strcmp(pPath, SET_CLIENT_CMD) == 0 ) {
+				// 执行客户端命令
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pCommand = dataHttpParser.GetParam(COMMAND);
 				if( (pClientId != NULL) && (pCommand != NULL) ) {
@@ -962,6 +966,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				}
 
 			} else if( strcmp(pPath, GET_CLIENT_DIR) == 0 ) {
+				// 获取客户端目录
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pDirecory = dataHttpParser.GetParam(DIRECTORY);
 				if( (pClientId != NULL) ) {
@@ -1139,11 +1144,10 @@ int SnifferServer::GetClientDir(
 
 	int iClientId = atoi(clientId);
 
-	Client *client = NULL;
 	mClientMap.Lock();
 	ClientMap::iterator itr = mClientMap.Find(iClientId);
 	if( itr != mClientMap.End() ) {
-		client = (Client*)itr->second;
+		Client *client = (Client*)itr->second;
 
 		// 创建命令
 		GetClientDirTask* task = new GetClientDirTask();
