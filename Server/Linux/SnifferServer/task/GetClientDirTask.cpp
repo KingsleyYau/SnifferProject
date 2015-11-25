@@ -9,7 +9,10 @@
 
 GetClientDirTask::GetClientDirTask() {
 	// TODO Auto-generated constructor stub
-	mDir = "/";
+	mClientId = 0;
+	mDir = "";
+	mPageIndex = 0;
+	mPageSize = 20;
 }
 
 GetClientDirTask::~GetClientDirTask() {
@@ -17,25 +20,25 @@ GetClientDirTask::~GetClientDirTask() {
 }
 
 void GetClientDirTask::GetSendCmd(SCMD* scmd) {
+	Json::FastWriter writer;
+	Json::Value rootSend;
+	string result;
+
+	rootSend[DIRECTORY] = mDir;
+	rootSend[COMMON_PAGE_SIZE] = mPageSize;
+	rootSend[COMMON_PAGE_INDEX] = mPageIndex;
+	result = writer.write(rootSend);
+
 	scmd->header.scmdt = SnifferListDir;
 	scmd->header.bNew = true;
-	scmd->header.len = mDir.length();
-	memcpy(scmd->param, mDir.c_str(), scmd->header.len);
+	scmd->header.len = result.length();
+	memcpy(scmd->param, result.c_str(), scmd->header.len);
 }
 
 bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	bool bFlag = false;
 
 	if( buffer != NULL ) {
-//		snprintf(buffer,
-//				MAXLEN - 1,
-//				"<html>\n<body>\n"
-//				"%s"
-//				"</body>\n</html>\n",
-//				StringHandle::replace(scmd->param, "\n", "</br>\n").c_str()
-//				);
-//		len = strlen(buffer);
-
 		string result = "";
 		result += "<html>\n<body>\n";
 
@@ -96,4 +99,12 @@ void GetClientDirTask::SetDir(const char* dir) {
 
 void GetClientDirTask::SetClientId(int clientId) {
 	mClientId = clientId;
+}
+
+void GetClientDirTask::SetPageIndex(int pageIndex) {
+	mPageIndex = pageIndex;
+}
+
+void GetClientDirTask::SetPageSize(int pageSize) {
+	mPageSize = pageSize;
 }
