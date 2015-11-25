@@ -8,7 +8,11 @@
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
-#define MAXLEN 4096
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAXLEN 8192
 typedef struct Buffer {
 	int		len;
 	char	buffer[MAXLEN];

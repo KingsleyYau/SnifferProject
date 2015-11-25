@@ -9,6 +9,8 @@
 #ifndef MESSAGELIST_H_
 #define MESSAGELIST_H_
 
+#include <common/Buffer.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +23,6 @@
 #include <list>
 using namespace std;
 
-#define MAXLEN 2048
 typedef struct Message {
 	int		fd;
 	int 	len;

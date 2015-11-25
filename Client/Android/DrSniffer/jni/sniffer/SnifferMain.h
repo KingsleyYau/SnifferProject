@@ -12,6 +12,7 @@
 #include "SnifferClient.h"
 
 #include <common/command.h>
+#include <json/json/json.h>
 
 class SnifferMain : public SnifferClientCallback {
 public:

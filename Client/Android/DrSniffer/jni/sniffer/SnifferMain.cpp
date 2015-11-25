@@ -37,6 +37,51 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 		client->SendCommand(scmdSend);
 
 	}break;
+	case SnifferListDir:{
+		// 列目录
+		Json::FastWriter writer;
+		Json::Value rootSend;
+		string result;
+
+		rootSend[COMMON_RET] = 0;
+
+		string dir = scmd.param;
+
+		DIR *dirp;
+		dirent *dp;
+
+	    if( (dirp = opendir(dir.c_str())) != NULL ) {
+	    	rootSend[COMMON_RET] = 1;
+	    	 while( (dp = readdir(dirp)) != NULL ) {
+	    		 Json::Value dirItem;
+
+	    		 dirItem[D_TYPE] = dp->d_type;
+	    		 if( dp->d_type == DT_DIR ) {
+		    		 if( strcmp(dp->d_name, ".") != 0 ) {
+		    			 dirItem[D_NAME] = dp->d_name;
+		    			 rootSend[FILE_LIST].append(dirItem);
+		    		 }
+	    		 } else {
+	    			 dirItem[D_NAME] = dp->d_name;
+	    		 }
+
+	    	 }
+
+	    	 closedir(dirp);
+	    }
+
+	    result = writer.write(rootSend);
+
+		SCMD scmdSend;
+		scmdSend.header.scmdt = SnifferTypeClientInfoResult;
+		scmdSend.header.bNew = false;
+		scmdSend.header.seq = scmd.header.seq;
+		scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+		memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+		scmdSend.param[scmdSend.header.len] = '\0';
+		client->SendCommand(scmdSend);
+
+	}break;
 	case SinfferTypeStart:{
 		// 开始监听
 		FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 开始监听 )");

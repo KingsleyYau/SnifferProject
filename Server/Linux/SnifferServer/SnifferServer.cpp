@@ -977,6 +977,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				}
 
 			} else if( strcmp(pPath, "/RELOAD") == 0 ) {
+				// 重新加载配置
 				if( Reload()) {
 					rootSend[COMMON_RET] = 1;
 				}
@@ -985,6 +986,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				ret = 1;
 
 			} else {
+				// 不匹配的接口
 				code = 404;
 				sprintf(reason, "Not Found");
 				param = "404 Not Found";
@@ -1152,6 +1154,7 @@ int SnifferServer::GetClientDir(
 		// 创建命令
 		GetClientDirTask* task = new GetClientDirTask();
 		task->SetDir(directory);
+		task->SetClientId(iClientId);
 
 		// 发送命令
 		if( SendRequestMsg2Client(m->fd, client, (ITask*)task) ) {

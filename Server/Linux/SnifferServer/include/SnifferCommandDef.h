@@ -11,7 +11,7 @@
 
 #pragma pack(push,1)
 
-#define MAX_PARAM_LEN 1024
+#define MAX_PARAM_LEN 4096
 
 /*
  * 命令类型
@@ -82,6 +82,10 @@ typedef struct SnifferCommand {
  */
 #define GET_CLIENT_DIR			"/GET_CLIENT_DIR"
 #define DIRECTORY				"DIRECTORY"
+#define FILE_LIST				"FILE_LIST"
+#define D_NAME					"N"
+#define D_TYPE					"T"
 
 #pragma pack(pop)
+
 #endif /* SNIFFERCOMMANDDEF_H_ */

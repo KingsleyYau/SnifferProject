@@ -36,6 +36,18 @@ int Client::ParseData(char* buffer, int len)  {
 
 	int recvLen = (len < MAXLEN - mBuffer.len)?len:(MAXLEN - mBuffer.len);
 	if( recvLen > 0 ) {
+		LogManager::GetLogManager()->Log(
+				LOG_STAT,
+				"Client::ParseData( "
+				"tid : %d, "
+				"mBuffer.len : %d, "
+				"recvLen : %d "
+				")",
+				(int)syscall(SYS_gettid),
+				mBuffer.len,
+				recvLen
+				);
+
 		memcpy(mBuffer.buffer + mBuffer.len, buffer, recvLen);
 		mBuffer.len += recvLen;
 	}
@@ -52,6 +64,7 @@ int Client::ParseData(char* buffer, int len)  {
 
 	// 解析命令头
 	while(mBuffer.len >= sizeof(SCMDH)) {
+		// 头部已经收够
 		SCMDH *header = (SCMDH*)mBuffer.buffer;
 
 		LogManager::GetLogManager()->Log(
@@ -72,15 +85,15 @@ int Client::ParseData(char* buffer, int len)  {
 
 		int iLen = mBuffer.len - sizeof(SCMDH);
 		if( iLen >= header->len ) {
+			// 参数已经收够
 			SCMD scmd;
 			memcpy(&scmd, mBuffer.buffer, sizeof(SCMDH) + header->len);
-			scmd.param[header->len] = '\0';
 
 			LogManager::GetLogManager()->Log(
 					LOG_STAT,
 					"Client::ParseData( "
 					"tid : %d, "
-					"scmd->param : %s "
+					"scmd->param : \n%s "
 					")",
 					(int)syscall(SYS_gettid),
 					scmd.param
