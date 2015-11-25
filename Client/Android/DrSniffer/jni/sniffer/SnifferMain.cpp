@@ -42,32 +42,59 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 		Json::FastWriter writer;
 		Json::Value rootSend;
 		string result;
-
 		rootSend[COMMON_RET] = 0;
 
-		string dir = scmd.param;
+	    Json::Reader reader;
+	    Json::Value rootRecv;
+	    reader.parse(scmd.param, rootRecv);
+
+	    int index = 0;
+	    if( rootRecv[COMMON_PAGE_INDEX].isInt() ) {
+	    	index = rootRecv[COMMON_PAGE_INDEX].asInt();
+	    }
+
+	    int size = 0;
+	    if( rootRecv[COMMON_PAGE_SIZE].isInt() ) {
+	    	size = rootRecv[COMMON_PAGE_SIZE].asInt();
+	    }
+
+	    string dir = "";
+	    if( rootRecv[DIRECTORY].isString() ) {
+	    	dir = rootRecv[DIRECTORY].asString();
+	    }
 
 		DIR *dirp;
 		dirent *dp;
+		int i = 0;
 
 	    if( (dirp = opendir(dir.c_str())) != NULL ) {
 	    	rootSend[COMMON_RET] = 1;
-	    	 while( (dp = readdir(dirp)) != NULL ) {
-	    		 Json::Value dirItem;
+	    	int i = 0;
 
-	    		 dirItem[D_TYPE] = dp->d_type;
-	    		 if( dp->d_type == DT_DIR ) {
-		    		 if( strcmp(dp->d_name, ".") != 0 ) {
-		    			 dirItem[D_NAME] = dp->d_name;
-		    			 rootSend[FILE_LIST].append(dirItem);
-		    		 }
-	    		 } else {
-	    			 dirItem[D_NAME] = dp->d_name;
-	    		 }
+	    	while( (dp = readdir(dirp)) != NULL ) {
+				Json::Value dirItem;
+				dirItem[D_TYPE] = dp->d_type;
+				if( dp->d_type == DT_DIR ) {
+					if( strcmp(dp->d_name, ".") != 0 ) {
+						if( i >= index * size && i < (index + 1) * size ) {
+							dirItem[D_NAME] = dp->d_name;
+							rootSend[FILE_LIST].append(dirItem);
+						}
+						i++;
+					}
+				} else {
+					if( i >= index * size && i < (index + 1) * size ) {
+						dirItem[D_NAME] = dp->d_name;
+						rootSend[FILE_LIST].append(dirItem);
+					}
+					i++;
+				}
 
 	    	 }
 
 	    	 closedir(dirp);
+
+	    	 rootSend[COMMON_TOTAL] = i;
 	    }
 
 	    result = writer.write(rootSend);

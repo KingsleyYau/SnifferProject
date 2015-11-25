@@ -10,6 +10,7 @@
 RequestUploadTask::RequestUploadTask() {
 	// TODO Auto-generated constructor stub
 	mUrl = "Upload";
+	mpCallback = NULL;
 }
 
 RequestUploadTask::~RequestUploadTask() {

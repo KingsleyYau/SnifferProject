@@ -88,6 +88,7 @@ int Client::ParseData(char* buffer, int len)  {
 			// 参数已经收够
 			SCMD scmd;
 			memcpy(&scmd, mBuffer.buffer, sizeof(SCMDH) + header->len);
+			scmd.param[header->len] = '\0';
 
 			LogManager::GetLogManager()->Log(
 					LOG_STAT,

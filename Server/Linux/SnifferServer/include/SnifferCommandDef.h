@@ -53,6 +53,9 @@ typedef struct SnifferCommand {
  */
 
 #define COMMON_RET				"ret"
+#define COMMON_TOTAL 			"TOTAL"
+#define COMMON_PAGE_INDEX 		"PAGEINDEX"
+#define COMMON_PAGE_SIZE 		"PAGESIZE"
 
 /**
  * 获取在线列表
