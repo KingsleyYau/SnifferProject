@@ -52,9 +52,7 @@ typedef struct SnifferCommand {
  * Json协议定义
  */
 
-#define COMMON_RET				"RET"
-#define COMMON_PAGE_INDEX 		"PAGEINDEX"
-#define COMMON_PAGE_SIZE 		"PAGESIZE"
+#define COMMON_RET				"ret"
 
 /**
  * 获取在线列表

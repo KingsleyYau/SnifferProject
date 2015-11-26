@@ -969,10 +969,8 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				// 获取客户端目录
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pDirecory = dataHttpParser.GetParam(DIRECTORY);
-				const char* pPageIndex = dataHttpParser.GetParam(COMMON_PAGE_INDEX);
-				const char* pPageSize = dataHttpParser.GetParam(COMMON_PAGE_SIZE);
 				if( (pClientId != NULL) ) {
-					if( 1 == GetClientDir(pClientId, pDirecory, pPageIndex, pPageSize, m) ) {
+					if( 1 == GetClientDir(pClientId, pDirecory, m) ) {
 						// 解析成功, 对客户端发送命令, 不返回
 						ret = 0;
 					}
@@ -1129,8 +1127,6 @@ int SnifferServer::SetClientCmd(
 int SnifferServer::GetClientDir(
 		const char* clientId,
 		const char* directory,
-		const char* pageIndex,
-		const char* pageSize,
 		Message *m
 		) {
 	int ret = 0;
@@ -1140,17 +1136,12 @@ int SnifferServer::GetClientDir(
 			"tid : %d, "
 			"m->fd: [%d], "
 			"clientId : %s, "
-			"directory : %s, "
-			"pageIndex : %s, "
-			"pageSize : %s "
-			""
+			"directory : %s "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd,
 			clientId,
-			directory,
-			pageIndex,
-			pageSize
+			directory
 			);
 
 	int iClientId = atoi(clientId);
@@ -1164,8 +1155,6 @@ int SnifferServer::GetClientDir(
 		GetClientDirTask* task = new GetClientDirTask();
 		task->SetDir(directory);
 		task->SetClientId(iClientId);
-		task->SetPageIndex(atoi(pageIndex));
-		task->SetPageSize(atoi(pageSize));
 
 		// 发送命令
 		if( SendRequestMsg2Client(m->fd, client, (ITask*)task) ) {

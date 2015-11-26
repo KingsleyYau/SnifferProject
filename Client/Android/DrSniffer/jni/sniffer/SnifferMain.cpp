@@ -42,52 +42,17 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 		Json::FastWriter writer;
 		Json::Value rootSend;
 		string result;
+
 		rootSend[COMMON_RET] = 0;
 
-	    Json::Reader reader;
-	    Json::Value rootRecv;
-	    reader.parse(scmd.param, rootRecv);
-
-		string dir = "";
-		if( rootRecv[DIRECTORY].isString() ) {
-			dir = rootRecv[DIRECTORY].asString();
-		}
-
-		int index = 0;
-		if( rootRecv[COMMON_PAGE_INDEX].isInt() ) {
-			index = rootRecv[COMMON_PAGE_INDEX].asInt();
-		}
-
-		int size = 0;
-		if( rootRecv[COMMON_PAGE_SIZE].isInt() ) {
-			size = rootRecv[COMMON_PAGE_SIZE].asInt();
-		}
-
-		FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( "
-				"dir : %s, "
-				"index : %d, "
-				"size : %d "
-				")",
-				dir.c_str(),
-				index,
-				size
-				);
+		string dir = scmd.param;
 
 		DIR *dirp;
 		dirent *dp;
-		int i = 0;
 
 	    if( (dirp = opendir(dir.c_str())) != NULL ) {
 	    	rootSend[COMMON_RET] = 1;
 	    	 while( (dp = readdir(dirp)) != NULL ) {
-	    		 if( i < size * index ) {
-	    			 continue;
-	    		 }
-
-	    		 if( i >= size * (index + 1) ) {
-	    			 break;
-	    		 }
-
 	    		 Json::Value dirItem;
 
 	    		 dirItem[D_TYPE] = dp->d_type;
@@ -100,7 +65,6 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 	    			 dirItem[D_NAME] = dp->d_name;
 	    		 }
 
-	    		 i++;
 	    	 }
 
 	    	 closedir(dirp);
