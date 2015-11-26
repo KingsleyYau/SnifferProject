@@ -25,10 +25,14 @@ public:
 
 	void SetDir(const char* dir);
 	void SetClientId(int clientId);
+	void SetPageIndex(int pageIndex);
+	void SetPageSize(int pageSize);
 
 private:
-	string mDir;
 	int mClientId;
+	string mDir;
+	int mPageIndex;
+	int mPageSize;
 };
 
 #endif /* GETCLIENTDIRTASK_H_ */

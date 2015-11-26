@@ -132,6 +132,8 @@ private:
 	int GetClientDir(
 			const char* clientId,
 			const char* directory,
+			const char* pageIndex,
+			const char* pageSize,
 			Message *m
 			);
 
