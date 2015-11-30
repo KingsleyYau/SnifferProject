@@ -41,7 +41,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 
 	if( buffer != NULL ) {
 		string result = "";
-		result += "<html>\n<body>\n";
+		result += "<html>\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n</head>\n<body>\n";
 
 		char temp[8];
 		char clientId[8];
@@ -66,8 +66,17 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 						result += "&";
 						result += DIRECTORY;
 						result += "=";
-						result += mDir + "/";
-						result += dirItem[D_NAME].asString();
+
+						if( dirItem[D_NAME].asString() != ".." ) {
+							result += mDir + "/";
+							result += dirItem[D_NAME].asString();
+						} else {
+							string::size_type pos = mDir.find_last_of("/");
+							if( pos != string::npos ) {
+								result += mDir.substr(0, pos);
+							}
+						}
+
 						result += "&";
 						result += COMMON_PAGE_SIZE;
 						result += "=";
@@ -83,6 +92,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	    		}
 	    	}
 	    }
+	    result += "</br>\n";
 
     	if( mPageIndex != 0 ) {
 			result += "<a href=\"";
@@ -106,8 +116,8 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			sprintf(temp, "%d", mPageSize);
 			result += temp;
 			result += "\">";
-			result += "pre";
-			result += "</a> ";
+			result += "上一页";
+			result += "</a>		";
     	}
 
 	    if( rootRecv[COMMON_TOTAL].isInt() ) {
@@ -134,7 +144,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 				sprintf(temp, "%d", mPageSize);
 				result += temp;
 				result += "\">";
-				result += "next";
+				result += "下一页";
 				result += "</a></br>\n";
 		    }
 	    }
