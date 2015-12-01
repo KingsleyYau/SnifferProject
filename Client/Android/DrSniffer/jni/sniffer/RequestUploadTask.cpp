@@ -9,7 +9,7 @@
 
 RequestUploadTask::RequestUploadTask() {
 	// TODO Auto-generated constructor stub
-	mUrl = "Upload";
+	mUrl = "upload.cgi";
 	mpCallback = NULL;
 }
 
@@ -56,14 +56,10 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
 }
 
 /**
- * @param email				电子邮箱
- * @param password			密码
  * @param deviceId			设备唯一标识
- * @param versioncode		客户端内部版本号
- * @param model				移动设备型号
- * @param manufacturer		制造厂商
  */
 void RequestUploadTask::SetParam(
+		const string& deviceId,
 		const string& filePath
 		) {
 
@@ -71,9 +67,13 @@ void RequestUploadTask::SetParam(
 	mHttpEntiy.Reset();
 	mHttpEntiy.SetSaveCookie(true);
 
-	if( filePath.length() > 0 ) {
+	if( deviceId.length() > 0 ) {
+		mHttpEntiy.AddContent(DEVICE_ID, deviceId);
 	}
 
+	if( filePath.length() > 0 ) {
+		mHttpEntiy.AddFile("upload_file", filePath, "image/jpg");
+	}
 
 	FileLog(
 			SnifferLogFileName,

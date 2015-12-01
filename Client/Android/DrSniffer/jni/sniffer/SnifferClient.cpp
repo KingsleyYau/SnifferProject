@@ -37,9 +37,6 @@ SnifferClient::SnifferClient() {
 	miServerPort = ServerPort;
 
 	mbRunning = false;
-
-	mHttpRequestHostManager.SetWebSite(ServerAdess);
-	mHttpRequestManager.SetHostManager(&mHttpRequestHostManager);
 }
 
 SnifferClient::~SnifferClient() {
@@ -84,7 +81,10 @@ void SnifferClient::HandleSnifferClientRunnable() {
 	int seq = 0;
 
 	while( mbRunning ) {
-		FileLog(SnifferLogFileName, "SnifferClient::HandleSnifferClientRunnable( 等待连接服务端 )");
+		FileLog(
+				SnifferLogFileName,
+				"SnifferClient::HandleSnifferClientRunnable( 等待连接服务端 )"
+				);
 
 		if( ConnectServer() ) {
 			char deviceId[128] = {'\0'};
@@ -147,10 +147,6 @@ void SnifferClient::HandleSnifferClientRunnable() {
 		}
 		sleep(10);
 	}
-}
-
-void SnifferClient::OnTaskFinish(ITask* pTask) {
-	delete pTask;
 }
 
 bool SnifferClient::ConnectServer() {
@@ -242,27 +238,6 @@ bool SnifferClient::SendCommand(const SCMD &scmd) {
 	if( iSend == iLen ) {
 		bFlag = true;
 	}
-
-	return bFlag;
-}
-
-// 上传文件到服务器
-bool SnifferClient::UploadFile(const string& filePath) {
-	FileLog(
-			SnifferLogFileName,
-			"SnifferClient::UploadFile( "
-			"filePath : %s "
-			")",
-			filePath.c_str()
-			);
-
-	bool bFlag = false;
-
-	RequestUploadTask* task = new RequestUploadTask();
-	task->SetTaskCallback(this);
-	task->Init(&mHttpRequestManager);
-	task->SetParam(filePath);
-	task->Start();
 
 	return bFlag;
 }

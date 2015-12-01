@@ -29,9 +29,13 @@ public:
 	void SetCallback(IRequestUploadCallback* pCallback);
 
     /**
+     * @param deviceId				设备Id
      * @param filePath				文件路径
      */
-	void SetParam(const string& filePath);
+	void SetParam(
+			const string& deviceId,
+			const string& filePath
+			);
 
 protected:
 	IRequestUploadCallback* mpCallback;

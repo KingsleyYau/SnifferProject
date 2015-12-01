@@ -9,7 +9,10 @@
 
 SnifferMain::SnifferMain() {
 	// TODO Auto-generated constructor stub
-
+	string website = ServerAdess;
+	website += ":9875";
+	mHttpRequestHostManager.SetWebSite(website);
+	mHttpRequestManager.SetHostManager(&mHttpRequestHostManager);
 }
 
 SnifferMain::~SnifferMain() {
@@ -135,6 +138,26 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 		client->SendCommand(scmdSend);
 
 	}break;
+	case SnifferUploadFile:{
+		char deviceId[128] = {'\0'};
+		memset(deviceId, '\0', sizeof(deviceId));
+		list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
+		if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
+			IpAddressNetworkInfo info = *(infoList.begin());
+			GetMD5String(info.mac.c_str(), deviceId);
+		}
+
+		// 文件路径
+		string filePath = scmd.param;
+
+		// 上传文件到服务器
+		RequestUploadTask* task = new RequestUploadTask();
+		task->SetTaskCallback(this);
+		task->Init(&mHttpRequestManager);
+		task->SetParam(deviceId, filePath);
+		task->Start();
+
+	}break;
 	case SinfferTypeNone:{
 		// 与服务端连接已经断开
 
@@ -157,4 +180,8 @@ bool SnifferMain::Run() {
 	FileLog(SnifferLogFileName, "SnifferMain::Run( bFlag : %s )", bFlag?"true":"false");
 
 	return bFlag;
+}
+
+void SnifferMain::OnTaskFinish(ITask* pTask) {
+	delete pTask;
 }

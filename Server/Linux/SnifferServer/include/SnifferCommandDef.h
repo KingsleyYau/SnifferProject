@@ -28,6 +28,7 @@ typedef enum SnifferCommandType {
 	SnifferTypeClientInfoResult = 8,
 	SnifferListDir = 9,
 	SnifferListDirResult = 10,
+	SnifferUploadFile = 11,
 } SCMDT;
 
 /*

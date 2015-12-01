@@ -11,6 +11,7 @@
 #include "RequestDefine.h"
 #include "BaseTask.h"
 #include "SinfferExecuteDef.h"
+#include "SnifferCommandDef.h"
 
 #include <map>
 using namespace std;

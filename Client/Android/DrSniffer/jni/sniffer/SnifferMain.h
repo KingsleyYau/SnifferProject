@@ -10,11 +10,15 @@
 
 #include "Sniffer.h"
 #include "SnifferClient.h"
+#include "RequestUploadTask.h"
+
+#include <httpclient/HttpRequestHostManager.h>
+#include <httpclient/HttpRequestManager.h>
 
 #include <common/command.h>
 #include <json/json/json.h>
 
-class SnifferMain : public SnifferClientCallback {
+class SnifferMain : public SnifferClientCallback, public ITaskCallback {
 public:
 	SnifferMain();
 	virtual ~SnifferMain();
@@ -27,8 +31,16 @@ public:
 	bool Run();
 
 private:
+	/**
+	 * Implement from ITaskCallback
+	 */
+	void OnTaskFinish(ITask* pTask);
+
 	Sniffer mSniffer;
 	SnifferClient mSnifferClient;
+
+	HttpRequestHostManager mHttpRequestHostManager;
+	HttpRequestManager mHttpRequestManager;
 };
 
 #endif /* SNIFFERMAIN_H_ */

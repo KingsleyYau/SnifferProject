@@ -11,7 +11,6 @@
 
 #include "SnifferCommandDef.h"
 #include "SinfferExecuteDef.h"
-#include "RequestUploadTask.h"
 
 #include <common/KTcpSocket.h>
 #include <common/KThread.h>
@@ -20,9 +19,6 @@
 #include <common/md5.h>
 #include <json/json/json.h>
 
-#include <httpclient/HttpRequestHostManager.h>
-#include <httpclient/HttpRequestManager.h>
-
 class SnifferClient;
 class SnifferClientCallback {
 public:
@@ -30,7 +26,7 @@ public:
 	virtual void OnRecvCommand(SnifferClient* client, const SCMD &scmd) = 0;
 };
 class SnifferClientRunnable;
-class SnifferClient : public ITaskCallback {
+class SnifferClient {
 public:
 	SnifferClient();
 	virtual ~SnifferClient();
@@ -45,19 +41,11 @@ public:
 	void HandleSnifferClientRunnable();
 
 private:
-	/**
-	 * Implement from ITaskCallback
-	 */
-	void OnTaskFinish(ITask* pTask);
-
 	// 连接服务器
 	bool ConnectServer();
 
 	// 接收服务器命令
 	bool RecvCommand(SCMD &scmd);
-
-	// 上传文件到服务器
-	bool UploadFile(const string& filePath);
 
 	SnifferClientCallback* mpSnifferClientCallback;
 	bool mbRunning;
@@ -69,8 +57,6 @@ private:
 	string mServerAddress;
 	int miServerPort;
 
-	HttpRequestHostManager mHttpRequestHostManager;
-	HttpRequestManager mHttpRequestManager;
 };
 
 #endif /* SNIFFERCLIENT_H_ */
