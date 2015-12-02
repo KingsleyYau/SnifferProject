@@ -56,7 +56,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	    	for( int i = 0; i < (int)rootRecv[FILE_LIST].size(); i++ ) {
 	    		dirItem = rootRecv[FILE_LIST].get(i, Json::Value::null);
 	    		if( dirItem[D_NAME].isString() ) {
-		    		if( dirItem[D_TYPE] == DT_DIR ) {
+		    		if( dirItem[D_TYPE] == DT_DIR || dirItem[D_TYPE] == DT_LNK ) {
 						result += "<a href=\"";
 						result += GET_CLIENT_DIR;
 						result += "?";
@@ -84,11 +84,28 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 						result += temp;
 						result += "\">";
 						result += dirItem[D_NAME].asString();
-						result += "</a></br>\n";
+						result += "</a>";
 		    		} else {
 		    			result += dirItem[D_NAME].asString();
-		    			result += "</br>\n";
+		    			result += "&nbsp;&nbsp;&nbsp;";
+		    			// 上传按钮
+		    			result += "<a href=\"";
+						result += UPLOAD_CLIENT_FILE;
+						result += "?";
+						result += CLIENT_ID;
+						result += "=";
+						result += clientId;
+						result += "&";
+						result += FILEPATH;
+						result += "=";
+						result += mDir + "/";
+						result += dirItem[D_NAME].asString();
+						result += "\">";
+						result += "上传";
+						result += "</a>";
 		    		}
+
+		    		result += "</br>\n";
 	    		}
 	    	}
 	    }

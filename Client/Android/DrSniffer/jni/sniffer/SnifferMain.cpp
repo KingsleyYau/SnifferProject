@@ -9,10 +9,12 @@
 
 SnifferMain::SnifferMain() {
 	// TODO Auto-generated constructor stub
-	string website = ServerAdess;
+	string website = "http://";
+	website += ServerAdess;
 	website += ":9875";
 	mHttpRequestHostManager.SetWebSite(website);
 	mHttpRequestManager.SetHostManager(&mHttpRequestHostManager);
+	mHttpRequestManager.SetVersionCode("Version", SnifferVersion);
 }
 
 SnifferMain::~SnifferMain() {
@@ -153,8 +155,9 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 		// 上传文件到服务器
 		RequestUploadTask* task = new RequestUploadTask();
 		task->SetTaskCallback(this);
+		task->SetCallback(this);
 		task->Init(&mHttpRequestManager);
-		task->SetParam(deviceId, filePath);
+		task->SetParam(scmd.header, deviceId, filePath);
 		task->Start();
 
 	}break;
@@ -184,4 +187,25 @@ bool SnifferMain::Run() {
 
 void SnifferMain::OnTaskFinish(ITask* pTask) {
 	delete pTask;
+}
+
+void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTask* task) {
+	Json::FastWriter writer;
+	Json::Value rootSend;
+	rootSend[COMMON_RET] = success?1:0;
+	string website = "http://";
+	website += ServerAdess;
+	website += ":9875/";
+	rootSend[FILEPATH] = website + filePath;
+
+	string result;
+	result = writer.write(rootSend);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = SnifferUploadFileResult;
+	scmdSend.header.bNew = false;
+	scmdSend.header.seq = task->GetSCMDH().seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	mSnifferClient.SendCommand(scmdSend);
 }

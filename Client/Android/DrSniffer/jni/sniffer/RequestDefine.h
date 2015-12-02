@@ -10,7 +10,7 @@
 #define REQUESTDEFINE_H_
 
 /* 公共字段 */
-#define COMMON_RESULT 		"result"
+#define COMMON_RESULT 		"ret"
 #define COMMON_DATA			"data"
 
 #endif /* REQUESTDEFINE_H_ */

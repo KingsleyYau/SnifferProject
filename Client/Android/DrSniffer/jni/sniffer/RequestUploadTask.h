@@ -15,7 +15,7 @@ class RequestUploadTask;
 class IRequestUploadCallback {
 public:
 	virtual ~IRequestUploadCallback(){};
-	virtual void OnUpload(bool success, const string& errnum, RequestUploadTask* task) = 0;
+	virtual void OnUpload(bool success, const string& filePath, RequestUploadTask* task) = 0;
 };
 
 class RequestUploadTask : public RequestBaseTask {
@@ -33,12 +33,17 @@ public:
      * @param filePath				文件路径
      */
 	void SetParam(
+			const SCMDH& header,
 			const string& deviceId,
 			const string& filePath
 			);
 
+	const SCMDH& GetSCMDH();
+
 protected:
 	IRequestUploadCallback* mpCallback;
+
+	SCMDH mHeader;
 };
 
 #endif /* REQUESTUPLOADTASK_H_ */

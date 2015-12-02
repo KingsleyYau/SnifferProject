@@ -137,6 +137,15 @@ private:
 			Message *m
 			);
 
+	/**
+	 * 上传客户端文件
+	 */
+	int UploadClientFile(
+			const char* clientId,
+			const char* filePath,
+			Message *m
+			);
+
 	TcpServer mClientTcpServer;
 	TcpServer mClientTcpInsideServer;
 

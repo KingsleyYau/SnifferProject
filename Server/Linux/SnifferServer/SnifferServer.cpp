@@ -10,6 +10,7 @@
 
 #include "task/GetClientDirTask.h"
 #include "task/SetClientCmdTask.h"
+#include "task/UploadClientFileTask.h"
 
 #include <sys/syscall.h>
 
@@ -932,7 +933,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 			if( strcmp(pPath, GET_CLIENT_LIST) == 0 ) {
 				// 获取在线客户端列表
 				Json::Value clientListNode;
-				if( 1 == GetClientList(clientListNode, m) ) {
+				if( (ret = GetClientList(clientListNode, m)) == 1 ) {
 					rootSend[CLIENT_LIST] = clientListNode;
 					rootSend[COMMON_RET] = 1;
 					ret = 1;
@@ -945,9 +946,8 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				if( (pClientId != NULL) ) {
 					Json::Value clientNode;
-					if( 1 == GetClientInfo(clientNode, pClientId, m) ) {
+					if( (ret = GetClientInfo(clientNode, pClientId, m)) == 1 ) {
 						rootSend[CLIENT_INFO] = clientNode;
-						ret = 1;
 						rootSend[COMMON_RET] = 1;
 					}
 				}
@@ -959,10 +959,7 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pCommand = dataHttpParser.GetParam(COMMAND);
 				if( (pClientId != NULL) && (pCommand != NULL) ) {
-					if( 1 == SetClientCmd(pClientId, pCommand, m) ) {
-						// 解析成功, 对客户端发送命令, 不返回
-						ret = 0;
-					}
+					ret = SetClientCmd(pClientId, pCommand, m);
 				}
 
 			} else if( strcmp(pPath, GET_CLIENT_DIR) == 0 ) {
@@ -972,10 +969,15 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 				const char* pPageIndex = dataHttpParser.GetParam(COMMON_PAGE_INDEX);
 				const char* pPageSize = dataHttpParser.GetParam(COMMON_PAGE_SIZE);
 				if( (pClientId != NULL) ) {
-					if( 1 == GetClientDir(pClientId, pDirecory, pPageIndex, pPageSize, m) ) {
-						// 解析成功, 对客户端发送命令, 不返回
-						ret = 0;
-					}
+					ret = GetClientDir(pClientId, pDirecory, pPageIndex, pPageSize, m);
+				}
+
+			} else if( strcmp(pPath, UPLOAD_CLIENT_FILE) == 0 ) {
+				// 上传客户端文件
+				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
+				const char* pFilePath = dataHttpParser.GetParam(FILEPATH);
+				if( (pClientId != NULL) && (pFilePath != NULL) ) {
+					ret = UploadClientFile(pClientId, pFilePath, m);
 				}
 
 			} else if( strcmp(pPath, "/RELOAD") == 0 ) {
@@ -1087,7 +1089,7 @@ int SnifferServer::SetClientCmd(
 		const char* command,
 		Message *m
 		) {
-	int ret = 0;
+	int ret = -1;
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"SnifferServer::SetClientCmd( "
@@ -1115,7 +1117,7 @@ int SnifferServer::SetClientCmd(
 
 			// 发送命令
 			if( SendRequestMsg2Client(m->fd, client, (ITask*)task) ) {
-				ret = 1;
+				ret = 0;
 			}
 		}
 
@@ -1132,7 +1134,7 @@ int SnifferServer::GetClientDir(
 		const char* pageSize,
 		Message *m
 		) {
-	int ret = 0;
+	int ret = -1;
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"SnifferServer::GetClientDir( "
@@ -1173,7 +1175,52 @@ int SnifferServer::GetClientDir(
 
 		// 发送命令
 		if( SendRequestMsg2Client(m->fd, client, (ITask*)task) ) {
-			ret = 1;
+			ret = 0;
+		}
+	}
+	mClientMap.Unlock();
+
+	return ret;
+}
+
+/**
+ * 上传客户端文件
+ */
+int SnifferServer::UploadClientFile(
+		const char* clientId,
+		const char* filePath,
+		Message *m
+		) {
+	int ret = -1;
+	LogManager::GetLogManager()->Log(
+			LOG_MSG,
+			"SnifferServer::UploadClientFile( "
+			"tid : %d, "
+			"m->fd: [%d], "
+			"clientId : %s, "
+			"filePath : %s "
+			")",
+			(int)syscall(SYS_gettid),
+			m->fd,
+			clientId,
+			filePath
+			);
+
+	int iClientId = atoi(clientId);
+
+	mClientMap.Lock();
+	ClientMap::iterator itr = mClientMap.Find(iClientId);
+	if( itr != mClientMap.End() ) {
+		Client *client = (Client*)itr->second;
+
+		// 创建命令
+		UploadClientFileTask* task = new UploadClientFileTask();
+		task->SetClientId(iClientId);
+		task->SetFilePath(filePath);
+
+		// 发送命令
+		if( SendRequestMsg2Client(m->fd, client, (ITask*)task) ) {
+			ret = 0;
 		}
 	}
 	mClientMap.Unlock();

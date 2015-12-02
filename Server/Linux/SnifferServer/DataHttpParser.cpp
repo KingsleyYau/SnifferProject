@@ -145,7 +145,7 @@ bool DataHttpParser::ParseFirstLine(char* buffer) {
 			}
 			path[len] = '\0';
 			mPath = path;
-			transform(mPath.begin(), mPath.end(), mPath.begin(), ::toupper);
+//			transform(mPath.begin(), mPath.end(), mPath.begin(), ::toupper);
 		}break;
 		default:break;
 		};
@@ -176,7 +176,7 @@ void DataHttpParser::ParseParameters(char* buffer) {
 			case 0:{
 				// key
 				key = p;
-				transform(key.begin(), key.end(), key.begin(), ::toupper);
+//				transform(key.begin(), key.end(), key.begin(), ::toupper);
 			}break;
 			case 1:{
 				// value

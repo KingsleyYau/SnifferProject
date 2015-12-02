@@ -12,6 +12,7 @@ RequestBaseTask::RequestBaseTask() {
 	mRequestId = -1;
 	mUrl = "";
 	mNoCache = false;
+	mSiteType = WebSite;
 	mbFinishOK = false;
 	mErrCode = "";
 	mpErrcodeHandler = NULL;
@@ -103,7 +104,7 @@ bool RequestBaseTask::HandleResult(const char* buf, int size, Json::Value *data,
 		}
 	}
 
-	FileLog(SnifferLogFileName, "RequestBaseTask::HandleResult( handle json result %s )", bFlag?"OK":"Fail");
+	FileLog(SnifferLogFileName, "RequestBaseTask::HandleResult( handle json result %s )", bFlag?"ok":"fail");
 
 	return bFlag;
 }

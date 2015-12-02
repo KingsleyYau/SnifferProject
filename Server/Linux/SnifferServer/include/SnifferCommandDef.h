@@ -29,6 +29,7 @@ typedef enum SnifferCommandType {
 	SnifferListDir = 9,
 	SnifferListDirResult = 10,
 	SnifferUploadFile = 11,
+	SnifferUploadFileResult = 12,
 } SCMDT;
 
 /*
@@ -89,6 +90,16 @@ typedef struct SnifferCommand {
 #define FILE_LIST				"FILE_LIST"
 #define D_NAME					"N"
 #define D_TYPE					"T"
+
+/**
+ * 上传客户端文件
+ */
+#define UPLOAD_CLIENT_FILE		"/UPLOAD_CLIENT_FILE"
+#define FILEPATH				"FILEPATH"
+
+#define FILEPATH_LOWER			"filepath"
+#define UPLOAD_FILE_LOWER		"upload_file"
+#define DEVICE_ID_LOWER			"device_id"
 
 #pragma pack(pop)
 

@@ -9,7 +9,7 @@
 
 RequestUploadTask::RequestUploadTask() {
 	// TODO Auto-generated constructor stub
-	mUrl = "upload.cgi";
+	mUrl = "/upload.cgi";
 	mpCallback = NULL;
 }
 
@@ -24,7 +24,7 @@ void RequestUploadTask::SetCallback(IRequestUploadCallback* pCallback) {
 bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const char* buf, int size) {
 	FileLog(
 			SnifferLogFileName,
-			"RequestUploadTask::HandleResult( "
+			"RequestUploadTask::HandleCallback( "
 			"url : %s,"
 			"requestRet : %s "
 			")",
@@ -33,7 +33,7 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
 			);
 
 	if (size < MAX_LOG_BUFFER) {
-		FileLog(SnifferLogFileName, "RequestUploadTask::HandleResult( buf( %d ) : %s )", size, buf);
+		FileLog(SnifferLogFileName, "RequestUploadTask::HandleCallback( buf( %d ) : %s )", size, buf);
 	}
 
 	bool bFlag = false;
@@ -44,7 +44,7 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
 		Json::Value dataJson;
 		if( HandleResult(buf, size, &dataJson) ) {
 			bFlag = true;
-			filePath = dataJson["filePath"].asString();
+			filePath = dataJson[FILEPATH_LOWER].asString();
 		}
 	}
 
@@ -59,20 +59,22 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
  * @param deviceId			设备唯一标识
  */
 void RequestUploadTask::SetParam(
+		const SCMDH& header,
 		const string& deviceId,
 		const string& filePath
 		) {
+	mHeader = header;
 
 	char temp[16];
 	mHttpEntiy.Reset();
-	mHttpEntiy.SetSaveCookie(true);
+	mHttpEntiy.SetSaveCookie(false);
 
 	if( deviceId.length() > 0 ) {
-		mHttpEntiy.AddContent(DEVICE_ID, deviceId);
+		mHttpEntiy.AddContent(DEVICE_ID_LOWER, deviceId);
 	}
 
 	if( filePath.length() > 0 ) {
-		mHttpEntiy.AddFile("upload_file", filePath, "image/jpg");
+		mHttpEntiy.AddFile(UPLOAD_FILE_LOWER, filePath, "image/jpg");
 	}
 
 	FileLog(
@@ -82,4 +84,8 @@ void RequestUploadTask::SetParam(
 			")",
 			filePath.c_str()
 			);
+}
+
+const SCMDH& RequestUploadTask::GetSCMDH() {
+	return mHeader;
 }

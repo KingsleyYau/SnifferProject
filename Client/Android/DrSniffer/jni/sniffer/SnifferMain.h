@@ -18,7 +18,9 @@
 #include <common/command.h>
 #include <json/json/json.h>
 
-class SnifferMain : public SnifferClientCallback, public ITaskCallback {
+class SnifferMain : public SnifferClientCallback,
+					public ITaskCallback,
+					public IRequestUploadCallback {
 public:
 	SnifferMain();
 	virtual ~SnifferMain();
@@ -35,6 +37,11 @@ private:
 	 * Implement from ITaskCallback
 	 */
 	void OnTaskFinish(ITask* pTask);
+
+	/**
+	 * Implement from IRequestUploadCallback
+	 */
+	void OnUpload(bool success, const string& filePath, RequestUploadTask* task);
 
 	Sniffer mSniffer;
 	SnifferClient mSnifferClient;
