@@ -29,8 +29,10 @@ bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		snprintf(buffer,
 				MAXLEN - 1,
 				"<html><body><pre>"
-				"%s"
+				"命令 : %s\n"
+				"结果 : %s\n"
 				"</pre></body></html>",
+				mCommand.c_str(),
 				scmd->param
 				);
 		len = strlen(buffer);

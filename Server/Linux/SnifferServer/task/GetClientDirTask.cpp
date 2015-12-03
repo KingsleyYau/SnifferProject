@@ -61,19 +61,60 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    	for( int i = 0; i < (int)rootRecv[FILE_LIST].size(); i++ ) {
 		    		dirItem = rootRecv[FILE_LIST].get(i, Json::Value::null);
 		    		if( dirItem[D_NAME].isString() ) {
+
+			    		if( dirItem[D_NAME].asString() != ".." ) {
+			    			// 上传按钮
+			    			result += "<a href=\"";
+			    			result += UPLOAD_CLIENT_FILE;
+			    			result += "?";
+			    			result += CLIENT_ID;
+			    			result += "=";
+			    			result += clientId;
+			    			result += "&";
+			    			result += FILEPATH;
+			    			result += "=";
+			    			result += mDir + "/";
+			    			result += dirItem[D_NAME].asString();
+			    			result += "\">";
+			    			result += "[上传]";
+			    			result += "</a>";
+			    			result += " ";
+
+			    			// 删除
+			    			result += "<a href=\"";
+			    			result += SET_CLIENT_CMD;
+			    			result += "?";
+			    			result += CLIENT_ID;
+			    			result += "=";
+			    			result += clientId;
+			    			result += "&";
+			    			result += COMMAND;
+			    			result += "=";
+			    			result += "rm -rf ";
+							result += mDir + "/";
+							result += dirItem[D_NAME].asString();
+							result += "&";
+							result += "\">";
+							result += "[删除]";
+							result += "</a>";
+							result += " ";
+
+			    		} else {
+			    			result += "[----------]";
+							result += " ";
+			    		}
+
 		    			snprintf(
 		    					upload, sizeof(upload) - 1,
 		    					"%7s "
-		    					"%8s bytes "
-		    					"%-32s ",
+		    					"%8s bytes ",
 		    					dirItem[D_MODE].asString().c_str(),
-		    					dirItem[D_SIZE].asString().c_str(),
-		    					dirItem[D_NAME].asString().c_str()
+		    					dirItem[D_SIZE].asString().c_str()
 		    					);
 		    			result += upload;
 
 			    		if( dirItem[D_TYPE] == DT_DIR || dirItem[D_TYPE] == DT_LNK ) {
-
+			    			// 进入
 			    			result += "<a href=\"";
 			    			result += GET_CLIENT_DIR;
 			    			result += "?";
@@ -85,8 +126,9 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    			result += "=";
 
 							if( dirItem[D_NAME].asString() != ".." ) {
-								result += mDir + "/";
+								result += mDir;
 								result += dirItem[D_NAME].asString();
+								result += "/";
 							} else {
 								string::size_type pos = mDir.find_last_of("/");
 								if( pos != string::npos ) {
@@ -94,37 +136,19 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 								}
 							}
 
-							// 进入
 							result += "&";
 							result += COMMON_PAGE_SIZE;
 							result += "=";
 							sprintf(temp, "%d", mPageSize);
 							result += temp;
 							result += "\">";
-							result += "[进入]";
+							result += dirItem[D_NAME].asString().c_str();
 							result += "</a>";
 
 			    		} else {
-			    			result += "[---]";
+			    			result += dirItem[D_NAME].asString().c_str();
 			    		}
 
-			    		result += " ";
-
-		    			// 上传按钮
-		    			result += "<a href=\"";
-		    			result += UPLOAD_CLIENT_FILE;
-		    			result += "?";
-		    			result += CLIENT_ID;
-		    			result += "=";
-		    			result += clientId;
-		    			result += "&";
-		    			result += FILEPATH;
-		    			result += "=";
-		    			result += mDir + "/";
-		    			result += dirItem[D_NAME].asString();
-		    			result += "\">";
-		    			result += "[上传]";
-		    			result += "</a>";
 			    		result += "\n";
 		    		}
 		    	}
@@ -153,7 +177,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 				sprintf(temp, "%d", mPageSize);
 				result += temp;
 				result += "\">";
-				result += "上一页";
+				result += "[上一页]";
 				result += "</a>		";
 	    	}
 
@@ -181,7 +205,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 					sprintf(temp, "%d", mPageSize);
 					result += temp;
 					result += "\">";
-					result += "下一页";
+					result += "[下一页]";
 					result += "</a>\n";
 			    }
 		    }
