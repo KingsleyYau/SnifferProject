@@ -26,6 +26,10 @@ void GetClientDirTask::GetSendCmd(SCMD* scmd) {
 
 	rootSend[COMMON_PAGE_INDEX] = mPageIndex;
 	rootSend[COMMON_PAGE_SIZE] = mPageSize;
+
+	if( mDir.length() == 0 ) {
+		mDir = "/";
+	}
 	rootSend[DIRECTORY] = mDir;
 
 	result = writer.write(rootSend);
@@ -130,10 +134,18 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 								result += dirItem[D_NAME].asString();
 								result += "/";
 							} else {
-								string::size_type pos = mDir.find_last_of("/");
-								if( pos != string::npos ) {
-									result += mDir.substr(0, pos);
+								string dir = mDir;
+								if( dir.length() > 2 ) {
+									string::size_type pos = mDir.find_last_of("/", dir.length() - 2);
+									if( pos != string::npos ) {
+										dir = mDir.substr(0, pos);
+									}
 								}
+								if( dir.length() == 0 ) {
+									dir = "/";
+								}
+
+								result += dir;
 							}
 
 							result += "&";
