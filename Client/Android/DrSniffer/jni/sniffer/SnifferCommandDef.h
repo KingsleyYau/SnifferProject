@@ -102,6 +102,8 @@ typedef enum ProtocolType {
 #define FILE_LIST				"FILE_LIST"
 #define D_NAME					"N"
 #define D_TYPE					"T"
+#define D_SIZE					"S"
+#define D_MODE					"M"
 
 /**
  * 上传客户端文件
@@ -112,6 +114,9 @@ typedef enum ProtocolType {
 #define FILEPATH_LOWER			"filepath"
 #define UPLOAD_FILE_LOWER		"upload_file"
 #define DEVICE_ID_LOWER			"device_id"
+
+#define DOWN_SERVER_FILE		"/download.cgi"
+#define DOWN_SERVER_ADDRESS		"SERVER_ADDRESS"
 
 #pragma pack(pop)
 

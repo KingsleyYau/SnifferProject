@@ -43,6 +43,9 @@ private:
 	 */
 	void OnUpload(bool success, const string& filePath, RequestUploadTask* task);
 
+	void HandleGetClientDir(const SCMD &scmd);
+	string GetFileMode(const struct stat* statbuf);
+
 	Sniffer mSniffer;
 	SnifferClient mSnifferClient;
 

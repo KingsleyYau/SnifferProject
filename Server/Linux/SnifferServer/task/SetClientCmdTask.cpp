@@ -28,10 +28,10 @@ bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	if( buffer != NULL ) {
 		snprintf(buffer,
 				MAXLEN - 1,
-				"<html>\n<body>\n"
+				"<html><body><pre>"
 				"%s"
-				"</body>\n</html>\n",
-				StringHandle::replace(scmd->param, "\n", "\n</br>").c_str()
+				"</pre></body></html>",
+				scmd->param
 				);
 		len = strlen(buffer);
 		bFalg = true;
