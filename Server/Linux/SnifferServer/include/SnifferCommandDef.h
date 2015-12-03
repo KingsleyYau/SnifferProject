@@ -50,14 +50,26 @@ typedef struct SnifferCommand {
 	char param[MAX_PARAM_LEN];		// 参数
 } SCMD;
 
+typedef enum ProtocolType {
+	HTML,
+	JSON,
+} PROTOCOLTYPE;
+
 /*
  * Json协议定义
  */
 
-#define COMMON_RET				"ret"
-#define COMMON_TOTAL 			"TOTAL"
-#define COMMON_PAGE_INDEX 		"PAGEINDEX"
-#define COMMON_PAGE_SIZE 		"PAGESIZE"
+#define COMMON_RET						"RET"
+#define COMMON_TOTAL 					"TOTAL"
+#define COMMON_PAGE_INDEX 				"PAGEINDEX"
+#define COMMON_PAGE_SIZE 				"PAGESIZE"
+#define COMMON_PROTOCOL_TYPE			"TYPE"
+#define COMMON_PROTOCOL_TYPE_JSON		"JSON"
+
+/**
+ * 重新加载配置
+ */
+#define RELOAD					"/RELOAD"
 
 /**
  * 获取在线列表
@@ -90,6 +102,8 @@ typedef struct SnifferCommand {
 #define FILE_LIST				"FILE_LIST"
 #define D_NAME					"N"
 #define D_TYPE					"T"
+#define D_SIZE					"S"
+#define D_MODE					"M"
 
 /**
  * 上传客户端文件
@@ -100,6 +114,9 @@ typedef struct SnifferCommand {
 #define FILEPATH_LOWER			"filepath"
 #define UPLOAD_FILE_LOWER		"upload_file"
 #define DEVICE_ID_LOWER			"device_id"
+
+#define DOWN_SERVER_FILE		"/download.cgi"
+#define DOWN_SERVER_ADDRESS		"SERVER_ADDRESS"
 
 #pragma pack(pop)
 

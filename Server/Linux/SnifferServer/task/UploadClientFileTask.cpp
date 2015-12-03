@@ -41,7 +41,6 @@ bool UploadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 
 		    if( rootRecv[DOWN_SERVER_ADDRESS].isString() && rootRecv[FILEPATH].isString() ) {
 		    	result += rootRecv[DOWN_SERVER_ADDRESS].asString();
-		    	result += "/";
 		    	result += rootRecv[FILEPATH].asString();
 		    	result += " ";
 
@@ -53,7 +52,7 @@ bool UploadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
     			result += "=";
     			result += rootRecv[FILEPATH].asString();
     			result += "\">";
-    			result += "下载";
+    			result += "下载到本地";
     			result += "</a>";
 		    }
 

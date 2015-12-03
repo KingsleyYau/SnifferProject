@@ -7,6 +7,7 @@
 
 #include "SnifferMain.h"
 
+#include <common/KZip.h>
 #include <sys/stat.h>
 
 SnifferMain::SnifferMain() {
@@ -84,11 +85,26 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 			GetMD5String(info.mac.c_str(), deviceId);
 		}
 
+		// 上传文件到服务器
+		RequestUploadTask* task = new RequestUploadTask();
+
 		// 文件路径
 		string filePath = scmd.param;
 
-		// 上传文件到服务器
-		RequestUploadTask* task = new RequestUploadTask();
+		struct stat statbuf;
+		if( 0 == stat(filePath.c_str(), &statbuf) ) {
+			if( S_ISDIR(statbuf.st_mode) ) {
+				FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传目录 : %s )", filePath.c_str());
+				// 打包
+				KZip zip;
+				zip.CreateZipFromDir(filePath, filePath + ".zip");
+				filePath += ".zip";
+			} else {
+				FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传文件 : %s )", filePath.c_str());
+			}
+		}
+
+
 		task->SetTaskCallback(this);
 		task->SetCallback(this);
 		task->Init(&mHttpRequestManager);

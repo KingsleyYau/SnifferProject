@@ -50,6 +50,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			sprintf(clientId, "%d", mClientId);
 
 			char upload[512];
+			string item = "";
 
 		    Json::Reader reader;
 		    Json::Value rootRecv;
@@ -60,15 +61,18 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    	for( int i = 0; i < (int)rootRecv[FILE_LIST].size(); i++ ) {
 		    		dirItem = rootRecv[FILE_LIST].get(i, Json::Value::null);
 		    		if( dirItem[D_NAME].isString() ) {
+		    			snprintf(
+		    					upload, sizeof(upload) - 1,
+		    					"%7s "
+		    					"%8s bytes "
+		    					"%-32s ",
+		    					dirItem[D_MODE].asString().c_str(),
+		    					dirItem[D_SIZE].asString().c_str(),
+		    					dirItem[D_NAME].asString().c_str()
+		    					);
+		    			result += upload;
+
 			    		if( dirItem[D_TYPE] == DT_DIR || dirItem[D_TYPE] == DT_LNK ) {
-			    			snprintf(
-			    					upload, sizeof(upload) - 1,
-			    					"%7s "
-			    					"%16s bytes ",
-			    					dirItem[D_MODE].asString().c_str(),
-			    					dirItem[D_SIZE].asString().c_str()
-			    					);
-			    			result += upload;
 
 			    			result += "<a href=\"";
 			    			result += GET_CLIENT_DIR;
@@ -90,44 +94,37 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 								}
 							}
 
+							// 进入
 							result += "&";
 							result += COMMON_PAGE_SIZE;
 							result += "=";
 							sprintf(temp, "%d", mPageSize);
 							result += temp;
 							result += "\">";
-							result += dirItem[D_NAME].asString();
+							result += "[进入]";
 							result += "</a>";
 
 			    		} else {
-			    			snprintf(
-			    					upload, sizeof(upload) - 1,
-			    					"%7s "
-			    					"%16s bytes "
-			    					"%-48s ",
-			    					dirItem[D_MODE].asString().c_str(),
-			    					dirItem[D_SIZE].asString().c_str(),
-			    					dirItem[D_NAME].asString().c_str()
-			    					);
-			    			result += upload;
-
-			    			// 上传按钮
-			    			result += "<a href=\"";
-			    			result += UPLOAD_CLIENT_FILE;
-			    			result += "?";
-			    			result += CLIENT_ID;
-			    			result += "=";
-			    			result += clientId;
-			    			result += "&";
-			    			result += FILEPATH;
-			    			result += "=";
-			    			result += mDir + "/";
-			    			result += dirItem[D_NAME].asString();
-			    			result += "\">";
-			    			result += "上传到文件服务器";
-			    			result += "</a>";
+			    			result += "[---]";
 			    		}
 
+			    		result += " ";
+
+		    			// 上传按钮
+		    			result += "<a href=\"";
+		    			result += UPLOAD_CLIENT_FILE;
+		    			result += "?";
+		    			result += CLIENT_ID;
+		    			result += "=";
+		    			result += clientId;
+		    			result += "&";
+		    			result += FILEPATH;
+		    			result += "=";
+		    			result += mDir + "/";
+		    			result += dirItem[D_NAME].asString();
+		    			result += "\">";
+		    			result += "[上传]";
+		    			result += "</a>";
 			    		result += "\n";
 		    		}
 		    	}
