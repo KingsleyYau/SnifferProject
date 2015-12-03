@@ -205,7 +205,8 @@ void SnifferMain::HandleGetClientDir(const SCMD &scmd) {
 			string m = GetFileMode(&statbuf);
 			dirItem[D_MODE] = m;
 
-			lstat(dp->d_name, &statbuf);
+			string absPath = dir + dp->d_name;
+			stat(absPath.c_str(), &statbuf);
 			sprintf(st_size, "%lld", statbuf.st_size);
 			dirItem[D_SIZE] = st_size;
 

@@ -111,7 +111,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    			snprintf(
 		    					upload, sizeof(upload) - 1,
 		    					"%7s "
-		    					"%8s bytes ",
+		    					"%10s bytes ",
 		    					dirItem[D_MODE].asString().c_str(),
 		    					dirItem[D_SIZE].asString().c_str()
 		    					);
