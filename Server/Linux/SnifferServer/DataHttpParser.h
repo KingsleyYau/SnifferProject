@@ -43,6 +43,7 @@ public:
 	HttpType GetType();
 
 	void Reset();
+
 private:
 	HttpType mHttpType;
 	int miContentLength;

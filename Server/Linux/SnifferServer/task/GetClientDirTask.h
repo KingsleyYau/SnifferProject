@@ -8,14 +8,11 @@
 #ifndef GETCLIENTDIRTASK_H_
 #define GETCLIENTDIRTASK_H_
 
-#include "ITask.h"
+#include "BaseTask.h"
 
 #include <dirent.h>
-#include <json/json.h>
-#include <common/Buffer.h>
-#include <common/StringHandle.h>
 
-class GetClientDirTask : public ITask {
+class GetClientDirTask : public BaseTask {
 public:
 	GetClientDirTask();
 	virtual ~GetClientDirTask();

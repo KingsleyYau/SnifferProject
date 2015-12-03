@@ -8,14 +8,11 @@
 #ifndef UploadClientFileTask_H_
 #define UploadClientFileTask_H_
 
-#include "ITask.h"
+#include "BaseTask.h"
 
 #include <dirent.h>
-#include <json/json.h>
-#include <common/Buffer.h>
-#include <common/StringHandle.h>
 
-class UploadClientFileTask : public ITask {
+class UploadClientFileTask : public BaseTask {
 public:
 	UploadClientFileTask();
 	virtual ~UploadClientFileTask();

@@ -40,6 +40,10 @@ public:
 		return itr;
 	}
 
+	int Size() {
+		return (int)mMap.size();
+	}
+
 	void Lock() {
 		mKMutex.lock();
 	}

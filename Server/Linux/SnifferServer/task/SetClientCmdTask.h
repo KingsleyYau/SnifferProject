@@ -8,12 +8,9 @@
 #ifndef SETCLIENTCMDTASK_H_
 #define SETCLIENTCMDTASK_H_
 
-#include "ITask.h"
+#include "BaseTask.h"
 
-#include <common/Buffer.h>
-#include <common/StringHandle.h>
-
-class SetClientCmdTask : public ITask {
+class SetClientCmdTask : public BaseTask {
 public:
 	SetClientCmdTask();
 	virtual ~SetClientCmdTask();

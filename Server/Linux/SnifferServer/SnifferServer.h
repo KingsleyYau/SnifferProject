@@ -104,17 +104,19 @@ private:
 	 * 获取在线客户端列表
 	 */
 	int GetClientList(
-			Json::Value& listNode,
-			Message *m
+			string& result,
+			Message *m,
+			PROTOCOLTYPE type = HTML
 			);
 
 	/**
 	 * 获取在线客户端详细信息
 	 */
 	int GetClientInfo(
-			Json::Value& clientNode,
+			string& result,
 			const char* clientId,
-			Message *m
+			Message *m,
+			PROTOCOLTYPE type = HTML
 			);
 
 	/**
@@ -123,7 +125,8 @@ private:
 	int SetClientCmd(
 			const char* clientId,
 			const char* command,
-			Message *m
+			Message *m,
+			PROTOCOLTYPE type = HTML
 			);
 
 	/**
@@ -134,7 +137,8 @@ private:
 			const char* directory,
 			const char* pageIndex,
 			const char* pageSize,
-			Message *m
+			Message *m,
+			PROTOCOLTYPE type = HTML
 			);
 
 	/**
@@ -143,7 +147,8 @@ private:
 	int UploadClientFile(
 			const char* clientId,
 			const char* filePath,
-			Message *m
+			Message *m,
+			PROTOCOLTYPE type = HTML
 			);
 
 	TcpServer mClientTcpServer;

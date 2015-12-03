@@ -176,7 +176,7 @@ void DataHttpParser::ParseParameters(char* buffer) {
 			case 0:{
 				// key
 				key = p;
-//				transform(key.begin(), key.end(), key.begin(), ::toupper);
+				transform(key.begin(), key.end(), key.begin(), ::toupper);
 			}break;
 			case 1:{
 				// value

@@ -891,16 +891,10 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 	int ret = -1;
 	int code = 200;
 	char reason[16] = {"OK"};
-	string param = "";
-
-	Json::FastWriter writer;
-	Json::Value rootSend;
-	rootSend[COMMON_RET] = 0;
+	string result = "";
 
 	if( m == NULL ) {
 		return ret;
-	} else {
-		param = writer.write(rootSend);
 	}
 
 	DataHttpParser dataHttpParser;
@@ -915,90 +909,90 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 		const char* pPath = dataHttpParser.GetPath();
 		HttpType type = dataHttpParser.GetType();
 
+		PROTOCOLTYPE ptType = HTML;
+		const char* pCommonType = dataHttpParser.GetParam(COMMON_PROTOCOL_TYPE);
+		if( pCommonType != NULL && strlen(pCommonType) > 0 ) {
+			if( strcasecmp(pCommonType, COMMON_PROTOCOL_TYPE_JSON) == 0 ) {
+				ptType = JSON;
+			}
+		}
+
 		LogManager::GetLogManager()->Log(
 				LOG_MSG,
 				"SnifferServer::HandleInsideRecvMessage( "
 				"tid : %d, "
 				"m->fd: [%d], "
 				"type : %d, "
-				"pPath : %s "
+				"pPath : %s, "
+				"pCommonType : %s "
 				")",
 				(int)syscall(SYS_gettid),
 				m->fd,
 				type,
-				pPath
+				pPath,
+				pCommonType
 				);
 
 		if( type == GET ) {
-			if( strcmp(pPath, GET_CLIENT_LIST) == 0 ) {
+			if( strcasecmp(pPath, GET_CLIENT_LIST) == 0 ) {
 				// 获取在线客户端列表
-				Json::Value clientListNode;
-				if( (ret = GetClientList(clientListNode, m)) == 1 ) {
-					rootSend[CLIENT_LIST] = clientListNode;
-					rootSend[COMMON_RET] = 1;
-					ret = 1;
-				}
+				ret = GetClientList(result, m, ptType);
 
-				param = writer.write(rootSend);
-
-			} else if( strcmp(pPath, GET_CLIENT_INFO) == 0 ) {
+			} else if( strcasecmp(pPath, GET_CLIENT_INFO) == 0 ) {
 				// 获取在线客户端详细信息
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				if( (pClientId != NULL) ) {
-					Json::Value clientNode;
-					if( (ret = GetClientInfo(clientNode, pClientId, m)) == 1 ) {
-						rootSend[CLIENT_INFO] = clientNode;
-						rootSend[COMMON_RET] = 1;
-					}
+					ret = GetClientInfo(result, pClientId, m, ptType);
 				}
 
-				param = writer.write(rootSend);
-
-			} else if( strcmp(pPath, SET_CLIENT_CMD) == 0 ) {
+			} else if( strcasecmp(pPath, SET_CLIENT_CMD) == 0 ) {
 				// 执行客户端命令
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pCommand = dataHttpParser.GetParam(COMMAND);
 				if( (pClientId != NULL) && (pCommand != NULL) ) {
-					ret = SetClientCmd(pClientId, pCommand, m);
+					ret = SetClientCmd(pClientId, pCommand, m, ptType);
 				}
 
-			} else if( strcmp(pPath, GET_CLIENT_DIR) == 0 ) {
+			} else if( strcasecmp(pPath, GET_CLIENT_DIR) == 0 ) {
 				// 获取客户端目录
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pDirecory = dataHttpParser.GetParam(DIRECTORY);
 				const char* pPageIndex = dataHttpParser.GetParam(COMMON_PAGE_INDEX);
 				const char* pPageSize = dataHttpParser.GetParam(COMMON_PAGE_SIZE);
 				if( (pClientId != NULL) ) {
-					ret = GetClientDir(pClientId, pDirecory, pPageIndex, pPageSize, m);
+					ret = GetClientDir(pClientId, pDirecory, pPageIndex, pPageSize, m, ptType);
 				}
 
-			} else if( strcmp(pPath, UPLOAD_CLIENT_FILE) == 0 ) {
+			} else if( strcasecmp(pPath, UPLOAD_CLIENT_FILE) == 0 ) {
 				// 上传客户端文件
 				const char* pClientId = dataHttpParser.GetParam(CLIENT_ID);
 				const char* pFilePath = dataHttpParser.GetParam(FILEPATH);
 				if( (pClientId != NULL) && (pFilePath != NULL) ) {
-					ret = UploadClientFile(pClientId, pFilePath, m);
+					ret = UploadClientFile(pClientId, pFilePath, m, ptType);
 				}
 
-			} else if( strcmp(pPath, "/RELOAD") == 0 ) {
+			} else if( strcasecmp(pPath, RELOAD) == 0 ) {
 				// 重新加载配置
+				Json::FastWriter writer;
+				Json::Value rootSend;
+
 				if( Reload()) {
 					rootSend[COMMON_RET] = 1;
 				}
 
-				param = writer.write(rootSend);
+				result = writer.write(rootSend);
 				ret = 1;
 
 			} else {
 				// 不匹配的接口
 				code = 404;
 				sprintf(reason, "Not Found");
-				param = "404 Not Found";
+				result = "404 Not Found";
 			}
 		} else {
 			code = 404;
 			sprintf(reason, "Not Found");
-			param = "404 Not Found";
+			result = "404 Not Found";
 		}
 
 	}
@@ -1006,8 +1000,8 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 	snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n%s",
 			code,
 			reason,
-			(int)param.length(),
-			param.c_str()
+			(int)result.length(),
+			result.c_str()
 			);
 	sm->len = strlen(sm->buffer);
 
@@ -1018,26 +1012,85 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
  * 获取在线客户端
  */
 int SnifferServer::GetClientList(
-		Json::Value& listNode,
-		Message *m
+		string& result,
+		Message *m,
+		PROTOCOLTYPE ptType
 		) {
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"SnifferServer::GetClientList( "
 			"tid : %d, "
-			"m->fd: [%d] "
+			"m->fd: [%d], "
+			"ptType : %d "
 			")",
 			(int)syscall(SYS_gettid),
-			m->fd
+			m->fd,
+			ptType
 			);
 
 	Client *client = NULL;
+
 	mClientMap.Lock();
-	for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
-		client = (Client*)itr->second;
-		Json::Value clientNode;
-		clientNode[CLIENT_ID] = client->fd;
-		listNode.append(clientNode);
+	switch( ptType ) {
+	case HTML:{
+		char count[16];
+		sprintf(count, "%d", mClientMap.Size());
+
+		result = "<html>\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n</head>\n<body>\n";
+		result += "<b>在线客户端列表&nbsp;:&nbsp";
+		result += count;
+		result += "</b></br>\n";
+
+		for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
+			client = (Client*)itr->second;
+			char clientId[16];
+			sprintf(clientId, "%d", client->fd);
+
+			result += "<a href=\"";
+			result += GET_CLIENT_INFO;
+			result += "?";
+			result += CLIENT_ID;
+			result += "=";
+			result += clientId;
+			result += "\">";
+
+			result += "[&nbsp;";
+			result += CLIENT_ID;
+			result += "&nbsp;:&nbsp;";
+			result += clientId;
+			result += "&nbsp;]";
+
+			result += "&nbsp;&nbsp;";
+
+			result += "[&nbsp;";
+			result += DEVICE_ID;
+			result += "&nbsp;:&nbsp;";
+			result += client->deviceId;
+			result += "&nbsp;]";
+			result += "</a></br>\n";
+		}
+
+	}break;
+	case JSON:{
+		Json::FastWriter writer;
+		Json::Value rootSend;
+		Json::Value clientListNode;
+
+		for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
+			client = (Client*)itr->second;
+
+			Json::Value clientNode;
+			clientNode[CLIENT_ID] = client->fd;
+			clientNode[DEVICE_ID] = client->deviceId;
+			clientListNode.append(clientNode);
+		}
+
+		rootSend[COMMON_RET] = 1;
+		rootSend[CLIENT_LIST] = clientListNode;
+
+		result = writer.write(rootSend);
+
+	}break;
 	}
 	mClientMap.Unlock();
 
@@ -1048,33 +1101,98 @@ int SnifferServer::GetClientList(
  * 获取在线客户端详细信息
  */
 int SnifferServer::GetClientInfo(
-		Json::Value& clientNode,
+		string& result,
 		const char* clientId,
-		Message *m
+		Message *m,
+		PROTOCOLTYPE ptType
 		) {
-	int ret = 0;
+	int ret = -1;
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"SnifferServer::GetClientInfo( "
 			"tid : %d, "
 			"m->fd: [%d], "
-			"clientId : %s "
+			"clientId : %s, "
+			"ptType : %d "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd,
-			clientId
+			clientId,
+			ptType
 			);
 
 	Client *client = NULL;
+
 	mClientMap.Lock();
 	ClientMap::iterator itr = mClientMap.Find(atoi(clientId));
 	if( itr != mClientMap.End() ) {
 		client = (Client*)itr->second;
-		clientNode[CLIENT_ID] = client->fd;
-		clientNode[PHONE_INFO_BRAND] = client->brand;
-		clientNode[PHONE_INFO_MODEL] = client->model;
-		clientNode[PHONE_INFO_NUMBER] = client->phoneNumber;
 		ret = 1;
+
+		switch( ptType ) {
+		case HTML:{
+			result = "<html>\n<head>\n<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n</head>\n<body>\n";
+			result += "<b>客户端详细信息</b></br>\n";
+
+			char clientId[16];
+			sprintf(clientId, "%d", client->fd);
+
+			result += CLIENT_ID;
+			result += " : ";
+			result += clientId;
+			result += "</br>";
+
+			result += DEVICE_ID;
+			result += " : ";
+			result += client->deviceId;
+			result += "</br>";
+
+			result += PHONE_INFO_BRAND;
+			result += " : ";
+			result += client->brand;
+			result += "</br>";
+
+			result += PHONE_INFO_MODEL;
+			result += " : ";
+			result += client->model;
+			result += "</br>";
+
+			result += PHONE_INFO_NUMBER;
+			result += " : ";
+			result += client->phoneNumber;
+			result += "</br></br>";
+
+			result += "<a href=\"";
+			result += GET_CLIENT_DIR;
+			result += "?";
+			result += CLIENT_ID;
+			result += "=";
+			result += clientId;
+			result += "\">";
+			result += "列目录";
+			result += "</a></br>\n";
+
+		}break;
+		case JSON:{
+			Json::FastWriter writer;
+			Json::Value rootSend;
+			Json::Value clientNode;
+
+			clientNode[CLIENT_ID] = client->fd;
+			clientNode[DEVICE_ID] = client->deviceId;
+			clientNode[PHONE_INFO_BRAND] = client->brand;
+			clientNode[PHONE_INFO_MODEL] = client->model;
+			clientNode[PHONE_INFO_NUMBER] = client->phoneNumber;
+
+			rootSend[CLIENT_INFO] = clientNode;
+			rootSend[COMMON_RET] = ret;
+
+			result = writer.write(rootSend);
+
+		}break;
+		}
+
+
 	}
 	mClientMap.Unlock();
 
@@ -1087,7 +1205,8 @@ int SnifferServer::GetClientInfo(
 int SnifferServer::SetClientCmd(
 		const char* clientId,
 		const char* command,
-		Message *m
+		Message *m,
+		PROTOCOLTYPE ptType
 		) {
 	int ret = -1;
 	LogManager::GetLogManager()->Log(
@@ -1096,12 +1215,14 @@ int SnifferServer::SetClientCmd(
 			"tid : %d, "
 			"m->fd: [%d], "
 			"clientId : %s, "
-			"command : %s "
+			"command : %s, "
+			"ptType : %d "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd,
 			clientId,
-			command
+			command,
+			ptType
 			);
 
 	int iClientId = atoi(clientId);
@@ -1132,7 +1253,8 @@ int SnifferServer::GetClientDir(
 		const char* directory,
 		const char* pageIndex,
 		const char* pageSize,
-		Message *m
+		Message *m,
+		PROTOCOLTYPE ptType
 		) {
 	int ret = -1;
 	LogManager::GetLogManager()->Log(
@@ -1143,14 +1265,16 @@ int SnifferServer::GetClientDir(
 			"clientId : %s, "
 			"directory : %s, "
 			"pageIndex : %s, "
-			"pageSize : %s "
+			"pageSize : %s, "
+			"ptType : %d "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd,
 			clientId,
 			directory,
 			pageIndex,
-			pageSize
+			pageSize,
+			ptType
 			);
 
 	int iClientId = atoi(clientId);
@@ -1189,7 +1313,8 @@ int SnifferServer::GetClientDir(
 int SnifferServer::UploadClientFile(
 		const char* clientId,
 		const char* filePath,
-		Message *m
+		Message *m,
+		PROTOCOLTYPE ptType
 		) {
 	int ret = -1;
 	LogManager::GetLogManager()->Log(
@@ -1198,12 +1323,14 @@ int SnifferServer::UploadClientFile(
 			"tid : %d, "
 			"m->fd: [%d], "
 			"clientId : %s, "
-			"filePath : %s "
+			"filePath : %s, "
+			"ptType : %d "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd,
 			clientId,
-			filePath
+			filePath,
+			ptType
 			);
 
 	int iClientId = atoi(clientId);
