@@ -94,7 +94,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    			result += "&";
 			    			result += COMMAND;
 			    			result += "=";
-			    			result += "rm -rf ";
+			    			result += "rm ";
 							result += mDir + "/";
 							result += dirItem[D_NAME].asString();
 							result += "&";

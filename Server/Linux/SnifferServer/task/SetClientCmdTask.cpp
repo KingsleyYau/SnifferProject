@@ -28,7 +28,7 @@ bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	if( buffer != NULL ) {
 		snprintf(buffer,
 				MAXLEN - 1,
-				"<html><body><pre>"
+				"<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body><pre>"
 				"命令 : %s\n"
 				"结果 : %s\n"
 				"</pre></body></html>",
