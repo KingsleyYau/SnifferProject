@@ -30,7 +30,7 @@ bool UploadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	if( buffer != NULL ) {
 		switch( mPtType ) {
 		case HTML: {
-			string result = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+			string result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
 			result += "<pre>";
 
 			char upload[512];
@@ -85,8 +85,10 @@ void UploadClientFileTask::SetClientId(int clientId) {
 	mClientId = clientId;
 }
 
-void UploadClientFileTask::SetFilePath(const char* filePath) {
-	if( filePath != NULL ) {
+void UploadClientFileTask::SetFilePath(const string& filePath) {
+	if( filePath.length() > 0 ) {
 		mFilePath = filePath;
+	} else {
+		mFilePath = "/";
 	}
 }

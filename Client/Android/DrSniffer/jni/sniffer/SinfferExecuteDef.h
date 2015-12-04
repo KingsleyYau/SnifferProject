@@ -28,7 +28,8 @@
 
 //#define ServerAdess					"sniffer.wicp.net"
 #define ServerAdess						"192.168.70.134"
-#define ServerPort						 9876
+#define ServerPort						 9873
+#define HttpServerPort					 9875
 #define SnifferLogFileName				"sniffer"
 
 static unsigned char AutoStartScript[] {

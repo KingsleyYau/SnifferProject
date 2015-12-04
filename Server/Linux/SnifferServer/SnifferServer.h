@@ -106,7 +106,7 @@ private:
 	int GetClientList(
 			string& result,
 			Message *m,
-			PROTOCOLTYPE type = HTML
+			PROTOCOLTYPE ptType = HTML
 			);
 
 	/**
@@ -114,41 +114,53 @@ private:
 	 */
 	int GetClientInfo(
 			string& result,
-			const char* clientId,
+			const string& clientId,
 			Message *m,
-			PROTOCOLTYPE type = HTML
+			PROTOCOLTYPE ptType = HTML
 			);
 
 	/**
 	 * 执行客户端命令
 	 */
 	int SetClientCmd(
-			const char* clientId,
-			const char* command,
+			const string& clientId,
+			const string& command,
 			Message *m,
-			PROTOCOLTYPE type = HTML
+			PROTOCOLTYPE ptType = HTML
 			);
 
 	/**
 	 * 获取客户端目录
 	 */
 	int GetClientDir(
-			const char* clientId,
-			const char* directory,
-			const char* pageIndex,
-			const char* pageSize,
+			const string& clientId,
+			const string& directory,
+			const string& pageIndex,
+			const string& pageSize,
 			Message *m,
-			PROTOCOLTYPE type = HTML
+			PROTOCOLTYPE ptType = HTML
 			);
 
 	/**
-	 * 上传客户端文件
+	 * 上传客户端文件到服务器
 	 */
 	int UploadClientFile(
-			const char* clientId,
-			const char* filePath,
+			const string& clientId,
+			const string& filePath,
 			Message *m,
-			PROTOCOLTYPE type = HTML
+			PROTOCOLTYPE ptType = HTML
+			);
+
+	/**
+	 * 下载文件到客户端
+	 */
+	int DownloadClientFile(
+			const string& clientId,
+			const string& url,
+			const string& filePath,
+			const string& fileName,
+			Message *m,
+			PROTOCOLTYPE ptType = HTML
 			);
 
 	TcpServer mClientTcpServer;

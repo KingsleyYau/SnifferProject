@@ -18,20 +18,14 @@
  */
 typedef enum SnifferCommandType {
 	SinfferTypeNone = 0,
-	SinfferTypeVersion = 1,
-	SinfferTypeVersionResult = 2,
-	SinfferTypeStart = 3,
-	SinfferTypeStop = 4,
-	ExcuteCommand  = 5,
-	ExcuteCommandResult = 6,
-	SnifferTypeClientInfo = 7,
-	SnifferTypeClientInfoResult = 8,
-	SnifferListDir = 9,
-	SnifferListDirResult = 10,
-	SnifferUploadFile = 11,
-	SnifferUploadFileResult = 12,
-	SnifferDownloadFile = 13,
-	SnifferDownloadFileResult = 14,
+	SinfferTypeVersion,
+	SinfferTypeStart,
+	SinfferTypeStop,
+	ExcuteCommand,
+	SnifferTypeClientInfo,
+	SnifferListDir,
+	SnifferUploadFile,
+	SnifferDownloadFile,
 } SCMDT;
 
 /*
@@ -108,7 +102,7 @@ typedef enum ProtocolType {
 #define D_MODE					"M"
 
 /**
- * 上传客户端文件
+ * 上传客户端文件到服务器
  */
 #define UPLOAD_CLIENT_FILE		"/UPLOAD_CLIENT_FILE"
 #define FILEPATH				"FILEPATH"
@@ -119,6 +113,13 @@ typedef enum ProtocolType {
 
 #define DOWN_SERVER_FILE		"/download.cgi"
 #define DOWN_SERVER_ADDRESS		"SERVER_ADDRESS"
+
+/**
+ * 下载文件到客户端
+ */
+#define DOWNLOAD_CLIENT_FILE	"/DOWNLOAD_CLIENT_FILE"
+#define URL						"URL"
+#define FILENAME				"FILENAME"
 
 #pragma pack(pop)
 

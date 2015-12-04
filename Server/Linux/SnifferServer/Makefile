@@ -25,7 +25,8 @@ LIBS =		-L. \
 COMMONOBJ =	common/LogFile.o common/md5.o common/KThread.o \
 			common/ConfFile.o common/Arithmetic.o
 JSONOBJS = 	json/json_reader.o json/json_value.o json/json_writer.o
-TASKOBJ = 	task/BaseTask.o task/SetClientCmdTask.o task/GetClientDirTask.o task/UploadClientFileTask.o
+TASKOBJ = 	task/BaseTask.o task/SetClientCmdTask.o task/GetClientDirTask.o task/UploadClientFileTask.o \
+			task/DownloadClientFileTask.o
 OBJS =		server.o SnifferServer.o TcpServer.o MessageList.o LogManager.o \
 			DataParser.o DataHttpParser.o Client.o Session.o
 OBJS +=		$(COMMONOBJ)

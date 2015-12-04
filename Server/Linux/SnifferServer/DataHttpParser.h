@@ -38,8 +38,8 @@ public:
 
 	int ParseData(char* buffer, int len);
 
-	const char* GetParam(const char* key);
-	const char* GetPath();
+	const string& GetParam(const char* key);
+	const string& GetPath();
 	HttpType GetType();
 
 	void Reset();

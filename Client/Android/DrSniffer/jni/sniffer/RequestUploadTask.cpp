@@ -59,11 +59,9 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
  * @param deviceId			设备唯一标识
  */
 void RequestUploadTask::SetParam(
-		const SCMDH& header,
 		const string& deviceId,
 		const string& filePath
 		) {
-	mHeader = header;
 
 	char temp[16];
 	mHttpEntiy.Reset();
@@ -84,8 +82,4 @@ void RequestUploadTask::SetParam(
 			")",
 			filePath.c_str()
 			);
-}
-
-const SCMDH& RequestUploadTask::GetSCMDH() {
-	return mHeader;
 }

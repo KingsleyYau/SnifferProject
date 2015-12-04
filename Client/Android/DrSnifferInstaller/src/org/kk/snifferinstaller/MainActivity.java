@@ -19,13 +19,13 @@ public class MainActivity extends Activity {
         
         final String packageName = this.getPackageName(); 
 
-        new Thread() {
-        	@Override
-			public void run(){
-            	String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        		jni.ReleaseDrSniffer(packageName, sdcardPath);
-        	}
-        }.start();
+//        new Thread() {
+//        	@Override
+//			public void run(){
+//            	String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+//        		jni.ReleaseDrSniffer(packageName, sdcardPath);
+//        	}
+//        }.start();
     }
 
 

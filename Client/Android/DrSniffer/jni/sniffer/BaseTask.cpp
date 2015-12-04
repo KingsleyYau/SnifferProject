@@ -49,3 +49,11 @@ void BaseTask::OnTaskFinish() {
 		mpTaskCallback->OnTaskFinish(this);
 	}
 }
+
+const SCMDH& BaseTask::GetSCMDH() {
+	return mHeader;
+}
+
+void BaseTask::SetCmdHeader(const SCMDH& scmdh) {
+	mHeader = scmdh;
+}

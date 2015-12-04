@@ -8,12 +8,14 @@
 #ifndef BASETASK_H_
 #define BASETASK_H_
 
-#include <string>
-using namespace std;
+#include "ITask.h"
+#include "SnifferCommandDef.h"
+#include "SinfferExecuteDef.h"
 
 #include <common/KLog.h>
 
-#include "ITask.h"
+#include <string>
+using namespace std;
 
 class BaseTask : public ITask {
 public:
@@ -30,10 +32,15 @@ public:
 
 	virtual void OnTaskFinish();
 
+	const SCMDH& GetSCMDH();
+	void SetCmdHeader(const SCMDH& scmd);
+
 protected:
 	ITaskCallback* mpTaskCallback;
 
 	bool mbStop;
+
+	SCMDH mHeader;
 };
 
 #endif /* BASETASK_H_ */

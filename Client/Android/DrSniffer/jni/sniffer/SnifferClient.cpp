@@ -119,7 +119,7 @@ void SnifferClient::HandleSnifferClientRunnable() {
 			param = writer.write(root);
 
 			bzero(&scmd, sizeof(SCMD));
-			scmd.header.scmdt = SnifferTypeClientInfoResult;
+			scmd.header.scmdt = SnifferTypeClientInfo;
 			scmd.header.bNew = true;
 			scmd.header.seq = seq++;
 			scmd.header.len = MIN(param.length(), MAX_PARAM_LEN - 1);

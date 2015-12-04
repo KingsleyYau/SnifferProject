@@ -89,17 +89,17 @@ int DataHttpParser::ParseData(char* buffer, int len) {
 	return result;
 }
 
-const char* DataHttpParser::GetParam(const char* key) {
-	const char* result = NULL;
+const string& DataHttpParser::GetParam(const char* key) {
+	string result = "";
 	Parameters::iterator itr = mParameters.find(key);
 	if( itr != mParameters.end() ) {
-		result = (itr->second).c_str();
+		result = (itr->second);
 	}
 	return result;
 }
 
-const char* DataHttpParser::GetPath() {
-	return mPath.c_str();
+const string& DataHttpParser::GetPath() {
+	return mPath;
 }
 
 HttpType DataHttpParser::GetType() {
@@ -140,7 +140,6 @@ bool DataHttpParser::ParseFirstLine(char* buffer) {
 				memcpy(path, temp, len);
 				ParseParameters(pPath + 1);
 			} else {
-				len = strlen(temp);
 				memcpy(path, temp, len);
 			}
 			path[len] = '\0';
@@ -162,34 +161,50 @@ void DataHttpParser::ParseParameters(char* buffer) {
 	char* param = NULL;
 	string key;
 	string value;
-	int j = 0;
+//	int j = 0;
 
 	char *pFirst = NULL;
-	char *pSecond = NULL;
+//	char *pSecond = NULL;
 
 	param = strtok_r(buffer, "&", &pFirst);
 	while( param != NULL ) {
-		j = 0;
-		p = strtok_r(param, "=", &pSecond);
-		while( p != NULL ) {
-			switch(j) {
-			case 0:{
-				// key
-				key = p;
-				transform(key.begin(), key.end(), key.begin(), ::toupper);
-			}break;
-			case 1:{
-				// value
-				value = p;
-//				transform(value.begin(), value.end(), value.begin(), ::toupper);
-				mParameters.insert(Parameters::value_type(key, value));
-			}break;
-			default:break;
-			};
+		p = strstr(param, "=");
+		if( p != NULL && ((p + 1) != NULL) ) {
+			*p = '\0';
+			// key
+			key = param;
+			transform(key.begin(), key.end(), key.begin(), ::toupper);
 
-			j++;
-			p = strtok_r(NULL, "=", &pSecond);
+			// value
+			value = p + 1;
+			mParameters.insert(Parameters::value_type(key, value));
+		} else {
+			// key
+			key = p;
+			transform(key.begin(), key.end(), key.begin(), ::toupper);
 		}
+
+//		j = 0;
+//		p = strtok_r(param, "=", &pSecond);
+//		while( p != NULL ) {
+//			switch(j) {
+//			case 0:{
+//				// key
+//				key = p;
+//				transform(key.begin(), key.end(), key.begin(), ::toupper);
+//			}break;
+//			case 1:{
+//				// value
+//				value = p;
+////				transform(value.begin(), value.end(), value.begin(), ::toupper);
+//				mParameters.insert(Parameters::value_type(key, value));
+//			}break;
+//			default:break;
+//			};
+//
+//			j++;
+//			p = strtok_r(NULL, "=", &pSecond);
+//		}
 		param = strtok_r(NULL, "&", &pFirst);
 	}
 }

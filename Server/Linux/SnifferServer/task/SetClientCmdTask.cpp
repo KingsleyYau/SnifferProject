@@ -28,9 +28,9 @@ bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	if( buffer != NULL ) {
 		snprintf(buffer,
 				MAXLEN - 1,
-				"<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body><pre>"
+				"<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body><pre>"
 				"命令 : %s\n"
-				"结果 : %s\n"
+				"结果 : \n%s\n"
 				"</pre></body></html>",
 				mCommand.c_str(),
 				scmd->param
@@ -42,8 +42,6 @@ bool SetClientCmdTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	return bFalg;
 }
 
-void SetClientCmdTask::SetCommand(const char* command) {
-	if( command != NULL ) {
-		mCommand = command;
-	}
+void SetClientCmdTask::SetCommand(const string& command) {
+	mCommand = command;
 }

@@ -1,0 +1,60 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:wheel="http://schemas.android.com/apk/res-auto">
+    
+    <ImageView android:id="@+id/back_image"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"/>
+    
+    <org.kk.snifferinstaller.MovingImageView
+        android:id="@+id/imageView"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+	
+    <View android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:background="#32000000"/>
+    
+    <TextView android:id="@+id/text"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_margin="32dp"
+        android:textSize="36sp"
+        android:text="Torrent Search"
+        android:gravity="center"
+        android:layout_centerVertical="true"/>
+    
+    <LinearLayout android:id="@+id/skip"
+        android:layout_height="72dp"
+        android:layout_width="72dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:clickable="true"
+        android:orientation="horizontal">
+        
+	    <TextView
+	        android:gravity="center"
+	        android:layout_height="wrap_content"
+	        android:layout_width="wrap_content"
+	        android:textSize="16sp"
+	        android:textStyle="bold"
+	        android:text=""/>
+	        
+	    <ImageView android:layout_height="wrap_content"
+	        android:layout_width="wrap_content"
+	        android:src="@drawable/ic_keyboard_arrow_right_white_18dp"
+	        android:layout_marginLeft="-4dp"
+	        android:layout_marginRight="-4dp"/>
+        
+    </LinearLayout>
+    
+    
+
+    
+    
+    
+</RelativeLayout>

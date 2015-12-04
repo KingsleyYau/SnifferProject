@@ -20,7 +20,7 @@ public:
 	void GetSendCmd(SCMD* scmd);
 	bool GetReturnData(SCMD* scmd, char* buffer, int& len);
 
-	void SetDir(const char* dir);
+	void SetDir(const string& dir);
 	void SetClientId(int clientId);
 	void SetPageIndex(int pageIndex);
 	void SetPageSize(int pageSize);

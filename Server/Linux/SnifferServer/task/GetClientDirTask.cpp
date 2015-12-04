@@ -46,12 +46,35 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	if( buffer != NULL ) {
 		switch( mPtType ) {
 		case HTML: {
-			string result = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+			string result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
 			result += "<pre>";
 
 			char temp[8];
 			char clientId[8];
 			sprintf(clientId, "%d", mClientId);
+
+			result += "<form action=\"";
+			result += DOWNLOAD_CLIENT_FILE;
+			result += "\" method=\"GET\">";
+			result += "URL:<input type=\"text\" name=\"";
+			result += URL;
+			result += "\"/>  ";
+			result += "filename:<input type=\"text\" name=\"";
+			result += FILENAME;
+			result += "\"/> ";
+			result += "<input type=\"hidden\" name=\"";
+			result += CLIENT_ID;
+			result += "\" value=\"";
+			result += clientId;
+			result += "\" />";
+			result += "<input type=\"hidden\" name=\"";
+			result += FILEPATH;
+			result += "\" value=\"";
+			result += mDir;
+			result += "\" />";
+			result += "<input type=\"submit\" value=\"上传\"/>";
+			result += "</form>";
+			result += "\n";
 
 			char upload[512];
 			string item = "";
@@ -250,9 +273,11 @@ void GetClientDirTask::SetClientId(int clientId) {
 	mClientId = clientId;
 }
 
-void GetClientDirTask::SetDir(const char* dir) {
-	if( dir != NULL ) {
+void GetClientDirTask::SetDir(const string& dir) {
+	if( dir.length() > 0 ) {
 		mDir = dir;
+	} else {
+		mDir = "/";
 	}
 }
 

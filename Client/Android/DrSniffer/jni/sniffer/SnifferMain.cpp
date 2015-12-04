@@ -14,7 +14,10 @@ SnifferMain::SnifferMain() {
 	// TODO Auto-generated constructor stub
 	string website = "http://";
 	website += ServerAdess;
-	website += ":9875";
+	website += ":";
+	char port[8];
+	sprintf(port, "%d", HttpServerPort);
+	website += port;
 	mHttpRequestHostManager.SetWebSite(website);
 	mHttpRequestManager.SetHostManager(&mHttpRequestHostManager);
 	mHttpRequestManager.SetVersionCode("Version", SnifferVersion);
@@ -36,7 +39,7 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 
 		// 返回命令结果
 		SCMD scmdSend;
-		scmdSend.header.scmdt = ExcuteCommandResult;
+		scmdSend.header.scmdt = ExcuteCommand;
 		scmdSend.header.bNew = false;
 		scmdSend.header.seq = scmd.header.seq;
 		scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
@@ -67,7 +70,7 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 		FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 返回版本号 : %s )", SnifferVersion);
 
 		SCMD scmdSend;
-		scmdSend.header.scmdt = SinfferTypeVersionResult;
+		scmdSend.header.scmdt = SinfferTypeVersion;
 		scmdSend.header.bNew = false;
 		scmdSend.header.seq = scmd.header.seq;
 		scmdSend.header.len = MIN(strlen(SnifferVersion), MAX_PARAM_LEN - 1);
@@ -77,39 +80,13 @@ void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 
 	}break;
 	case SnifferUploadFile:{
-		char deviceId[128] = {'\0'};
-		memset(deviceId, '\0', sizeof(deviceId));
-		list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
-		if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
-			IpAddressNetworkInfo info = *(infoList.begin());
-			GetMD5String(info.mac.c_str(), deviceId);
-		}
+		// 上传文件
+		HandleUploadFile(scmd);
 
-		// 上传文件到服务器
-		RequestUploadTask* task = new RequestUploadTask();
-
-		// 文件路径
-		string filePath = scmd.param;
-
-		struct stat statbuf;
-		if( 0 == stat(filePath.c_str(), &statbuf) ) {
-			if( S_ISDIR(statbuf.st_mode) ) {
-				FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传目录 : %s )", filePath.c_str());
-				// 打包
-				KZip zip;
-				zip.CreateZipFromDir(filePath, filePath + ".zip");
-				filePath += ".zip";
-			} else {
-				FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传文件 : %s )", filePath.c_str());
-			}
-		}
-
-
-		task->SetTaskCallback(this);
-		task->SetCallback(this);
-		task->Init(&mHttpRequestManager);
-		task->SetParam(scmd.header, deviceId, filePath);
-		task->Start();
+	}break;
+	case SnifferDownloadFile:{
+		// 下载文件
+		HandleDownloadFile(scmd);
 
 	}break;
 	case SinfferTypeNone:{
@@ -137,6 +114,7 @@ bool SnifferMain::Run() {
 }
 
 void SnifferMain::OnTaskFinish(ITask* pTask) {
+	FileLog(SnifferLogFileName, "SnifferMain::OnTaskFinish( pTask : %p )", pTask);
 	delete pTask;
 }
 
@@ -146,7 +124,10 @@ void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTa
 	rootSend[COMMON_RET] = success?1:0;
 	string website = "http://";
 	website += ServerAdess;
-	website += ":9875";
+	website += ":";
+	char port[8];
+	sprintf(port, "%d", HttpServerPort);
+	website += port;
 
 	rootSend[DOWN_SERVER_ADDRESS] = website;
 	rootSend[FILEPATH] = filePath;
@@ -155,7 +136,25 @@ void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTa
 	result = writer.write(rootSend);
 
 	SCMD scmdSend;
-	scmdSend.header.scmdt = SnifferUploadFileResult;
+	scmdSend.header.scmdt = SnifferUploadFile;
+	scmdSend.header.bNew = false;
+	scmdSend.header.seq = task->GetSCMDH().seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	mSnifferClient.SendCommand(scmdSend);
+}
+
+void SnifferMain::OnDownload(bool success, const string& filePath, RequestDownloadTask* task) {
+	Json::FastWriter writer;
+	Json::Value rootSend;
+	rootSend[COMMON_RET] = success?1:0;
+	rootSend[FILEPATH] = filePath;
+
+	string result;
+	result = writer.write(rootSend);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = SnifferDownloadFile;
 	scmdSend.header.bNew = false;
 	scmdSend.header.seq = task->GetSCMDH().seq;
 	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
@@ -236,13 +235,108 @@ void SnifferMain::HandleGetClientDir(const SCMD &scmd) {
     result = writer.write(rootSend);
 
 	SCMD scmdSend;
-	scmdSend.header.scmdt = SnifferTypeClientInfoResult;
+	scmdSend.header.scmdt = SnifferTypeClientInfo;
 	scmdSend.header.bNew = false;
 	scmdSend.header.seq = scmd.header.seq;
 	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
 	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
 	scmdSend.param[scmdSend.header.len] = '\0';
 	mSnifferClient.SendCommand(scmdSend);
+
+}
+
+void SnifferMain::HandleUploadFile(const SCMD &scmd) {
+	// 上传文件到服务器
+	char deviceId[128] = {'\0'};
+	memset(deviceId, '\0', sizeof(deviceId));
+	list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
+	if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
+		IpAddressNetworkInfo info = *(infoList.begin());
+		GetMD5String(info.mac.c_str(), deviceId);
+	}
+
+	RequestUploadTask* task = new RequestUploadTask();
+
+	// 文件路径
+	string filePath = scmd.param;
+
+	struct stat statbuf;
+	if( 0 == stat(filePath.c_str(), &statbuf) ) {
+		if( S_ISDIR(statbuf.st_mode) ) {
+			FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传目录 : %s )", filePath.c_str());
+			// 打包
+			KZip zip;
+			zip.CreateZipFromDir(filePath, filePath + ".zip");
+			filePath += ".zip";
+		} else {
+			FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传文件 : %s )", filePath.c_str());
+		}
+	}
+
+	task->SetTaskCallback(this);
+	task->SetCallback(this);
+	task->Init(&mHttpRequestManager);
+	task->SetCmdHeader(scmd.header);
+	task->SetParam(deviceId, filePath);
+	if( !task->Start() ) {
+		Json::FastWriter writer;
+		Json::Value rootSend;
+		rootSend[COMMON_RET] = 0;
+		rootSend[DOWN_SERVER_ADDRESS] = "";
+		rootSend[FILEPATH] = "";
+
+		string result;
+		result = writer.write(rootSend);
+
+		SCMD scmdSend;
+		scmdSend.header.scmdt = SnifferUploadFile;
+		scmdSend.header.bNew = false;
+		scmdSend.header.seq = task->GetSCMDH().seq;
+		scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+		memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+		mSnifferClient.SendCommand(scmdSend);
+	}
+}
+
+void SnifferMain::HandleDownloadFile(const SCMD &scmd) {
+	// 下载文件到客户端
+    Json::Reader reader;
+    Json::Value rootRecv;
+    reader.parse(scmd.param, rootRecv);
+
+    // 地址
+    string url = "";
+    if( rootRecv[URL].isString() ) {
+    	url = rootRecv[URL].asString();
+    }
+
+    // 文件路径
+    string filePath = "";
+    if( rootRecv[FILEPATH].isString() ) {
+    	filePath = rootRecv[FILEPATH].asString();
+    }
+
+	RequestDownloadTask* task = new RequestDownloadTask();
+	task->SetTaskCallback(this);
+	task->SetCallback(this);
+	task->SetCmdHeader(scmd.header);
+	task->SetParam(url, filePath);
+	if( !task->Start() ) {
+		Json::FastWriter writer;
+		Json::Value rootSend;
+		rootSend[COMMON_RET] = 0;
+
+		string result;
+		result = writer.write(rootSend);
+
+		SCMD scmdSend;
+		scmdSend.header.scmdt = SnifferDownloadFile;
+		scmdSend.header.bNew = false;
+		scmdSend.header.seq = task->GetSCMDH().seq;
+		scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+		memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+		mSnifferClient.SendCommand(scmdSend);
+	}
 
 }
 

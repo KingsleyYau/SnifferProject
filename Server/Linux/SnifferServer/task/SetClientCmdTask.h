@@ -18,7 +18,7 @@ public:
 	void GetSendCmd(SCMD* scmd);
 	bool GetReturnData(SCMD* scmd, char* buffer, int& len);
 
-	void SetCommand(const char* command);
+	void SetCommand(const string& command);
 
 private:
 	string mCommand;
