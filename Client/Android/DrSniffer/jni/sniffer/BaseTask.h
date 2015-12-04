@@ -33,7 +33,7 @@ public:
 	virtual void OnTaskFinish();
 
 	const SCMDH& GetSCMDH();
-	void SetCmdHeader(const SCMDH& scmd);
+	void SetSCMDH(const SCMDH& scmd);
 
 protected:
 	ITaskCallback* mpTaskCallback;

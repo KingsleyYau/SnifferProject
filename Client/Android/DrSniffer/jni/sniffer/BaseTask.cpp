@@ -54,6 +54,6 @@ const SCMDH& BaseTask::GetSCMDH() {
 	return mHeader;
 }
 
-void BaseTask::SetCmdHeader(const SCMDH& scmdh) {
+void BaseTask::SetSCMDH(const SCMDH& scmdh) {
 	mHeader = scmdh;
 }

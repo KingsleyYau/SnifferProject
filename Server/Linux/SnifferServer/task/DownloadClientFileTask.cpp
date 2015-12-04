@@ -49,6 +49,13 @@ bool DownloadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    Json::Value rootRecv;
 		    reader.parse(scmd->param, rootRecv);
 
+		    bool bFlag = false;
+		    if( rootRecv[COMMON_RET].isInt() ) {
+		    	bFlag = (0 == rootRecv[COMMON_RET].asInt())?false:true;
+		    }
+		    result += bFlag?"下载成功":"下载失败";
+
+		    result += "下载路径: ";
 		    if( rootRecv[FILEPATH].isString() ) {
 		    	result += rootRecv[FILEPATH].asString();
 		    }

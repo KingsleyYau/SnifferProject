@@ -47,19 +47,30 @@ void RequestDownloadTask::SetParam(
 }
 
 bool RequestDownloadTask::Start() {
+	bool bFlag = false;
+
 	if( BaseTask::Start() ) {
 		if( mHttpDownloader.StartDownload(mUrl, mFilePath, this) ) {
-			return true;
+			bFlag = true;
 		} else {
 			OnTaskFinish();
 		}
 	}
-	return false;
+
+	FileLog(
+			SnifferLogFileName,
+			"RequestDownloadTask::Start( "
+			"bFlag : %s "
+			")",
+			bFlag?"true":"false"
+			);
+
+	return bFlag;
 }
 
 void RequestDownloadTask::Stop() {
 	mHttpDownloader.Stop();
-	return BaseTask::Stop();
+	BaseTask::Stop();
 }
 
 bool RequestDownloadTask::IsFinishOK() {

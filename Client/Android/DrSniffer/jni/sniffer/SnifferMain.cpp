@@ -119,6 +119,17 @@ void SnifferMain::OnTaskFinish(ITask* pTask) {
 }
 
 void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTask* task) {
+	FileLog(SnifferLogFileName,
+			"SnifferMain::OnUpload( "
+			"success : %s,"
+			"filePath : %s, "
+			"task : %p "
+			")",
+			success?"true":"false",
+			filePath.c_str(),
+			task
+			);
+
 	Json::FastWriter writer;
 	Json::Value rootSend;
 	rootSend[COMMON_RET] = success?1:0;
@@ -145,6 +156,17 @@ void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTa
 }
 
 void SnifferMain::OnDownload(bool success, const string& filePath, RequestDownloadTask* task) {
+	FileLog(SnifferLogFileName,
+			"SnifferMain::OnDownload( "
+			"success : %s,"
+			"filePath : %s, "
+			"task : %p "
+			")",
+			success?"true":"false",
+			filePath.c_str(),
+			task
+			);
+
 	Json::FastWriter writer;
 	Json::Value rootSend;
 	rootSend[COMMON_RET] = success?1:0;
@@ -235,7 +257,7 @@ void SnifferMain::HandleGetClientDir(const SCMD &scmd) {
     result = writer.write(rootSend);
 
 	SCMD scmdSend;
-	scmdSend.header.scmdt = SnifferTypeClientInfo;
+	scmdSend.header.scmdt = SnifferListDir;
 	scmdSend.header.bNew = false;
 	scmdSend.header.seq = scmd.header.seq;
 	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
@@ -276,7 +298,7 @@ void SnifferMain::HandleUploadFile(const SCMD &scmd) {
 	task->SetTaskCallback(this);
 	task->SetCallback(this);
 	task->Init(&mHttpRequestManager);
-	task->SetCmdHeader(scmd.header);
+	task->SetSCMDH(scmd.header);
 	task->SetParam(deviceId, filePath);
 	if( !task->Start() ) {
 		Json::FastWriter writer;
@@ -319,7 +341,7 @@ void SnifferMain::HandleDownloadFile(const SCMD &scmd) {
 	RequestDownloadTask* task = new RequestDownloadTask();
 	task->SetTaskCallback(this);
 	task->SetCallback(this);
-	task->SetCmdHeader(scmd.header);
+	task->SetSCMDH(scmd.header);
 	task->SetParam(url, filePath);
 	if( !task->Start() ) {
 		Json::FastWriter writer;

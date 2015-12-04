@@ -32,6 +32,28 @@ typedef enum SnifferCommandType {
  * 公用命令头
  */
 typedef struct SnifferCommandHedaer {
+	SnifferCommandHedaer() {
+		scmdt = SinfferTypeNone;
+		len = 0;
+		seq = 0;
+		bNew = false;
+	}
+
+	SnifferCommandHedaer(const SnifferCommandHedaer& item) {
+		scmdt = item.scmdt;
+		len = item.len;
+		seq = item.seq;
+		bNew = item.bNew;
+	}
+
+	SnifferCommandHedaer operator=(const SnifferCommandHedaer& item) {
+		scmdt = item.scmdt;
+		len = item.len;
+		seq = item.seq;
+		bNew = item.bNew;
+		return *this;
+	}
+
 	SCMDT scmdt;		// 类型
 	int len;			// 参数长度
 	int seq;			// 请求号
