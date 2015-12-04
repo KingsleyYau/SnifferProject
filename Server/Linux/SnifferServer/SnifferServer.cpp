@@ -35,6 +35,23 @@ private:
 SnifferServer::SnifferServer() {
 	// TODO Auto-generated constructor stub
 	mpStateRunnable = new StateRunnable(this);
+	mpStateThread = NULL;
+
+	miPort = 0;
+	miMaxClient = 0;
+	miMaxHandleThread = 0;
+	miMaxQueryPerThread = 0;
+	miTimeout = 0;
+
+	miStateTime = 0;
+	miDebugMode = 0;
+	miLogLevel = 0;
+
+	mHit = 0;
+	mResponed = 0;
+	mTotal = 0;
+
+	mIsRunning = false;
 }
 
 SnifferServer::~SnifferServer() {
