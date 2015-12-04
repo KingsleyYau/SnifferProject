@@ -54,6 +54,7 @@ bool DownloadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    	bFlag = (0 == rootRecv[COMMON_RET].asInt())?false:true;
 		    }
 		    result += bFlag?"下载成功":"下载失败";
+		    result += ",";
 
 		    result += "下载路径: ";
 		    if( rootRecv[FILEPATH].isString() ) {
