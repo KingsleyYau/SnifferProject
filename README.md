@@ -9,13 +9,14 @@ Autor:  Kingsley Yau
 1.支持Linux服务端</br>
 
 交互流程
+<pre>
 Client    				Linux Server	    		 Admin</br>
       主动连接---></br>
 															<---调用API</br>
 			<---发送命令</br>
 			返回命令---></br>
 														  返回结果---></br>
-
+</pre>
 2.支持的API</br>
 2.1.获取在线客户端列表</br>
 2.2.获取在线客户端详细信息</br>
