@@ -43,7 +43,7 @@ class TcpServer;
 class TcpServerObserver {
 public:
 	virtual ~TcpServerObserver(){};
-	virtual bool OnAccept(TcpServer *ts, Message *m) = 0;
+	virtual bool OnAccept(TcpServer *ts, int fd, char* ip) = 0;
 	virtual void OnRecvMessage(TcpServer *ts, Message *m) = 0;
 	virtual void OnSendMessage(TcpServer *ts, Message *m) = 0;
 	virtual void OnDisconnect(TcpServer *ts, int fd) = 0;
@@ -95,7 +95,7 @@ public:
 	void Accept_Callback(ev_io *w, int revents);
 	void Recv_Callback(ev_io *w, int revents);
 
-	bool OnAccept(Message *m);
+	bool OnAccept(int fd, char* ip);
 	void OnRecvMessage(Message *m);
 	void OnSendMessage(Message *m);
 	void OnDisconnect(int fd, Message *m);

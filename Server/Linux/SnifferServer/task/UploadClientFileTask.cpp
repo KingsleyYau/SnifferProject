@@ -60,7 +60,7 @@ bool UploadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 				result += "下载到本地";
 				result += "</a>";
 		    } else {
-		    	result = "上传失败";
+		    	result += "上传失败";
 		    }
 
 		    result += "</pre>";

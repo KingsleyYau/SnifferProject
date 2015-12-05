@@ -15,6 +15,7 @@ Client::Client() {
     brand = "";
     model = "";
     phoneNumber = "";
+    ip = "";
 
     mSeq = 0;
 	mBuffer.Reset();

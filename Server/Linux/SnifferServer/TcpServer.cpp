@@ -560,7 +560,7 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 			revents
 			);
 
-	int client;
+	int client = 0;
 	struct sockaddr_in addr;
 	socklen_t iAddrLen = sizeof(struct sockaddr);
 	while ( (client = accept(w->fd, (struct sockaddr *)&addr, &iAddrLen)) < 0 ) {
@@ -591,6 +591,10 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 		}
 	}
 
+	if( client == 0 ) {
+		return;
+	}
+
 	mCloseMutex.lock();
 	mpCloseRecv[client] = false;
 	mpHandlingMessageCount[client] = 0;
@@ -604,25 +608,27 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 	int nZero = 0;
 	setsockopt(client, SOL_SOCKET, SO_SNDBUF, &nZero, sizeof(nZero));
 
-	Message *m = GetIdleMessageList()->PopFront();
-	if( m == NULL ) {
-		LogManager::GetLogManager()->Log(LOG_WARNING, "TcpServer::Accept_Callback( "
-				"tid : %d, "
-				"accept client fd : [%d], "
-				"m == NULL "
-				")",
-				(int)syscall(SYS_gettid),
-				client
-				);
-		OnDisconnect(client, NULL);
-		return;
-	}
+	char* ip = inet_ntoa(addr.sin_addr);
 
-	m->Reset();
-	m->fd = client;
+//	Message *m = GetIdleMessageList()->PopFront();
+//	if( m == NULL ) {
+//		LogManager::GetLogManager()->Log(LOG_WARNING, "TcpServer::Accept_Callback( "
+//				"tid : %d, "
+//				"accept client fd : [%d], "
+//				"m == NULL "
+//				")",
+//				(int)syscall(SYS_gettid),
+//				client
+//				);
+//		OnDisconnect(client, NULL);
+//		return;
+//	}
+
+//	m->Reset();
+//	m->fd = client;
 
 	/* Add Client */
-	if( OnAccept(m) ) {
+	if( OnAccept(client, ip) ) {
 		WatcherList *watcherList = GetWatcherList();
 		if( !watcherList->Empty() ) {
 			/* watch recv event for client */
@@ -643,7 +649,7 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 			ev_io_start(mLoop, watcher);
 			UnLockWatcherList();
 
-			GetIdleMessageList()->PushBack(m);
+//			GetIdleMessageList()->PushBack(m);
 		} else {
 			LogManager::GetLogManager()->Log(
 					LOG_WARNING,
@@ -654,11 +660,11 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 					(int)syscall(SYS_gettid)
 					);
 			Disconnect(client);
-			OnDisconnect(client, m);
+			OnDisconnect(client, NULL);
 		}
 	} else {
 		Disconnect(client);
-		OnDisconnect(client, m);
+		OnDisconnect(client, NULL);
 	}
 
 	LogManager::GetLogManager()->Log(
@@ -1190,17 +1196,17 @@ void TcpServer::OnDisconnect(int fd, Message *m) {
 			);
 }
 
-bool TcpServer::OnAccept(Message *m) {
+bool TcpServer::OnAccept(int fd, char* ip) {
 	LogManager::GetLogManager()->Log(LOG_MSG, "TcpServer::OnAccept( "
 				"tid : %d, "
-				"m->fd : [%d] "
+				"fd : [%d] "
 				")",
 				(int)syscall(SYS_gettid),
-				m->fd
+				fd
 				);
 
 	if( mpTcpServerObserver != NULL ) {
-		mpTcpServerObserver->OnAccept(this, m);
+		mpTcpServerObserver->OnAccept(this, fd, ip);
 	}
 
 	return true;

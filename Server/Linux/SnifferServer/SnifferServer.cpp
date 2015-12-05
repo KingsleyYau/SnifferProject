@@ -203,14 +203,15 @@ bool SnifferServer::IsRunning() {
 /**
  * New request
  */
-bool SnifferServer::OnAccept(TcpServer *ts, Message *m) {
+bool SnifferServer::OnAccept(TcpServer *ts, int fd, char* ip) {
 	if( ts == &mClientTcpServer ) {
 		Client *client = new Client();
 		client->SetClientCallback(this);
-		client->fd = m->fd;
+		client->fd = fd;
+		client->ip = ip;
 
 		mClientMap.Lock();
-		mClientMap.Insert(m->fd, client);
+		mClientMap.Insert(fd, client);
 		mClientMap.Unlock();
 
 		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnAccept( "
@@ -219,7 +220,7 @@ bool SnifferServer::OnAccept(TcpServer *ts, Message *m) {
 				"[客户端上线] "
 				")",
 				(int)syscall(SYS_gettid),
-				m->fd
+				fd
 				);
 	}
 
@@ -1075,19 +1076,25 @@ int SnifferServer::GetClientList(
 			result += clientId;
 			result += "\">";
 
-			result += "[ ";
+			result += "[";
 			result += CLIENT_ID;
 			result += " : ";
 			result += clientId;
-			result += " ]";
-
+			result += "]";
 			result += " ";
 
-			result += "[ ";
+			result += "[";
 			result += DEVICE_ID;
 			result += " : ";
 			result += client->deviceId;
-			result += " ]";
+			result += "]";
+			result += " ";
+
+			result += "[";
+			result += "IP";
+			result += " : ";
+			result += client->ip;
+			result += "]";
 			result += "</a>\n";
 
 		}

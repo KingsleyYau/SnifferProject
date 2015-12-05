@@ -43,7 +43,7 @@ public:
 	bool IsRunning();
 
 	/* callback by TcpServerObserver */
-	bool OnAccept(TcpServer *ts, Message *m);
+	bool OnAccept(TcpServer *ts, int fd, char* ip);
 	void OnRecvMessage(TcpServer *ts, Message *m);
 	void OnSendMessage(TcpServer *ts, Message *m);
 	void OnDisconnect(TcpServer *ts, int fd);

@@ -121,7 +121,7 @@ void SnifferMain::OnTaskFinish(ITask* pTask) {
 void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTask* task) {
 	FileLog(SnifferLogFileName,
 			"SnifferMain::OnUpload( "
-			"success : %s,"
+			"success : %s, "
 			"filePath : %s, "
 			"task : %p "
 			")",
@@ -132,16 +132,19 @@ void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTa
 
 	Json::FastWriter writer;
 	Json::Value rootSend;
-	rootSend[COMMON_RET] = success?1:0;
-	string website = "http://";
-	website += ServerAdess;
-	website += ":";
-	char port[8];
-	sprintf(port, "%d", HttpServerPort);
-	website += port;
 
-	rootSend[DOWN_SERVER_ADDRESS] = website;
-	rootSend[FILEPATH] = filePath;
+	rootSend[COMMON_RET] = success?1:0;
+	if( success ) {
+		string website = "http://";
+		website += ServerAdess;
+		website += ":";
+		char port[8];
+		sprintf(port, "%d", HttpServerPort);
+		website += port;
+
+		rootSend[DOWN_SERVER_ADDRESS] = website;
+		rootSend[FILEPATH] = filePath;
+	}
 
 	string result;
 	result = writer.write(rootSend);
@@ -158,7 +161,7 @@ void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTa
 void SnifferMain::OnDownload(bool success, const string& filePath, RequestDownloadTask* task) {
 	FileLog(SnifferLogFileName,
 			"SnifferMain::OnDownload( "
-			"success : %s,"
+			"success : %s, "
 			"filePath : %s, "
 			"task : %p "
 			")",
@@ -170,7 +173,9 @@ void SnifferMain::OnDownload(bool success, const string& filePath, RequestDownlo
 	Json::FastWriter writer;
 	Json::Value rootSend;
 	rootSend[COMMON_RET] = success?1:0;
-	rootSend[FILEPATH] = filePath;
+	if( success ) {
+		rootSend[FILEPATH] = filePath;
+	}
 
 	string result;
 	result = writer.write(rootSend);
@@ -304,8 +309,6 @@ void SnifferMain::HandleUploadFile(const SCMD &scmd) {
 		Json::FastWriter writer;
 		Json::Value rootSend;
 		rootSend[COMMON_RET] = 0;
-		rootSend[DOWN_SERVER_ADDRESS] = "";
-		rootSend[FILEPATH] = "";
 
 		string result;
 		result = writer.write(rootSend);
