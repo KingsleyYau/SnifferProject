@@ -13,6 +13,30 @@
 
 #include <common/KLog.h>
 
+/**
+ * 检查是否root
+ */
+static inline bool IsRoot() {
+	bool bFlag = false;
+
+	string result = "";
+	result = SystemComandExecuteWithRootWithResult("whoami");
+	string::size_type pos;
+	pos = result.find("root");
+	if( pos != string::npos ) {
+		bFlag = true;
+	}
+
+	ILog("SnifferInstaller::IsRoot()",
+			"bFlag : %s, "
+			"result : %s",
+			bFlag?"true":"false",
+			result.c_str()
+			);
+
+	return bFlag;
+}
+
 /*
  * 查看Sniffer版本
  * 用于检测Sniffer是否存在
@@ -102,11 +126,13 @@ static inline string ReleaseAutoStartScript(string filePath = "/sdcard/") {
  */
 static inline bool InstallSniffer(string packageName, string filePath) {
 	bool bFlag = false;
+	bool bRoot = IsRoot();
 
 	char pBuffer[2048] = {'\0'};
 	string curVersion = "";
 	string libPath = RelaseFilePrefix + packageName + RelaseFileLib;
-	string releaseFile = "";
+	string releaseFile = libPath + SnifferInStallerFile;
+	string releaseDir = RelaseFilePrefix + packageName + RelaseFileFile;
 
 	ILog("SnifferInstaller::InstallSniffer()", "开始安装依赖包...");
 	ILog("SnifferInstaller::InstallSniffer()", "所有依赖包安装完成!");
@@ -114,63 +140,111 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 	// 判断是否需要安装或者升级
 	ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 判断是否需要安装或者升级...");
 	curVersion = GetSnifferVersion();
+	ILog("SnifferInstaller::InstallSniffer()", "%s当前版本:(%s) 安装包版本:(%s)", SinfferFile, curVersion.c_str(), SnifferVersion);
 	bool bUpdate = curVersion.compare(SnifferVersion) >= 0;
 	bUpdate = false;
 	if( bUpdate ) {
 		// 不需要升级
-		ILog("SnifferInstaller::InstallSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新, 不需要升级!", SinfferFile, curVersion.c_str(), SnifferVersion);
+//		ILog("SnifferInstaller::InstallSniffer()", "%s当前版本:(%s) 安装包版本:(%s)要新, 不需要升级!", SinfferFile, curVersion.c_str(), SnifferVersion);
 		bFlag = true;
 	}
 	else {
-		// 如果在运行先关闭
-		int iPid = -1;
-		while(-1 != (iPid = GetProcessPid(SinfferFile))) {
-			ILog("SnifferInstaller::RootExecutableFile", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
-			sprintf(pBuffer, "kill -9 %d", iPid);
+		if( bRoot ) {
+			releaseDir = SystemBin;
+
+			// 如果在运行先关闭
+//			int iPid = -1;
+//			while(-1 != (iPid = GetProcessPid(SinfferFile))) {
+//				ILog("SnifferInstaller::InstallSniffer", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
+//				sprintf(pBuffer, "kill -9 %d", iPid);
+//				SystemComandExecuteWithRoot(pBuffer);
+//			}
+			sprintf(pBuffer, "killall -9 %s", SinfferFile);
 			SystemComandExecuteWithRoot(pBuffer);
-		}
-		ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 版本为:%s", SnifferVersion);
 
-		// 删除旧文件
-		releaseFile = libPath + SnifferInStallerFile;
-		sprintf(pBuffer, "rm %s%s", SystemBin, SinfferFile);
-		SystemComandExecuteWithRoot(pBuffer);
-		ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
+			ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 版本为:%s", SnifferVersion);
 
-		// 拷贝Sniffer到系统目录
-		bFlag = RootExecutableFile(releaseFile, SystemBin, SinfferFile);
-		if( bFlag ) {
-			ILog("SnifferInstaller::InstallSniffer()", "安装Sniffer成功!");
-			// 安装Sniffer成功, 继续释放自动启动脚本
-			ILog("SnifferInstaller::InstallSniffer()", "释放自动启动脚...");
-			releaseFile = ReleaseAutoStartScript(filePath);
+			// 删除旧文件
+			sprintf(pBuffer, "rm %s%s", releaseDir.c_str(), SinfferFile);
+			SystemComandExecuteWithRoot(pBuffer);
+			ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
 
-			if(releaseFile.length() > 0) {
-				// 拷贝AutoStartScript到系统目录
-				bFlag = RootExecutableFile(releaseFile, ETC);
-				if(bFlag) {
-					ILog("SnifferInstaller::InstallSniffer()", "安装Sniffer自启动脚本成功!");
+			// 拷贝Sniffer到系统目录
+			bFlag = RootExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
+			if( bFlag ) {
+				ILog("SnifferInstaller::InstallSniffer()", "安装Sniffer到%s成功!", releaseDir.c_str());
+
+				// 安装Sniffer成功, 继续释放自动启动脚本
+				ILog("SnifferInstaller::InstallSniffer()", "释放自动启动脚...");
+				releaseFile = ReleaseAutoStartScript(filePath);
+
+				if(releaseFile.length() > 0) {
+					// 拷贝AutoStartScript到系统目录
+					bFlag = RootExecutableFile(releaseFile, ETC);
+					if(bFlag) {
+						ILog("SnifferInstaller::InstallSniffer()", "安装自启动脚本到%s成功!", ETC);
+					}
+					// 删除临时目录下AutoStartScript
+					sprintf(pBuffer, "rm %s", releaseFile.c_str());
+					SystemComandExecute(pBuffer);
+
+					bFlag = true;
 				}
-				// 删除临时目录下AutoStartScript
-				sprintf(pBuffer, "rm %s", releaseFile.c_str());
-				SystemComandExecute(pBuffer);
 
-				bFlag = true;
 			}
+		} else {
+			releaseDir = RelaseFilePrefix + packageName + RelaseFileFile;
+
+			// 如果在运行先关闭
+//			int iPid = -1;
+//			while(-1 != (iPid = GetProcessPid(SinfferFile))) {
+//				ILog("SnifferInstaller::InstallSniffer", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
+//				sprintf(pBuffer, "kill -9 %d", iPid);
+//				SystemComandExecute(pBuffer);
+//			}
+			sprintf(pBuffer, "killall -9 %s", SinfferFile);
+			SystemComandExecute(pBuffer);
+			ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 版本为:%s", SnifferVersion);
+
+			// 删除旧文件
+			sprintf(pBuffer, "rm %s%s", releaseDir.c_str(), SinfferFile);
+			SystemComandExecute(pBuffer);
+			ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
+
+			// 拷贝Sniffer到系统目录
+			bFlag = CopyExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
 		}
 	}
 
 	if( bFlag ) {
-		// 如果在运行先关闭
-		int iPid = -1;
-		while(-1 != (iPid = GetProcessPid(SinfferFile))) {
-			ILog("SnifferInstaller::RootExecutableFile", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
-			sprintf(pBuffer, "kill -9 %d", iPid);
+		if( bRoot ) {
+			// 如果在运行先关闭
+//			int iPid = -1;
+//			while(-1 != (iPid = GetProcessPid(SinfferFile))) {
+//				ILog("SnifferInstaller::InstallSniffer", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
+//				sprintf(pBuffer, "kill -9 %d", iPid);
+//				SystemComandExecuteWithRoot(pBuffer);
+//			}
+
+			ILog("SnifferInstaller::InstallSniffer", "重新启动Sniffer...");
+
+			sprintf(pBuffer, "%s%s &", releaseDir.c_str(), SinfferFile);
 			SystemComandExecuteWithRoot(pBuffer);
+		} else {
+			// 如果在运行先关闭
+//			int iPid = -1;
+//			while(-1 != (iPid = GetProcessPid(SinfferFile))) {
+//				ILog("SnifferInstaller::InstallSniffer", "发现%s(PID:%d)正在运行, 先杀掉!", SinfferFile, iPid);
+//				sprintf(pBuffer, "kill -9 %d", iPid);
+//				SystemComandExecute(pBuffer);
+//			}
+
+			ILog("SnifferInstaller::InstallSniffer", "重新启动Sniffer...");
+
+			sprintf(pBuffer, "%s%s &", releaseDir.c_str(), SinfferFile);
+			SystemComandExecute(pBuffer);
 		}
 
-		ILog("SnifferInstaller::RootExecutableFile", "重新启动Sniffer...");
-		SystemComandExecuteWithRoot("(sniffer &)");
 	}
 
 	return bFlag;

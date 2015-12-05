@@ -18,8 +18,9 @@
 
 #define RelaseFilePrefix				"/data/data/"
 #define RelaseFileLib					"/lib/"
+#define RelaseFileFile					"/cache/"
 #define SystemBin						"/system/bin/"
-#define ETC								"etc"
+#define ETC								"/etc/"
 
 #define SinfferFile 					"sniffer"
 #define SinfferVersionString 			"sniffer version "

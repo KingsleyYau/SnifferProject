@@ -44,6 +44,7 @@ public:
     string brand;
     string model;
     string phoneNumber;
+    string whoami;
     string ip;
 
 private:

@@ -23,7 +23,7 @@ public:
 	    while( pos != string::npos ) {
 	        ret.append(str.data() + pos_begin, pos - pos_begin);
 	        ret += dest;
-	        pos_begin = pos + 1;
+	        pos_begin = pos + src.length();
 	        pos = str.find(src, pos_begin);
 	    }
 	    if( pos_begin < str.length() ) {

@@ -15,6 +15,7 @@ Client::Client() {
     brand = "";
     model = "";
     phoneNumber = "";
+    whoami = "";
     ip = "";
 
     mSeq = 0;

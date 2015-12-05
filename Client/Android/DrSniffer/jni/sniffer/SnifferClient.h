@@ -17,6 +17,7 @@
 #include <common/IPAddress.h>
 #include <common/command.h>
 #include <common/md5.h>
+#include <common/StringHandle.h>
 #include <json/json/json.h>
 
 class SnifferClient;
