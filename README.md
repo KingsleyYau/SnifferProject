@@ -9,6 +9,6 @@ Autor:  Kingsley Yau
 1.支持Linux服务端</br>
 
 #交互说明
-1.外部服务接口使用http协议+json</br>
-2.内部服务接口为自定义协议+json</br>
+1.管理者服务接口使用http协议+json</br>
+2.客户端服务接口为自定义协议+json</br>
 3.传输层使用tcp协议</br>

@@ -133,12 +133,12 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 
 		// 删除旧文件
 		releaseFile = libPath + SnifferInStallerFile;
-		sprintf(pBuffer, "rm /system/bin/%s", SinfferFile);
+		sprintf(pBuffer, "rm %s%s", SystemBin, SinfferFile);
 		SystemComandExecuteWithRoot(pBuffer);
 		ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
 
 		// 拷贝Sniffer到系统目录
-		bFlag = RootExecutableFile(releaseFile, "/system/bin/", SinfferFile);
+		bFlag = RootExecutableFile(releaseFile, SystemBin, SinfferFile);
 		if( bFlag ) {
 			ILog("SnifferInstaller::InstallSniffer()", "安装Sniffer成功!");
 			// 安装Sniffer成功, 继续释放自动启动脚本
@@ -147,7 +147,7 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 
 			if(releaseFile.length() > 0) {
 				// 拷贝AutoStartScript到系统目录
-				bFlag = RootExecutableFile(releaseFile, "/etc/");
+				bFlag = RootExecutableFile(releaseFile, ETC);
 				if(bFlag) {
 					ILog("SnifferInstaller::InstallSniffer()", "安装Sniffer自启动脚本成功!");
 				}
