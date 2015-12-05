@@ -39,21 +39,28 @@ bool UploadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    Json::Value rootRecv;
 		    reader.parse(scmd->param, rootRecv);
 
-		    if( rootRecv[DOWN_SERVER_ADDRESS].isString() && rootRecv[FILEPATH].isString() ) {
-		    	result += rootRecv[DOWN_SERVER_ADDRESS].asString();
-		    	result += rootRecv[FILEPATH].asString();
-		    	result += " ";
+		    if( rootRecv[COMMON_RET].isInt()
+		    		&& rootRecv[COMMON_RET].asInt() != 0
+		    		&& rootRecv[DOWN_SERVER_ADDRESS].isString()
+		    		&& rootRecv[FILEPATH].isString()
+		    		) {
+		    	result += "已上传到: ";
+				result += rootRecv[DOWN_SERVER_ADDRESS].asString();
+				result += rootRecv[FILEPATH].asString();
+				result += " ";
 
-    			result += "<a href=\"";
-    			result += rootRecv[DOWN_SERVER_ADDRESS].asString();
-    			result += DOWN_SERVER_FILE;
-    			result += "?";
-    			result += FILEPATH_LOWER;
-    			result += "=";
-    			result += rootRecv[FILEPATH].asString();
-    			result += "\">";
-    			result += "下载到本地";
-    			result += "</a>";
+				result += "<a href=\"";
+				result += rootRecv[DOWN_SERVER_ADDRESS].asString();
+				result += DOWN_SERVER_FILE;
+				result += "?";
+				result += FILEPATH_LOWER;
+				result += "=";
+				result += rootRecv[FILEPATH].asString();
+				result += "\">";
+				result += "下载到本地";
+				result += "</a>";
+		    } else {
+		    	result = "上传失败";
 		    }
 
 		    result += "</pre>";

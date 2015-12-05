@@ -1442,7 +1442,9 @@ int SnifferServer::DownloadClientFile(
 		task->SetUrl(url);
 
 		string file = filePath;
-		file += "/";
+		if( file.length() == 0 || file[file.length() -1] != '/' ) {
+			file += "/";
+		}
 		file += fileName;
 		task->SetFilePath(file);
 

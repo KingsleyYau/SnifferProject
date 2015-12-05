@@ -26,6 +26,7 @@ LOCAL_LDLIBS += -lz -lssl -lcrypto
 
 LOCAL_STATIC_LIBRARIES += common
 LOCAL_STATIC_LIBRARIES += json
+LOCAL_STATIC_LIBRARIES += crashhandler
 LOCAL_STATIC_LIBRARIES += httpclient
 
 LOCAL_CPPFLAGS  := -std=c++11

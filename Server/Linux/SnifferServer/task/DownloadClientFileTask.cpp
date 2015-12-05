@@ -11,7 +11,7 @@ DownloadClientFileTask::DownloadClientFileTask() {
 	// TODO Auto-generated constructor stub
 	mClientId = 0;
 	mUrl = "";
-	mFilePath = "/";
+	mFilePath = "";
 }
 
 DownloadClientFileTask::~DownloadClientFileTask() {
@@ -56,7 +56,7 @@ bool DownloadClientFileTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    result += bFlag?"下载成功":"下载失败";
 		    result += ",";
 
-		    result += "下载路径: ";
+		    result += "已下载到: ";
 		    if( rootRecv[FILEPATH].isString() ) {
 		    	result += rootRecv[FILEPATH].asString();
 		    }
@@ -95,9 +95,5 @@ void DownloadClientFileTask::SetUrl(const string& url) {
 }
 
 void DownloadClientFileTask::SetFilePath(const string& filePath) {
-	if( filePath.length() > 0 ) {
-		mFilePath = filePath;
-	} else {
-		mFilePath = "/";
-	}
+	mFilePath = filePath;
 }

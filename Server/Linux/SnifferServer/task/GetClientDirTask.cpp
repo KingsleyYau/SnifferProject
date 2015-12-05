@@ -59,7 +59,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			result += "URL:<input type=\"text\" name=\"";
 			result += URL;
 			result += "\"/>  ";
-			result += "filename:<input type=\"text\" name=\"";
+			result += "文件名:<input type=\"text\" name=\"";
 			result += FILENAME;
 			result += "\"/> ";
 			result += "<input type=\"hidden\" name=\"";
@@ -100,7 +100,10 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    			result += "&";
 			    			result += FILEPATH;
 			    			result += "=";
-			    			result += mDir + "/";
+			    			result += mDir;
+			    			if( mDir.length() == 0 || mDir[mDir.length() -1] != '/' ) {
+			    				result += "/";
+			    			}
 			    			result += dirItem[D_NAME].asString();
 			    			result += "\">";
 			    			result += "[上传]";
@@ -117,8 +120,11 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    			result += "&";
 			    			result += COMMAND;
 			    			result += "=";
-			    			result += "rm ";
-							result += mDir + "/";
+			    			result += "rm -r ";
+							result += mDir;
+			    			if( mDir.length() == 0 || mDir[mDir.length() -1] != '/' ) {
+			    				result += "/";
+			    			}
 							result += dirItem[D_NAME].asString();
 							result += "&";
 							result += "\">";

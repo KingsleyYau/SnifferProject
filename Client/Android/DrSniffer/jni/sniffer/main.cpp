@@ -8,6 +8,8 @@
 
 #include "SnifferMain.h"
 
+#include <crashhandler/CrashHandler.h>
+
 int main(int argc, char** argv) {
 	char stra[16] = {'\0'};
 	sprintf(stra, "%d", argc);
@@ -31,6 +33,9 @@ int main(int argc, char** argv) {
 
 	KLog::SetLogDirectory("/sdcard/sniffer/");
 	FileLog(SnifferLogFileName, "sniffer启动, 版本:%s", SnifferVersion);
+
+//	CrashHandler::GetInstance()->SetLogDirectory("/sdcard/sniffer/");
+	CrashHandler::GetInstance()->SetCrashLogDirectory("/sdcard/sniffer/");
 
 	SnifferMain sniffer;
 	if( sniffer.Run() ) {

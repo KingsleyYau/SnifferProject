@@ -25,7 +25,7 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
 	FileLog(
 			SnifferLogFileName,
 			"RequestUploadTask::HandleCallback( "
-			"url : %s,"
+			"url : %s, "
 			"requestRet : %s "
 			")",
 			url.c_str(),
