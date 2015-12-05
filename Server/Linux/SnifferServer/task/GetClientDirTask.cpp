@@ -72,11 +72,11 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			result += "\" value=\"";
 			result += mDir;
 			result += "\" />";
-			result += "<input type=\"submit\" value=\"上传\"/>";
+			result += "<input type=\"submit\" value=\"上传到此目录\"/>";
 			result += "</form>";
 			result += "\n";
 
-			char upload[512];
+			char line[512];
 			string item = "";
 
 		    Json::Reader reader;
@@ -138,13 +138,13 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    		}
 
 		    			snprintf(
-		    					upload, sizeof(upload) - 1,
+		    					line, sizeof(line) - 1,
 		    					"%7s "
 		    					"%10s bytes ",
 		    					dirItem[D_MODE].asString().c_str(),
 		    					dirItem[D_SIZE].asString().c_str()
 		    					);
-		    			result += upload;
+		    			result += line;
 
 			    		if( dirItem[D_TYPE] == DT_DIR || dirItem[D_TYPE] == DT_LNK ) {
 			    			// 进入

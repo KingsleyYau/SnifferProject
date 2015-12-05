@@ -1063,10 +1063,32 @@ int SnifferServer::GetClientList(
 		result += count;
 		result += " 个</b>\n";
 
+		char line[1024];
+		snprintf(
+				line, sizeof(line) - 1,
+				"[%8s]"
+				"[%32s]"
+				"[%15s]\n",
+				"ClientId",
+				"DeviceId",
+				"IP"
+				);
+		result += line;
 		for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
 			client = (Client*)itr->second;
 			char clientId[16];
 			sprintf(clientId, "%d", client->fd);
+
+			snprintf(
+					line, sizeof(line) - 1,
+					"[%8s]"
+					"[%32s]"
+					"[%15s] ",
+					clientId,
+					client->deviceId.c_str(),
+					client->ip.c_str()
+					);
+			result += line;
 
 			result += "<a href=\"";
 			result += GET_CLIENT_INFO;
@@ -1075,31 +1097,14 @@ int SnifferServer::GetClientList(
 			result += "=";
 			result += clientId;
 			result += "\">";
-
-			result += "[";
-			result += CLIENT_ID;
-			result += " : ";
-			result += clientId;
-			result += "]";
-			result += " ";
-
-			result += "[";
-			result += DEVICE_ID;
-			result += " : ";
-			result += client->deviceId;
-			result += "]";
-			result += " ";
-
-			result += "[";
-			result += "IP";
-			result += " : ";
-			result += client->ip;
-			result += "]";
+			result += "[查看]";
 			result += "</a>\n";
 
 		}
+
 		result += "</pre>";
 		result += "</body></html>";
+
 	}break;
 	case JSON:{
 		Json::FastWriter writer;
