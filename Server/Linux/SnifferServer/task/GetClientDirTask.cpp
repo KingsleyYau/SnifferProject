@@ -72,7 +72,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			result += "\" value=\"";
 			result += mDir;
 			result += "\" />";
-			result += "<input type=\"submit\" value=\"上传到此目录\"/>";
+			result += "<input type=\"submit\" value=\"下载到此目录\"/>";
 			result += "</form>";
 			result += "\n";
 
