@@ -10,13 +10,14 @@ Autor:  Kingsley Yau
 
 交互流程
 <pre>
-Client    				Linux Server	    		 Admin</br>
-      主动连接---></br>
-															<---调用API</br>
-			<---发送命令</br>
-			返回命令---></br>
-														  返回结果---></br>
+Client    				Linux Server	    		 Admin
+      主动连接--->
+															<---调用API
+			<---发送命令
+			返回命令--->
+														  返回结果--->
 </pre>
+
 2.支持的API</br>
 2.1.获取在线客户端列表</br>
 2.2.获取在线客户端详细信息</br>
