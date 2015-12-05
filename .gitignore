@@ -44,3 +44,5 @@ Client/Android/DrSniffer/libs/x86/libsniffer
 *.properties
 
 Client/Android/DrSnifferInstaller/project.properties
+
+*.properties

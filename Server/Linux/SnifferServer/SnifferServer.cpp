@@ -1185,17 +1185,17 @@ int SnifferServer::GetClientInfo(
 			result += client->deviceId;
 			result += "\n";
 
-			result += PHONE_INFO_BRAND;
+			result += "手机厂商";
 			result += " : ";
 			result += client->brand;
 			result += "\n";
 
-			result += PHONE_INFO_MODEL;
+			result += "手机型号";
 			result += " : ";
 			result += client->model;
 			result += "\n";
 
-			result += PHONE_INFO_NUMBER;
+			result += "手机号码";
 			result += " : ";
 			result += client->phoneNumber;
 			result += "\n\n";
