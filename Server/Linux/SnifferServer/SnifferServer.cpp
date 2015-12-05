@@ -291,7 +291,7 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 		int ret = -1;
 
 		if( &mClientTcpServer == ts ) {
-			// 外部服务请求
+			// 客户端服务请求
 			mCountMutex.lock();
 			mTotal++;
 			mCountMutex.unlock();
@@ -305,7 +305,7 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 				mCountMutex.unlock();
 			}
 		} else if( &mClientTcpInsideServer == ts ){
-			// 内部服务请求
+			// 管理者服务请求
 			ret = HandleInsideRecvMessage(m, sm);
 		}
 
@@ -992,6 +992,12 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 
 				ret = DownloadClientFile(pClientId, pUrl, pFilePath, pFileName, m, ptType);
 
+			} else if( strcasecmp(pPath.c_str(), KICK_CLIENT) == 0 ) {
+				// 踢掉客户端
+				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
+
+				ret = KickClient(result, pClientId, m, ptType);
+
 			} else if( strcasecmp(pPath.c_str(), RELOAD) == 0 ) {
 				// 重新加载配置
 				Json::FastWriter writer;
@@ -1098,6 +1104,16 @@ int SnifferServer::GetClientList(
 			result += clientId;
 			result += "\">";
 			result += "[查看]";
+			result += "</a> ";
+
+			result += "<a href=\"";
+			result += KICK_CLIENT;
+			result += "?";
+			result += CLIENT_ID;
+			result += "=";
+			result += clientId;
+			result += "\">";
+			result += "[踢掉]";
 			result += "</a>\n";
 
 		}
@@ -1214,7 +1230,7 @@ int SnifferServer::GetClientInfo(
 			result += "<form action=\"";
 			result += SET_CLIENT_CMD;
 			result += "\" method=\"GET\">";
-			result += "<input type=\"submit\" value=\"执行命令:\"/>";
+			result += "<input type=\"submit\" value=\"执行命令\"/>";
 			result += "<input type=\"text\" name=\"";
 			result += COMMAND;
 			result += "\"/>";
@@ -1463,6 +1479,70 @@ int SnifferServer::DownloadClientFile(
 		// 发送命令
 		if( SendRequestMsg2Client(m->fd, client, (ITask*)task) ) {
 			ret = 0;
+		}
+	}
+	mClientMap.Unlock();
+
+	return ret;
+}
+
+/**
+ * 踢掉客户端
+ */
+int SnifferServer::KickClient(
+		string& result,
+		const string& clientId,
+		Message *m,
+		PROTOCOLTYPE ptType
+		) {
+	int ret = -1;
+	LogManager::GetLogManager()->Log(
+			LOG_MSG,
+			"SnifferServer::KickClient( "
+			"tid : %d, "
+			"m->fd: [%d], "
+			"clientId : %s, "
+			"ptType : %d "
+			")",
+			(int)syscall(SYS_gettid),
+			m->fd,
+			clientId.c_str(),
+			ptType
+			);
+
+	int iClientId = atoi(clientId.c_str());
+
+	result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+	result += "<pre>";
+	result += "<b>踢掉客户端失败</b>\n";
+	result += "</pre>";
+	result += "</body></html>";
+
+	mClientMap.Lock();
+	ClientMap::iterator itr = mClientMap.Find(iClientId);
+	if( itr != mClientMap.End() ) {
+		Client *client = (Client*)itr->second;
+		mClientTcpServer.Disconnect(client->fd);
+		ret = 1;
+
+		switch( ptType ) {
+		case HTML:{
+			result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+			result += "<pre>";
+			result += "<b>踢掉客户端已成功</b>\n";
+			result += "</pre>";
+			result += "</body></html>";
+
+		}break;
+		case JSON:{
+			Json::FastWriter writer;
+			Json::Value rootSend;
+
+			rootSend[COMMON_RET] = ret;
+
+			result = writer.write(rootSend);
+
+		}break;
 		}
 	}
 	mClientMap.Unlock();

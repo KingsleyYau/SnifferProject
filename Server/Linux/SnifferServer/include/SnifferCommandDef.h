@@ -144,6 +144,11 @@ typedef enum ProtocolType {
 #define URL						"URL"
 #define FILENAME				"FILENAME"
 
+/**
+ * 踢掉客户端
+ */
+#define KICK_CLIENT				"/KICK_CLIENT"
+
 #pragma pack(pop)
 
 #endif /* SNIFFERCOMMANDDEF_H_ */

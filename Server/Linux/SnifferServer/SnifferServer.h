@@ -163,6 +163,16 @@ private:
 			PROTOCOLTYPE ptType = HTML
 			);
 
+	/**
+	 * 踢掉客户端
+	 */
+	int KickClient(
+			string& result,
+			const string& clientId,
+			Message *m,
+			PROTOCOLTYPE ptType = HTML
+			);
+
 	TcpServer mClientTcpServer;
 	TcpServer mClientTcpInsideServer;
 

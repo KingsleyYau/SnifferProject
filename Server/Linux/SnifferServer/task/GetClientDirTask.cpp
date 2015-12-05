@@ -219,7 +219,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 				result += temp;
 				result += "\">";
 				result += "[上一页]";
-				result += "</a>		";
+				result += "</a> ";
 	    	}
 
 		    if( rootRecv[COMMON_TOTAL].isInt() ) {
