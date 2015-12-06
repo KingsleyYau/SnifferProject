@@ -3,7 +3,7 @@
 Autor:  Kingsley Yau
 
 #客户端
-1.支持Android客户端, 必须root才能使用</br>
+1.支持Android客户端</br>
 
 #服务端
 1.支持Linux服务端</br>

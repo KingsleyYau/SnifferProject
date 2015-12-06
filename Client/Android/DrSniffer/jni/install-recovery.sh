@@ -1,2 +1,2 @@
 #!/system/bin/sh
-drsniffer &
+sniffer &

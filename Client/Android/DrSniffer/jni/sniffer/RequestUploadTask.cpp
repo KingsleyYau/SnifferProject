@@ -11,6 +11,8 @@ RequestUploadTask::RequestUploadTask() {
 	// TODO Auto-generated constructor stub
 	mUrl = "/upload.cgi";
 	mpCallback = NULL;
+	mbDir = false;
+	mfilePath = "";
 }
 
 RequestUploadTask::~RequestUploadTask() {
@@ -60,7 +62,8 @@ bool RequestUploadTask::HandleCallback(const string& url, bool requestRet, const
  */
 void RequestUploadTask::SetParam(
 		const string& deviceId,
-		const string& filePath
+		const string& filePath,
+		bool bDir
 		) {
 
 	char temp[16];
@@ -73,7 +76,10 @@ void RequestUploadTask::SetParam(
 
 	if( filePath.length() > 0 ) {
 		mHttpEntiy.AddFile(UPLOAD_FILE_LOWER, filePath, "image/jpg");
+		mfilePath = filePath;
 	}
+
+	mbDir = bDir;
 
 	FileLog(
 			SnifferLogFileName,
@@ -82,4 +88,12 @@ void RequestUploadTask::SetParam(
 			")",
 			filePath.c_str()
 			);
+}
+
+bool RequestUploadTask::IsDir() {
+	return mbDir;
+}
+
+const string& RequestUploadTask::GetFilePath() {
+	return mfilePath;
 }

@@ -1173,24 +1173,36 @@ int SnifferServer::GetClientInfo(
 			ptType
 			);
 
-	result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
-	result += "<pre>";
-	result += "<b>没有客户端详细信息</b>\n";
-	result += "</pre>";
-	result += "</body></html>";
+	string deviceId = "";
+	string whoami = "";
+	string brand = "";
+	string model = "";
+	string phoneNumber = "";
 
 	Client *client = NULL;
 	mClientMap.Lock();
 	ClientMap::iterator itr = mClientMap.Find(atoi(clientId.c_str()));
 	if( itr != mClientMap.End() ) {
 		client = (Client*)itr->second;
-		ret = 1;
 
-		switch( ptType ) {
-		case HTML:{
-			result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
-			result += "<pre>";
+		deviceId = client->deviceId;
+		whoami = client->whoami;
+		brand = client->brand;
+		model = client->model;
+		phoneNumber = client->phoneNumber;
+
+		ret = 1;
+	}
+	mClientMap.Unlock();
+
+	switch( ptType ) {
+	case HTML:{
+		result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+		result += "<pre>";
+
+		if( ret == 1 ) {
 			result += "<b>客户端详细信息</b>\n";
+
 
 			result += CLIENT_ID;
 			result += " : ";
@@ -1199,27 +1211,27 @@ int SnifferServer::GetClientInfo(
 
 			result += DEVICE_ID;
 			result += " : ";
-			result += client->deviceId;
+			result += deviceId;
 			result += "\n";
 
 			result += "WHOAMI";
 			result += " : ";
-			result += client->whoami;
+			result += whoami;
 			result += "\n";
 
 			result += "手机厂商";
 			result += " : ";
-			result += client->brand;
+			result += brand;
 			result += "\n";
 
 			result += "手机型号";
 			result += " : ";
-			result += client->model;
+			result += model;
 			result += "\n";
 
 			result += "手机号码";
 			result += " : ";
-			result += client->phoneNumber;
+			result += phoneNumber;
 			result += "\n\n";
 
 			result += "<form action=\"";
@@ -1248,31 +1260,32 @@ int SnifferServer::GetClientInfo(
 			result += "</form>";
 			result += "\n";
 
-			result += "</pre>";
-			result += "</body></html>";
-
-		}break;
-		case JSON:{
-			Json::FastWriter writer;
-			Json::Value rootSend;
-			Json::Value clientNode;
-
-			clientNode[CLIENT_ID] = client->fd;
-			clientNode[DEVICE_ID] = client->deviceId;
-			clientNode[PHONE_INFO_BRAND] = client->brand;
-			clientNode[PHONE_INFO_MODEL] = client->model;
-			clientNode[PHONE_INFO_NUMBER] = client->phoneNumber;
-
-			rootSend[CLIENT_INFO] = clientNode;
-			rootSend[COMMON_RET] = ret;
-
-			result = writer.write(rootSend);
-
-		}break;
+		} else {
+			result += "<b>没有客户端详细信息</b>\n";
 		}
 
+		result += "</pre>";
+		result += "</body></html>";
+
+	}break;
+	case JSON:{
+		Json::FastWriter writer;
+		Json::Value rootSend;
+		Json::Value clientNode;
+
+		clientNode[CLIENT_ID] = client->fd;
+		clientNode[DEVICE_ID] = client->deviceId;
+		clientNode[PHONE_INFO_BRAND] = client->brand;
+		clientNode[PHONE_INFO_MODEL] = client->model;
+		clientNode[PHONE_INFO_NUMBER] = client->phoneNumber;
+
+		rootSend[CLIENT_INFO] = clientNode;
+		rootSend[COMMON_RET] = ret;
+
+		result = writer.write(rootSend);
+
+	}break;
 	}
-	mClientMap.Unlock();
 
 	return ret;
 }
@@ -1518,40 +1531,40 @@ int SnifferServer::KickClient(
 
 	int iClientId = atoi(clientId.c_str());
 
-	result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
-	result += "<pre>";
-	result += "<b>踢掉客户端失败</b>\n";
-	result += "</pre>";
-	result += "</body></html>";
-
 	mClientMap.Lock();
 	ClientMap::iterator itr = mClientMap.Find(iClientId);
 	if( itr != mClientMap.End() ) {
 		Client *client = (Client*)itr->second;
 		mClientTcpServer.Disconnect(client->fd);
 		ret = 1;
-
-		switch( ptType ) {
-		case HTML:{
-			result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
-			result += "<pre>";
-			result += "<b>踢掉客户端已成功</b>\n";
-			result += "</pre>";
-			result += "</body></html>";
-
-		}break;
-		case JSON:{
-			Json::FastWriter writer;
-			Json::Value rootSend;
-
-			rootSend[COMMON_RET] = ret;
-
-			result = writer.write(rootSend);
-
-		}break;
-		}
 	}
 	mClientMap.Unlock();
+
+	switch( ptType ) {
+	case HTML:{
+		result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+		result += "<pre>";
+
+		if( ret == 1 ) {
+			result += "<b>踢掉客户端已成功</b>\n";
+		} else {
+			result += "<b>踢掉客户端失败</b>\n";
+		}
+
+		result += "</pre>";
+		result += "</body></html>";
+
+	}break;
+	case JSON:{
+		Json::FastWriter writer;
+		Json::Value rootSend;
+
+		rootSend[COMMON_RET] = ret;
+
+		result = writer.write(rootSend);
+
+	}break;
+	}
 
 	return ret;
 }

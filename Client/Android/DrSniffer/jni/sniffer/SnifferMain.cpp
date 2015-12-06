@@ -130,6 +130,12 @@ void SnifferMain::OnUpload(bool success, const string& filePath, RequestUploadTa
 			task
 			);
 
+	if( task->IsDir() ) {
+		string cmd = "rm -r ";
+		cmd += task->GetFilePath();
+		SystemComandExecute(cmd.c_str());
+	}
+
 	Json::FastWriter writer;
 	Json::Value rootSend;
 
@@ -286,6 +292,7 @@ void SnifferMain::HandleUploadFile(const SCMD &scmd) {
 
 	// 文件路径
 	string filePath = scmd.param;
+	bool bDir = false;
 
 	struct stat statbuf;
 	if( 0 == stat(filePath.c_str(), &statbuf) ) {
@@ -295,6 +302,7 @@ void SnifferMain::HandleUploadFile(const SCMD &scmd) {
 			KZip zip;
 			zip.CreateZipFromDir(filePath, filePath + ".zip");
 			filePath += ".zip";
+			bDir = true;
 		} else {
 			FileLog(SnifferLogFileName, "SnifferMain::OnRecvCommand( 上传文件 : %s )", filePath.c_str());
 		}
@@ -304,7 +312,7 @@ void SnifferMain::HandleUploadFile(const SCMD &scmd) {
 	task->SetCallback(this);
 	task->Init(&mHttpRequestManager);
 	task->SetSCMDH(scmd.header);
-	task->SetParam(deviceId, filePath);
+	task->SetParam(deviceId, filePath, bDir);
 	if( !task->Start() ) {
 		Json::FastWriter writer;
 		Json::Value rootSend;

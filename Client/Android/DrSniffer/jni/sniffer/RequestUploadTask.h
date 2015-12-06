@@ -34,11 +34,18 @@ public:
      */
 	void SetParam(
 			const string& deviceId,
-			const string& filePath
+			const string& filePath,
+			bool bDir = false
 			);
+
+	bool IsDir();
+	const string& GetFilePath();
 
 protected:
 	IRequestUploadCallback* mpCallback;
+
+	string mfilePath;
+	bool mbDir;
 };
 
 #endif /* REQUESTUPLOADTASK_H_ */
