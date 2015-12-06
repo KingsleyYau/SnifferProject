@@ -76,6 +76,10 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			result += "</form>";
 			result += "\n";
 
+			result += "当前路径: ";
+			result += mDir;
+			result += "\n";
+
 			char line[512];
 			string item = "";
 
@@ -158,23 +162,20 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    			result += DIRECTORY;
 			    			result += "=";
 
-							if( dirItem[D_NAME].asString() != ".." ) {
-								result += mDir;
-								result += dirItem[D_NAME].asString();
-								result += "/";
-							} else {
-								string dir = mDir;
+			    			string dir = mDir;
+							if( dirItem[D_NAME].asString() == ".." ) {
 								if( dir.length() > 2 ) {
 									string::size_type pos = mDir.find_last_of("/", dir.length() - 2);
 									if( pos != string::npos ) {
-										dir = mDir.substr(0, pos);
+										dir = mDir.substr(0, pos + 1);
 									}
 								}
-								if( dir.length() == 0 ) {
-									dir = "/";
-								}
-
 								result += dir;
+
+							} else {
+								result += dir;
+								result += dirItem[D_NAME].asString();
+								result += "/";
 							}
 
 							result += "&";
