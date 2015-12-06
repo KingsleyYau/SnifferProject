@@ -251,7 +251,7 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 
 		mClientMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnAccept( "
+		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[客户端下线] "
