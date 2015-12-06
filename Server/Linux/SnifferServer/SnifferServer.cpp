@@ -826,6 +826,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 		        reader.parse(scmd->param, rootRecv);
 
 		        client->deviceId = rootRecv[DEVICE_ID].asString();
+		        client->version = rootRecv[VERSION].asString();
 		        client->brand = rootRecv[PHONE_INFO_BRAND].asString();
 		        client->model = rootRecv[PHONE_INFO_MODEL].asString();
 		        client->phoneNumber = rootRecv[PHONE_INFO_NUMBER].asString();
@@ -1174,6 +1175,7 @@ int SnifferServer::GetClientInfo(
 			);
 
 	string deviceId = "";
+	string version = "";
 	string whoami = "";
 	string brand = "";
 	string model = "";
@@ -1186,6 +1188,7 @@ int SnifferServer::GetClientInfo(
 		client = (Client*)itr->second;
 
 		deviceId = client->deviceId;
+		version = client->version;
 		whoami = client->whoami;
 		brand = client->brand;
 		model = client->model;
@@ -1203,6 +1206,10 @@ int SnifferServer::GetClientInfo(
 		if( ret == 1 ) {
 			result += "<b>客户端详细信息</b>\n";
 
+			result += VERSION;
+			result += " : ";
+			result += version;
+			result += "\n";
 
 			result += CLIENT_ID;
 			result += " : ";

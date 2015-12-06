@@ -118,6 +118,7 @@ void SnifferClient::HandleSnifferClientRunnable() {
 
 			root.clear();
 			root[DEVICE_ID] = deviceId;
+			root[VERSION] = SnifferVersion;
 			root[PHONE_INFO_BRAND] = GetPhoneBrand();
 			root[PHONE_INFO_MODEL] = GetPhoneModel();
 			root[PHONE_INFO_NUMBER] = "";

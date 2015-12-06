@@ -41,6 +41,7 @@ public:
 
 	int fd;
 	string deviceId;
+	string version;
     string brand;
     string model;
     string phoneNumber;
