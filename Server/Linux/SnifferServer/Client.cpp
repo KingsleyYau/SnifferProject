@@ -17,6 +17,7 @@ Client::Client() {
     phoneNumber = "";
     whoami = "";
     ip = "";
+    miPacketSeq = -1;
 
     mSeq = 0;
 	mBuffer.Reset();
@@ -31,8 +32,26 @@ void Client::SetClientCallback(ClientCallback* pClientCallback) {
 	mpClientCallback = pClientCallback;
 }
 
-int Client::ParseData(char* buffer, int len)  {
+int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
 	int ret = 0;
+
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"Client::ParseData( "
+			"tid : %d, "
+			"miPacketSeq : %d, "
+			"iPacketSeq : %d "
+			")",
+			(int)syscall(SYS_gettid),
+			miPacketSeq,
+			iPacketSeq
+			);
+
+	while( miPacketSeq != iPacketSeq -1 ) {
+		mPacketSeqCond.lock();
+		mPacketSeqCond.wait();
+		mPacketSeqCond.unlock();
+	}
 
 	mKMutex.lock();
 
@@ -139,7 +158,13 @@ int Client::ParseData(char* buffer, int len)  {
 			ret
 			);
 
+	miPacketSeq++;
+
 	mKMutex.unlock();
+
+	mPacketSeqCond.lock();
+	mPacketSeqCond.broadcast();
+	mPacketSeqCond.unlock();
 
 	return ret;
 }

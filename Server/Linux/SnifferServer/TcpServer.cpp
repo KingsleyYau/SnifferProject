@@ -371,6 +371,10 @@ TcpServer::TcpServer() {
 	mpMainRunnable = new MainRunnable(this);
 	mpSendRunnable = new SendRunnable(this);
 
+	mpHandlingMessageCount = NULL;
+	mpCloseRecv = NULL;
+	mpPacketSeq = NULL;
+
 }
 
 TcpServer::~TcpServer() {
@@ -435,6 +439,7 @@ bool TcpServer::Start(int maxConnection, int port, int maxThreadHandle) {
 
 	mpCloseRecv = new bool[2 * maxConnection];
 	mpHandlingMessageCount = new int[2 * maxConnection];
+	mpPacketSeq = new int[2 * maxConnection];
 
 	/* create watchers */
 	for(int i = 0 ; i < 2 * maxConnection; i++) {
@@ -519,6 +524,10 @@ bool TcpServer::Stop() {
 		delete mpHandlingMessageCount;
 	}
 
+	if( mpPacketSeq != NULL ) {
+		delete mpPacketSeq;
+	}
+
 	Message *m;
 
 	/* release send message */
@@ -599,6 +608,10 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 	mpCloseRecv[client] = false;
 	mpHandlingMessageCount[client] = 0;
 	mCloseMutex.unlock();
+
+	mpPacketSeqMutex.lock();
+	mpPacketSeq[client] = 0;
+	mpPacketSeqMutex.unlock();
 
 	int iFlag = 1;
 	setsockopt(client, IPPROTO_TCP, TCP_NODELAY, &iFlag, sizeof(iFlag));
@@ -765,6 +778,11 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 				mCloseMutex.lock();
 				mpHandlingMessageCount[fd]++;
 				mCloseMutex.unlock();
+
+				mpPacketSeqMutex.lock();
+				m->seq = mpPacketSeq[fd]++;
+				mpPacketSeqMutex.unlock();
+
 				GetHandleMessageList()->PushBack(m);
 			}
 

@@ -9,11 +9,11 @@
 #define CLIENT_H_
 
 #include "SnifferCommandDef.h"
-#include "DataParser.h"
 #include "LogManager.h"
 
 #include <common/Arithmetic.hpp>
 #include <common/Buffer.h>
+#include <common/KCond.h>
 
 #include <string>
 using namespace std;
@@ -25,7 +25,7 @@ public:
 	virtual void OnParseCmd(Client* client, SCMD* scmd) = 0;
 };
 
-class Client : public DataParser {
+class Client {
 public:
 	Client();
 	virtual ~Client();
@@ -35,7 +35,7 @@ public:
 	/**
 	 * 解析数据
 	 */
-	int ParseData(char* buffer, int len);
+	int ParseData(char* buffer, int len, int iPacketSeq);
 
 	int AddSeq();
 
@@ -52,6 +52,9 @@ private:
     int mSeq;
     KMutex mKMutex;
     ClientCallback* mpClientCallback;
+
+    int miPacketSeq;
+    KCond mPacketSeqCond;
 };
 
 #endif /* CLIENT_H_ */

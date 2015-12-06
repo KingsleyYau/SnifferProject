@@ -27,6 +27,7 @@ typedef struct Message {
 	int		fd;
 	int 	len;
 	int		index;
+	int		seq;
 	unsigned int 	starttime;
 	unsigned int	totaltime;
 	int		type;
@@ -37,6 +38,7 @@ typedef struct Message {
 
 	void Reset() {
 		len = 0;
+		seq = 0;
 		starttime = 0;
 		totaltime = 0;
 		memset(buffer, '\0', sizeof(buffer));

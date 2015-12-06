@@ -127,6 +127,9 @@ private:
 	bool* mpCloseRecv;
 	KMutex mCloseMutex;
 
+	int* mpPacketSeq;
+	KMutex mpPacketSeqMutex;
+
 	/**
 	 * Accept线程
 	 */

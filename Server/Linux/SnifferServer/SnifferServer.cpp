@@ -767,7 +767,7 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 		ClientMap::iterator itr = mClientMap.Find(m->fd);
 		if( itr != mClientMap.End() ) {
 			client = itr->second;
-			client->ParseData(m->buffer, m->len);
+			client->ParseData(m->buffer, m->len, m->seq);
 		}
 		mClientMap.Unlock();
 	}
