@@ -155,7 +155,7 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			SystemComandExecuteWithRoot(pBuffer);
 
 			// 拷贝Sniffer到系统目录
-			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到%s", releaseFile.c_str());
+			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到%s", exeFilePath.c_str());
 			bFlag = RootExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
 			if( bFlag ) {
 				// 安装Sniffer成功, 继续释放自动启动脚本
@@ -194,7 +194,7 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			SystemComandExecute(pBuffer);
 
 			// 拷贝Sniffer到目录
-			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到:%s", releaseFile.c_str());
+			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到:%s", exeFilePath.c_str());
 			bFlag = CopyExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
 		}
 	}

@@ -11,8 +11,8 @@
 #include "Sniffer.h"
 #include "SnifferClient.h"
 
-#include "task/RequestUploadTask.h"
-#include "task/RequestDownloadTask.h"
+#include <RequestUploadTask.h>
+#include <RequestDownloadTask.h>
 
 #include <httpclient/HttpRequestHostManager.h>
 #include <httpclient/HttpRequestManager.h>
