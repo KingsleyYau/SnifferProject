@@ -95,9 +95,6 @@ void SnifferClient::HandleSnifferClientRunnable() {
 				GetMD5String(info.mac.c_str(), deviceId);
 			}
 
-			string whoami = SystemComandExecuteWithResult("whoami");
-			whoami = StringHandle::replace(whoami, "\n", "");
-
 			// 连接上服务端, 发送手机型号/手机号
 			FileLog(
 					SnifferLogFileName,
@@ -106,14 +103,12 @@ void SnifferClient::HandleSnifferClientRunnable() {
 					"DeviceId : %s, "
 					"厂商 : %s, "
 					"型号 : %s, "
-					"手机号 : %s, "
-					"whoami : %s "
+					"手机号 : %s "
 					")",
 					deviceId,
 					GetPhoneBrand().c_str(),
 					GetPhoneModel().c_str(),
-					"",
-					whoami.c_str()
+					""
 					);
 
 			root.clear();

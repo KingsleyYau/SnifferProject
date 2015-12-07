@@ -12,7 +12,7 @@ public class SnifferApplication extends Application  {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-        Log.d("sniffer", "Application.onCreate");
+        Log.d("sniffer", "SnifferApplication::onCreate");
         
         final String packageName = this.getPackageName(); 
         
