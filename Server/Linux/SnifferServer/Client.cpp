@@ -15,7 +15,7 @@ Client::Client() {
     brand = "";
     model = "";
     phoneNumber = "";
-    whoami = "";
+    isRoot = false;
     ip = "";
     miPacketSeq = -1;
 

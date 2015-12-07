@@ -45,8 +45,8 @@ public:
     string brand;
     string model;
     string phoneNumber;
-    string whoami;
     string ip;
+    bool isRoot;
 
 private:
     Buffer mBuffer;
