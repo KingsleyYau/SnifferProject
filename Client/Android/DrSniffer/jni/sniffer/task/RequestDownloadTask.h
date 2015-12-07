@@ -35,7 +35,7 @@ public:
 			const string& filePath
 			);
 
-	// Implement from ITask
+	// Implement from BaseTask
 	bool Start();
 	void Stop();
 	bool IsFinishOK();

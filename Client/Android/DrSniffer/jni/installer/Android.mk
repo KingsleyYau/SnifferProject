@@ -15,9 +15,9 @@ LOCAL_MODULE := snifferinstall
 
 LOCAL_MODULE_FILENAME := libsnifferinstall
 
-LOCAL_C_INCLUDES := $(LIBRARY_PATH)
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../include
+LOCAL_C_INCLUDES += $(LIBRARY_PATH)
 LOCAL_C_INCLUDES += $(LIBRARY_THIRDY_PARTY_PATH)
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/../sniffer
 
 LOCAL_CFLAGS = -fpermissive -Wno-write-strings
 

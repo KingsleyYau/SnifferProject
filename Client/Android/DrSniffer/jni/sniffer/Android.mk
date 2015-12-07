@@ -7,14 +7,15 @@
 #
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
+include $(call all-makefiles-under, $(LOCAL_PATH))
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := sniffer
 
 LOCAL_MODULE_FILENAME := libsniffer
 
-LOCAL_C_INCLUDES := $(LIBRARY_PATH)
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../include
+LOCAL_C_INCLUDES += $(LIBRARY_PATH)
 LOCAL_C_INCLUDES += $(LIBRARY_THIRDY_PARTY_PATH)
 LOCAL_C_INCLUDES += $(LIBRARY_THIRDY_PARTY_PATH)/curl/include
 
@@ -28,6 +29,7 @@ LOCAL_STATIC_LIBRARIES += common
 LOCAL_STATIC_LIBRARIES += json
 LOCAL_STATIC_LIBRARIES += crashhandler
 LOCAL_STATIC_LIBRARIES += httpclient
+LOCAL_STATIC_LIBRARIES += task
 
 LOCAL_CPPFLAGS  := -std=c++11
 LOCAL_CPPFLAGS	+= -fpermissive

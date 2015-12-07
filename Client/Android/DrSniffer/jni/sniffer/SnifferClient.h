@@ -9,8 +9,8 @@
 #ifndef SNIFFERCLIENT_H_
 #define SNIFFERCLIENT_H_
 
-#include "SnifferCommandDef.h"
-#include "SinfferExecuteDef.h"
+#include <SnifferCommandDef.h>
+#include <SinfferExecuteDef.h>
 
 #include <common/KTcpSocket.h>
 #include <common/KThread.h>

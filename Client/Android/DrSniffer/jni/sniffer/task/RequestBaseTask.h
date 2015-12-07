@@ -8,7 +8,7 @@
 #ifndef REQUESTBASETASK_H_
 #define REQUESTBASETASK_H_
 
-#include "RequestDefine.h"
+#include "../RequestDefine.h"
 #include "BaseTask.h"
 
 #include <map>
