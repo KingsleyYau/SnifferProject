@@ -9,8 +9,8 @@
 #define BASETASK_H_
 
 #include "ITask.h"
-#include <SnifferCommandDef.h>
-#include <SinfferExecuteDef.h>
+#include <../../include/SnifferCommandDef.h>
+#include <../../include/SinfferExecuteDef.h>
 
 #include <common/KLog.h>
 
