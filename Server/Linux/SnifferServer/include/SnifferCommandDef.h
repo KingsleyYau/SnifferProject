@@ -106,7 +106,7 @@ typedef enum ProtocolType {
 #define PHONE_INFO_BRAND 		"PHONE_INFO_BRAND"
 #define PHONE_INFO_MODEL 		"PHONE_INFO_MODEL"
 #define PHONE_INFO_NUMBER 		"PHONE_INFO_NUMBER"
-#define PHONE_INFO_WHOAMI 		"PHONE_INFO_WHOAMI"
+#define IS_ROOT 				"IS_ROOT"
 
 /**
  * 执行客户端命令

@@ -122,7 +122,8 @@ void SnifferClient::HandleSnifferClientRunnable() {
 			root[PHONE_INFO_BRAND] = GetPhoneBrand();
 			root[PHONE_INFO_MODEL] = GetPhoneModel();
 			root[PHONE_INFO_NUMBER] = "";
-			root[PHONE_INFO_WHOAMI] = whoami;
+			root[IS_ROOT] = IsRoot();
+
 			param = writer.write(root);
 
 			bzero(&scmd, sizeof(SCMD));

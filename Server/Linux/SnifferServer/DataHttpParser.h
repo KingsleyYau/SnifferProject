@@ -12,6 +12,7 @@
 #include "MessageList.h"
 
 #include <common/Arithmetic.hpp>
+#include <common/KMutex.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +43,9 @@ public:
 	const string& GetPath();
 	HttpType GetType();
 
+	void SetSendMaxSeq(int seq);
+	bool IsFinishSeq(int seq);
+
 	void Reset();
 
 private:
@@ -50,9 +54,8 @@ private:
 	Parameters mParameters;
 	string mPath;
 
-	char mHeaderBuffer[MAXLEN + 1];
-	int mHeaderIndex;
-	bool mbReceiveHeaderFinish;
+	int miSendMaxSeq;
+	KMutex mSeqMutex;
 
 	bool ParseFirstLine(char* buffer);
 	void ParseParameters(char* buffer);

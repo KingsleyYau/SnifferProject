@@ -25,10 +25,7 @@ JNIEXPORT jboolean JNICALL Java_org_kk_sniffer_SnifferJni_IsRoot
   (JNIEnv *, jobject) {
 	jboolean jbFlag = false;
 
-	string version = GetSnifferVersion();
-	if(version.length() > 0) {
-		jbFlag = true;
-	}
+	jbFlag = IsRoot();
 
 	return jbFlag;
 }

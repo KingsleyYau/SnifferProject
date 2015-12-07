@@ -18,16 +18,15 @@ DataHttpParser::~DataHttpParser() {
 
 void DataHttpParser::Reset() {
 	miContentLength = -1;
-	mHeaderIndex = 0;
-	mbReceiveHeaderFinish = false;
 	mHttpType = UNKNOW;
+	miSendMaxSeq = -1;
+	mPath = "";
+	mParameters.clear();
 }
 
 int DataHttpParser::ParseData(char* buffer, int len) {
-	char temp[16] = {'\0'};
 	int result = 0;
 	int j = 0;
-	char* pParam = NULL;
 
 	// parse header
 	char *pFirst = NULL;
@@ -207,4 +206,22 @@ void DataHttpParser::ParseParameters(char* buffer) {
 //		}
 		param = strtok_r(NULL, "&", &pFirst);
 	}
+}
+
+void DataHttpParser::SetSendMaxSeq(int seq) {
+	mSeqMutex.lock();
+	miSendMaxSeq = seq;
+	mSeqMutex.unlock();
+}
+
+bool DataHttpParser::IsFinishSeq(int seq) {
+	bool bFlag = false;
+
+	mSeqMutex.lock();
+	if( miSendMaxSeq == seq ) {
+		bFlag = true;
+	}
+	mSeqMutex.unlock();
+
+	return bFlag;
 }

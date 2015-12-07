@@ -373,7 +373,8 @@ TcpServer::TcpServer() {
 
 	mpHandlingMessageCount = NULL;
 	mpCloseRecv = NULL;
-	mpPacketSeq = NULL;
+	mpPacketSeqRecv = NULL;
+	mpPacketSeqSend = NULL;
 
 }
 
@@ -439,7 +440,8 @@ bool TcpServer::Start(int maxConnection, int port, int maxThreadHandle) {
 
 	mpCloseRecv = new bool[2 * maxConnection];
 	mpHandlingMessageCount = new int[2 * maxConnection];
-	mpPacketSeq = new int[2 * maxConnection];
+	mpPacketSeqRecv = new int[2 * maxConnection];
+	mpPacketSeqSend = new int[2 * maxConnection];
 
 	/* create watchers */
 	for(int i = 0 ; i < 2 * maxConnection; i++) {
@@ -524,8 +526,12 @@ bool TcpServer::Stop() {
 		delete mpHandlingMessageCount;
 	}
 
-	if( mpPacketSeq != NULL ) {
-		delete mpPacketSeq;
+	if( mpPacketSeqRecv != NULL ) {
+		delete mpPacketSeqRecv;
+	}
+
+	if( mpPacketSeqSend != NULL ) {
+		delete mpPacketSeqSend;
 	}
 
 	Message *m;
@@ -609,9 +615,13 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 	mpHandlingMessageCount[client] = 0;
 	mCloseMutex.unlock();
 
-	mpPacketSeqMutex.lock();
-	mpPacketSeq[client] = 0;
-	mpPacketSeqMutex.unlock();
+	mpPacketSeqRecvMutex.lock();
+	mpPacketSeqRecv[client] = 0;
+	mpPacketSeqRecvMutex.unlock();
+
+	mpPacketSeqSendMutex.lock();
+	mpPacketSeqSend[client] = 0;
+	mpPacketSeqSendMutex.unlock();
 
 	int iFlag = 1;
 	setsockopt(client, IPPROTO_TCP, TCP_NODELAY, &iFlag, sizeof(iFlag));
@@ -779,9 +789,9 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 				mpHandlingMessageCount[fd]++;
 				mCloseMutex.unlock();
 
-				mpPacketSeqMutex.lock();
-				m->seq = mpPacketSeq[fd]++;
-				mpPacketSeqMutex.unlock();
+				mpPacketSeqRecvMutex.lock();
+				m->seq = mpPacketSeqRecv[fd]++;
+				mpPacketSeqRecvMutex.unlock();
 
 				GetHandleMessageList()->PushBack(m);
 			}
@@ -889,6 +899,10 @@ void TcpServer::SendMessageByQueue(Message *m) {
 	mCloseMutex.lock();
 	mpHandlingMessageCount[m->fd]++;
 	mCloseMutex.unlock();
+
+	mpPacketSeqSendMutex.lock();
+	m->seq = mpPacketSeqSend[m->fd]++;
+	mpPacketSeqSendMutex.unlock();
 
 	GetSendImmediatelyMessageList()->PushBack(m);
 

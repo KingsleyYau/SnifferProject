@@ -222,6 +222,15 @@ bool SnifferServer::OnAccept(TcpServer *ts, int fd, char* ip) {
 				(int)syscall(SYS_gettid),
 				fd
 				);
+	} else if( ts == &mClientTcpInsideServer ) {
+		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnAccept( "
+				"tid : %d, "
+				"fd : [%d], "
+				"[管理者请求开始] "
+				")",
+				(int)syscall(SYS_gettid),
+				fd
+				);
 	}
 
 	return true;
@@ -263,6 +272,26 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 	} else if( ts == &mClientTcpInsideServer ) {
 		// 关闭会话
 		CloseSessionByRequest(fd);
+
+		mDataHttpParserMap.Lock();
+		DataHttpParserMap::iterator itr = mDataHttpParserMap.Erase(fd);
+		if( itr != mDataHttpParserMap.End() ) {
+			DataHttpParser* pDataHttpParser = itr->second;
+			if( pDataHttpParser != NULL ) {
+				delete pDataHttpParser;
+			}
+		}
+		mDataHttpParserMap.Unlock();
+
+		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+				"tid : %d, "
+				"fd : [%d], "
+				"[管理者请求结束] "
+				")",
+				(int)syscall(SYS_gettid),
+				fd
+				);
+
 	}
 
 	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
@@ -284,53 +313,15 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 			(int)syscall(SYS_gettid),
 			m->fd
 			);
-	Message *sm = ts->GetIdleMessageList()->PopFront();
-	if( sm != NULL ) {
-		sm->fd = m->fd;
-		sm->wr = m->wr;
-		int ret = -1;
 
-		if( &mClientTcpServer == ts ) {
-			// 客户端服务请求
-			mCountMutex.lock();
-			mTotal++;
-			mCountMutex.unlock();
-			ret = HandleRecvMessage(m, sm);
-			if( 0 != ret ) {
-				mCountMutex.lock();
-				mResponed += sm->totaltime;
-				if( ret == 1 ) {
-					mHit++;
-				}
-				mCountMutex.unlock();
-			}
-		} else if( &mClientTcpInsideServer == ts ){
-			// 管理者服务请求
-			ret = HandleInsideRecvMessage(m, sm);
-		}
-
-		if( ret != 0 ) {
-			// Process finish, send respond
-			ts->SendMessageByQueue(sm);
-		} else {
-			// receive continue
-			ts->GetIdleMessageList()->PushBack(sm);
-		}
-
-	} else {
-		LogManager::GetLogManager()->Log(
-				LOG_WARNING,
-				"SnifferServer::OnRecvMessage( "
-				"tid : %d, "
-				"m->fd : [%d], "
-				"No idle message can be use "
-				")",
-				(int)syscall(SYS_gettid),
-				m->fd
-				);
-		// 断开连接
-		ts->Disconnect(m->fd);
+	if( &mClientTcpServer == ts ) {
+		// 客户端服务请求
+		HandleRecvMessage(ts, m);
+	} else if( &mClientTcpInsideServer == ts ){
+		// 管理者服务请求
+		HandleInsideRecvMessage(ts, m);
 	}
+
 	LogManager::GetLogManager()->Log(
 			LOG_STAT,
 			"SnifferServer::OnRecvMessage( "
@@ -344,43 +335,73 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 }
 
 void SnifferServer::OnSendMessage(TcpServer *ts, Message *m) {
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnSendMessage( tid : %d, m->fd : [%d], start )", (int)syscall(SYS_gettid), m->fd);
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"SnifferServer::OnSendMessage( "
+			"tid : %d, "
+			"m->fd : [%d], "
+			"start "
+			")",
+			(int)syscall(SYS_gettid),
+			m->fd
+			);
+
 	if( ts == &mClientTcpInsideServer ) {
-		ts->Disconnect(m->fd);
+		mDataHttpParserMap.Lock();
+		DataHttpParserMap::iterator itr = mDataHttpParserMap.Find(m->fd);
+		if( itr != mDataHttpParserMap.End() ) {
+			DataHttpParser* pDataHttpParser = itr->second;
+			if( pDataHttpParser->IsFinishSeq(m->seq) ) {
+				LogManager::GetLogManager()->Log(
+						LOG_STAT,
+						"SnifferServer::OnSendMessage( "
+						"tid : %d, "
+						"m->fd : [%d], "
+						"[管理者请求回复完成], "
+						"end )",
+						(int)syscall(SYS_gettid),
+						m->fd
+						);
+
+				ts->Disconnect(m->fd);
+			}
+		}
+		mDataHttpParserMap.Unlock();
 	}
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnSendMessage( tid : %d, m->fd : [%d], end )", (int)syscall(SYS_gettid), m->fd);
+
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"SnifferServer::OnSendMessage( "
+			"tid : %d, "
+			"m->fd : [%d], "
+			"end )",
+			(int)syscall(SYS_gettid),
+			m->fd
+			);
 }
 
 void SnifferServer::OnTimeoutMessage(TcpServer *ts, Message *m) {
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnTimeoutMessage( tid : %d, m->fd : [%d], start )", (int)syscall(SYS_gettid), m->fd);
-	Message *sm = ts->GetIdleMessageList()->PopFront();
-	if( sm != NULL ) {
-		sm->fd = m->fd;
-		sm->wr = m->wr;
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"SnifferServer::OnTimeoutMessage( "
+			"tid : %d, "
+			"m->fd : [%d], "
+			"start )",
+			(int)syscall(SYS_gettid),
+			m->fd
+			);
 
-		mCountMutex.lock();
-		mTotal++;
-		mResponed += sm->totaltime;
-		mCountMutex.unlock();
+	HandleTimeoutMessage(ts, m);
 
-		HandleTimeoutMessage(m, sm);
-		// Process finish, send respond
-		ts->SendMessageByQueue(sm);
-	} else {
-		LogManager::GetLogManager()->Log(
-				LOG_WARNING,
-				"SnifferServer::OnTimeoutMessage( "
-				"tid : %d, "
-				"m->fd : [%d], "
-				"No idle message can be use "
-				")",
-				(int)syscall(SYS_gettid),
-				m->fd
-				);
-		// 断开连接
-		ts->Disconnect(m->fd);
-	}
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnTimeoutMessage( tid : %d, m->fd : [%d], end )", (int)syscall(SYS_gettid), m->fd);
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"SnifferServer::OnTimeoutMessage( "
+			"tid : %d, "
+			"m->fd : [%d], "
+			"end )",
+			(int)syscall(SYS_gettid),
+			m->fd
+			);
 }
 
 void SnifferServer::StateRunnableHandle() {
@@ -399,65 +420,9 @@ void SnifferServer::StateRunnableHandle() {
 	while( IsRunning() ) {
 		if ( iCount < iStateTime ) {
 			iCount++;
+
 		} else {
 			iCount = 0;
-			iSecondTotal = 0;
-			iSecondHit = 0;
-			iResponed = 0;
-
-			mCountMutex.lock();
-			iTotal = mTotal;
-			iHit = mHit;
-
-			if( iStateTime != 0 ) {
-				iSecondTotal = 1.0 * iTotal / iStateTime;
-				iSecondHit = 1.0 * iHit / iStateTime;
-			}
-			if( iTotal != 0 ) {
-				iResponed = 1.0 * mResponed / iTotal;
-			}
-
-			mHit = 0;
-			mTotal = 0;
-			mResponed = 0;
-			mCountMutex.unlock();
-
-			LogManager::GetLogManager()->Log(
-					LOG_WARNING,
-					"SnifferServer::StateRunnable( "
-					"tid : %d, "
-					"iTotal : %u, "
-					"iHit : %u, "
-					"iSecondTotal : %.1lf, "
-					"iSecondHit : %.1lf, "
-					"iResponed : %.1lf, "
-					"iStateTime : %u "
-					")",
-					(int)syscall(SYS_gettid),
-					iTotal,
-					iHit,
-					iSecondTotal,
-					iSecondHit,
-					iResponed,
-					iStateTime
-					);
-			LogManager::GetLogManager()->Log(LOG_WARNING,
-					"SnifferServer::StateRunnable( "
-					"tid : %d, "
-					"过去%u秒共收到%u个请求, "
-					"成功处理%u个请求, "
-					"平均收到%.1lf个/秒, "
-					"平均处理%.1lf个/秒, "
-					"平均响应时间%.1lf毫秒/个"
-					")",
-					(int)syscall(SYS_gettid),
-					iStateTime,
-					iTotal,
-					iHit,
-					iSecondTotal,
-					iSecondHit,
-					iResponed
-					);
 
 			iStateTime = miStateTime;
 		}
@@ -757,7 +722,18 @@ bool SnifferServer::CloseSessionByClient(Client* client) {
 	return bFlag;
 }
 
-int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
+int SnifferServer::HandleRecvMessage(TcpServer *ts, Message *m) {
+	LogManager::GetLogManager()->Log(
+			LOG_MSG,
+			"SnifferServer::HandleRecvMessage( "
+			"tid : %d, "
+			"m->fd: [%d], "
+			"start "
+			")",
+			(int)syscall(SYS_gettid),
+			m->fd
+			);
+
 	int ret = 0;
 
 	if( m->buffer != NULL ) {
@@ -772,19 +748,15 @@ int SnifferServer::HandleRecvMessage(Message *m, Message *sm) {
 		mClientMap.Unlock();
 	}
 
-	sm->totaltime = GetTickCount() - m->starttime;
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"SnifferServer::HandleRecvMessage( "
 			"tid : %d, "
 			"m->fd: [%d], "
-			"iTotaltime : %u ms, "
-			"ret : %d "
+			"end "
 			")",
 			(int)syscall(SYS_gettid),
-			m->fd,
-			sm->totaltime,
-			ret
+			m->fd
 			);
 
 	return ret;
@@ -830,7 +802,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 		        client->brand = rootRecv[PHONE_INFO_BRAND].asString();
 		        client->model = rootRecv[PHONE_INFO_MODEL].asString();
 		        client->phoneNumber = rootRecv[PHONE_INFO_NUMBER].asString();
-		        client->whoami = rootRecv[PHONE_INFO_WHOAMI].asString();
+		        client->isRoot = rootRecv[IS_ROOT].asBool();
 
 				LogManager::GetLogManager()->Log(
 						LOG_MSG,
@@ -876,62 +848,89 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 			);
 }
 
-int SnifferServer::HandleTimeoutMessage(Message *m, Message *sm) {
-	int ret = -1;
-
-	Json::FastWriter writer;
-	Json::Value rootSend, womanListNode, womanNode;
-
-	if( m == NULL ) {
-		return ret;
-	}
-
-	sm->totaltime = GetTickCount() - m->starttime;
+int SnifferServer::HandleTimeoutMessage(TcpServer *ts, Message *m) {
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"SnifferServer::HandleTimeoutMessage( "
 			"tid : %d, "
 			"m->fd: [%d], "
-			"iTotaltime : %u ms "
 			")",
 			(int)syscall(SYS_gettid),
-			m->fd,
-			sm->totaltime
+			m->fd
 			);
 
-	string param = writer.write(rootSend);
+	int ret = -1;
 
-	snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 200 ok\r\nContext-Length:%d\r\n\r\n%s",
-			(int)param.length(), param.c_str());
-	sm->len = strlen(sm->buffer);
+	Message *sm = ts->GetIdleMessageList()->PopFront();
+	if( sm != NULL ) {
+		sm->fd = m->fd;
+		sm->wr = m->wr;
+
+		Json::FastWriter writer;
+		Json::Value rootSend, womanListNode, womanNode;
+
+		sm->totaltime = GetTickCount() - m->starttime;
+
+		string param = writer.write(rootSend);
+
+		snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 200 ok\r\nContext-Length:%d\r\n\r\n%s",
+				(int)param.length(), param.c_str());
+		sm->len = strlen(sm->buffer);
+
+		ts->SendMessageByQueue(sm);
+
+	} else {
+		LogManager::GetLogManager()->Log(
+				LOG_WARNING,
+				"SnifferServer::HandleTimeoutMessage( "
+				"tid : %d, "
+				"m->fd : [%d], "
+				"No idle message can be use "
+				")",
+				(int)syscall(SYS_gettid),
+				m->fd
+				);
+
+		// 断开连接
+		ts->Disconnect(m->fd);
+	}
 
 	return ret;
 }
 
-int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
+int SnifferServer::HandleInsideRecvMessage(TcpServer *ts, Message *m) {
 	int ret = -1;
+
 	int code = 200;
 	char reason[16] = {"OK"};
 	string result = "";
 
-	if( m == NULL ) {
-		return ret;
-	}
+	DataHttpParser* pDataHttpParser;
 
-	DataHttpParser dataHttpParser;
+	mDataHttpParserMap.Lock();
+	DataHttpParserMap::iterator itr = mDataHttpParserMap.Find(m->fd);
+	if( itr == mDataHttpParserMap.End() ) {
+		pDataHttpParser = new DataHttpParser();
+		mDataHttpParserMap.Insert(m->fd, pDataHttpParser);
+	} else {
+		pDataHttpParser = itr->second;
+	}
+	mDataHttpParserMap.Unlock();
+
+	pDataHttpParser->Reset();
 	if ( DiffGetTickCount(m->starttime, GetTickCount()) < miTimeout * 1000 ) {
 		if( m->buffer != NULL ) {
-			ret = dataHttpParser.ParseData(m->buffer, m->len);
+			ret = pDataHttpParser->ParseData(m->buffer, m->len);
 		}
 	}
 
 	if( ret == 1 ) {
 		ret = -1;
-		const string pPath = dataHttpParser.GetPath();
-		HttpType type = dataHttpParser.GetType();
+		const string pPath = pDataHttpParser->GetPath();
+		HttpType type = pDataHttpParser->GetType();
 
 		PROTOCOLTYPE ptType = HTML;
-		const string pCommonType = dataHttpParser.GetParam(COMMON_PROTOCOL_TYPE);
+		const string pCommonType = pDataHttpParser->GetParam(COMMON_PROTOCOL_TYPE);
 		if( pCommonType.length() > 0 ) {
 			if( strcasecmp(pCommonType.c_str(), COMMON_PROTOCOL_TYPE_JSON) == 0 ) {
 				ptType = JSON;
@@ -961,42 +960,42 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 
 			} else if( strcasecmp(pPath.c_str(), GET_CLIENT_INFO) == 0 ) {
 				// 获取在线客户端详细信息
-				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
 				ret = GetClientInfo(result, pClientId, m, ptType);
 
 			} else if( strcasecmp(pPath.c_str(), SET_CLIENT_CMD) == 0 ) {
 				// 执行客户端命令
-				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
-				const string pCommand = dataHttpParser.GetParam(COMMAND);
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
+				const string pCommand = pDataHttpParser->GetParam(COMMAND);
 				ret = SetClientCmd(pClientId, pCommand, m, ptType);
 
 			} else if( strcasecmp(pPath.c_str(), GET_CLIENT_DIR) == 0 ) {
 				// 获取客户端目录
-				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
-				const string pDirecory = dataHttpParser.GetParam(DIRECTORY);
-				const string pPageIndex = dataHttpParser.GetParam(COMMON_PAGE_INDEX);
-				const string pPageSize = dataHttpParser.GetParam(COMMON_PAGE_SIZE);
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
+				const string pDirecory = pDataHttpParser->GetParam(DIRECTORY);
+				const string pPageIndex = pDataHttpParser->GetParam(COMMON_PAGE_INDEX);
+				const string pPageSize = pDataHttpParser->GetParam(COMMON_PAGE_SIZE);
 				ret = GetClientDir(pClientId, pDirecory, pPageIndex, pPageSize, m, ptType);
 
 			} else if( strcasecmp(pPath.c_str(), UPLOAD_CLIENT_FILE) == 0 ) {
 				// 上传客户端文件
-				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
-				const string pFilePath = dataHttpParser.GetParam(FILEPATH);
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
+				const string pFilePath = pDataHttpParser->GetParam(FILEPATH);
 
 				ret = UploadClientFile(pClientId, pFilePath, m, ptType);
 
 			} else if( strcasecmp(pPath.c_str(), DOWNLOAD_CLIENT_FILE) == 0 ) {
 				// 下载文件到客户端
-				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
-				const string pUrl = dataHttpParser.GetParam(URL);
-				const string pFilePath = dataHttpParser.GetParam(FILEPATH);
-				const string pFileName = dataHttpParser.GetParam(FILENAME);
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
+				const string pUrl = pDataHttpParser->GetParam(URL);
+				const string pFilePath = pDataHttpParser->GetParam(FILEPATH);
+				const string pFileName = pDataHttpParser->GetParam(FILENAME);
 
 				ret = DownloadClientFile(pClientId, pUrl, pFilePath, pFileName, m, ptType);
 
 			} else if( strcasecmp(pPath.c_str(), KICK_CLIENT) == 0 ) {
 				// 踢掉客户端
-				const string pClientId = dataHttpParser.GetParam(CLIENT_ID);
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
 
 				ret = KickClient(result, pClientId, m, ptType);
 
@@ -1026,13 +1025,80 @@ int SnifferServer::HandleInsideRecvMessage(Message *m, Message *sm) {
 
 	}
 
-	snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n%s",
-			code,
-			reason,
-			(int)result.length(),
-			result.c_str()
-			);
-	sm->len = strlen(sm->buffer);
+	if( ret != 0 ) {
+		// Process finish, send respond
+		// send http header
+		Message *sm = ts->GetIdleMessageList()->PopFront();
+		if( sm != NULL ) {
+			sm->fd = m->fd;
+			sm->wr = m->wr;
+
+			snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n",
+					code,
+					reason,
+					(int)result.length()
+					);
+			sm->len = strlen(sm->buffer);
+
+			ts->SendMessageByQueue(sm);
+			pDataHttpParser->SetSendMaxSeq(sm->seq);
+
+		} else {
+			LogManager::GetLogManager()->Log(
+					LOG_WARNING,
+					"SnifferServer::HandleInsideRecvMessage( "
+					"tid : %d, "
+					"m->fd : [%d], "
+					"Send header, no idle message can be use "
+					")",
+					(int)syscall(SYS_gettid),
+					m->fd
+					);
+
+			// 断开连接
+			ts->Disconnect(m->fd);
+
+			return -1;
+		}
+
+		// send http body
+		int iSendBodyLen = 0;
+		while( iSendBodyLen < (int)result.length() ) {
+			Message *sm = ts->GetIdleMessageList()->PopFront();
+			if( sm != NULL ) {
+				sm->fd = m->fd;
+				sm->wr = m->wr;
+
+				snprintf(sm->buffer, MAXLEN - 1, "%s", result.c_str() + iSendBodyLen);
+				sm->len = strlen(sm->buffer);
+
+				iSendBodyLen += sm->len;
+
+				ts->SendMessageByQueue(sm);
+				pDataHttpParser->SetSendMaxSeq(sm->seq);
+
+			} else {
+				LogManager::GetLogManager()->Log(
+						LOG_WARNING,
+						"SnifferServer::HandleInsideRecvMessage( "
+						"tid : %d, "
+						"m->fd : [%d], "
+						"Send http body, no idle message can be use "
+						")",
+						(int)syscall(SYS_gettid),
+						m->fd
+						);
+
+				// 断开连接
+				ts->Disconnect(m->fd);
+
+				return -1;
+			}
+		}
+
+	} else {
+		// receive continue
+	}
 
 	return ret;
 }
@@ -1076,10 +1142,12 @@ int SnifferServer::GetClientList(
 				line, sizeof(line) - 1,
 				"[%8s]"
 				"[%32s]"
-				"[%15s]\n",
+				"[%15s]"
+				"[%8s]\n",
 				"ClientId",
 				"DeviceId",
-				"IP"
+				"IP",
+				"VERSION"
 				);
 		result += line;
 		for( ClientMap::iterator itr = mClientMap.Begin(); itr != mClientMap.End(); itr++ ) {
@@ -1091,10 +1159,12 @@ int SnifferServer::GetClientList(
 					line, sizeof(line) - 1,
 					"[%8s]"
 					"[%32s]"
-					"[%15s] ",
+					"[%15s]"
+					"[%8s] ",
 					clientId,
 					client->deviceId.c_str(),
-					client->ip.c_str()
+					client->ip.c_str(),
+					client->version.c_str()
 					);
 			result += line;
 
@@ -1175,8 +1245,9 @@ int SnifferServer::GetClientInfo(
 			);
 
 	string deviceId = "";
+	string ip = "";
 	string version = "";
-	string whoami = "";
+	bool isRoot = false;
 	string brand = "";
 	string model = "";
 	string phoneNumber = "";
@@ -1188,8 +1259,9 @@ int SnifferServer::GetClientInfo(
 		client = (Client*)itr->second;
 
 		deviceId = client->deviceId;
+		ip = client->ip;
 		version = client->version;
-		whoami = client->whoami;
+		isRoot = client->isRoot;
 		brand = client->brand;
 		model = client->model;
 		phoneNumber = client->phoneNumber;
@@ -1206,40 +1278,64 @@ int SnifferServer::GetClientInfo(
 		if( ret == 1 ) {
 			result += "<b>客户端详细信息</b>\n";
 
-			result += VERSION;
-			result += " : ";
-			result += version;
+			char line[1024];
+			snprintf(line, sizeof(line) - 1,
+					"%-10s : %s\n",
+					CLIENT_ID,
+					clientId.c_str()
+					);
+			result += line;
+
+			snprintf(line, sizeof(line) - 1,
+					"%-10s : %s\n",
+					DEVICE_ID,
+					deviceId.c_str()
+					);
+			result += line;
+
+			snprintf(line, sizeof(line) - 1,
+					"%-10s : %s\n",
+					"IP",
+					ip.c_str()
+					);
+			result += line;
+
+			snprintf(line, sizeof(line) - 1,
+					"%-10s : %s\n",
+					IS_ROOT,
+					isRoot?"true":"false"
+					);
+			result += line;
+
+			snprintf(line, sizeof(line) - 1,
+					"%-10s : %s\n",
+					VERSION,
+					version.c_str()
+					);
+			result += line;
 			result += "\n";
 
-			result += CLIENT_ID;
-			result += " : ";
-			result += clientId;
-			result += "\n";
+			snprintf(line, sizeof(line) - 1,
+					"%-15s : %s\n",
+					"手机厂商",
+					brand.c_str()
+					);
+			result += line;
 
-			result += DEVICE_ID;
-			result += " : ";
-			result += deviceId;
-			result += "\n";
+			snprintf(line, sizeof(line) - 1,
+					"%-15s : %s\n",
+					"手机型号",
+					model.c_str()
+					);
+			result += line;
 
-			result += "WHOAMI";
-			result += " : ";
-			result += whoami;
+			snprintf(line, sizeof(line) - 1,
+					"%-15s : %s\n",
+					"手机号码",
+					phoneNumber.c_str()
+					);
+			result += line;
 			result += "\n";
-
-			result += "手机厂商";
-			result += " : ";
-			result += brand;
-			result += "\n";
-
-			result += "手机型号";
-			result += " : ";
-			result += model;
-			result += "\n";
-
-			result += "手机号码";
-			result += " : ";
-			result += phoneNumber;
-			result += "\n\n";
 
 			result += "<form action=\"";
 			result += GET_CLIENT_DIR;

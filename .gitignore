@@ -39,3 +39,4 @@ proguard/
 
 Client/Android/DrSniffer/libs/x86/libsniffer
 Client/Android/DrSniffer/libs/armeabi-v7a/libsniffer
+Client/Android/DrSniffer/project.properties

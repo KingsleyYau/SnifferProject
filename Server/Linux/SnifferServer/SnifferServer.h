@@ -26,6 +26,7 @@
 using namespace std;
 
 typedef KSafeMap<int, Client*> ClientMap;
+typedef KSafeMap<int, DataHttpParser*> DataHttpParserMap;
 
 // 外/内部服务交互会话
 typedef KSafeMap<int, Session*> Client2RequestMap;
@@ -61,9 +62,9 @@ private:
 	 *	请求解析函数
 	 *	return : -1:Send fail respond / 0:Continue recv, send no respond / 1:Send OK respond
 	 */
-	int HandleRecvMessage(Message *m, Message *sm);
-	int HandleTimeoutMessage(Message *m, Message *sm);
-	int HandleInsideRecvMessage(Message *m, Message *sm);
+	int HandleRecvMessage(TcpServer *ts, Message *m);
+	int HandleTimeoutMessage(TcpServer *ts, Message *m);
+	int HandleInsideRecvMessage(TcpServer *ts, Message *m);
 
 	/**
 	 * 外部服务发起交互请求
@@ -224,6 +225,11 @@ private:
 	 * 监听线程输出间隔
 	 */
 	unsigned int miStateTime;
+
+	/**
+	 * 管理者http解析器
+	 */
+	DataHttpParserMap mDataHttpParserMap;
 
 	/*
 	 * 在线客户端

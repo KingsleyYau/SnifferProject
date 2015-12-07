@@ -12,30 +12,33 @@
 #include "SinfferExecuteDef.h"
 
 #include <common/KLog.h>
-
-/**
- * 检查是否root
- */
-static inline bool IsRoot() {
-	bool bFlag = false;
-
-	string result = "";
-	result = SystemComandExecuteWithRootWithResult("whoami");
-	string::size_type pos;
-	pos = result.find("root");
-	if( pos != string::npos ) {
-		bFlag = true;
-	}
-
-	ILog("SnifferInstaller::IsRoot()",
-			"bFlag : %s, "
-			"result : %s",
-			bFlag?"true":"false",
-			result.c_str()
-			);
-
-	return bFlag;
-}
+//
+///**
+// * 检查是否root
+// */
+//static inline bool IsRoot() {
+//	bool bFlag = false;
+//
+//	string result = "";
+//	result = SystemComandExecuteWithRootWithResult("mkdir -p /data/data/testroot");
+////	string::size_type pos;
+////	pos = result.find("root");
+////	if( pos != string::npos ) {
+////		bFlag = true;
+////	}
+//	if( result.length() == 0 ) {
+//		bFlag = true;
+//	}
+//
+//	ILog("SnifferInstaller::IsRoot()",
+//			"bFlag : %s, "
+//			"result : %s",
+//			bFlag?"true":"false",
+//			result.c_str()
+//			);
+//
+//	return bFlag;
+//}
 
 /*
  * 查看Sniffer版本
