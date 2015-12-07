@@ -24,6 +24,7 @@ class SnifferClient;
 class SnifferClientCallback {
 public:
 	virtual ~SnifferClientCallback(){};
+	virtual void OnConnected(SnifferClient* client) = 0;
 	virtual void OnRecvCommand(SnifferClient* client, const SCMD &scmd) = 0;
 };
 class SnifferClientRunnable;

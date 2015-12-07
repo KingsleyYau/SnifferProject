@@ -27,6 +27,10 @@ SnifferMain::~SnifferMain() {
 	// TODO Auto-generated destructor stub
 }
 
+void SnifferMain::OnConnected(SnifferClient* client) {
+
+}
+
 void SnifferMain::OnRecvCommand(SnifferClient* client, const SCMD &scmd) {
 	switch(scmd.header.scmdt) {
 	case ExcuteCommand:{

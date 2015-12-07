@@ -31,6 +31,7 @@ public:
 	/**
 	 * Implement from SnifferClientCallback
 	 */
+	void OnConnected(SnifferClient* client);
 	void OnRecvCommand(SnifferClient* client, const SCMD &scmd);
 
 	bool Run();

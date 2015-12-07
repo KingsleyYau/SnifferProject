@@ -26,6 +26,7 @@ typedef enum SnifferCommandType {
 	SnifferListDir,
 	SnifferUploadFile,
 	SnifferDownloadFile,
+	SnifferCheckUpdate,
 } SCMDT;
 
 /*
@@ -73,17 +74,33 @@ typedef enum ProtocolType {
 	JSON,
 } PROTOCOLTYPE;
 
-/*
- * Json协议定义
+/**
+ * 所有服务公共定义
  */
 
+#define COMMON_PROTOCOL_TYPE			"TYPE"
+#define COMMON_PROTOCOL_TYPE_JSON		"JSON"
+#define URL								"URL"
+#define FILENAME						"FILENAME"
+#define FILEPATH						"FILEPATH"
+
+/*
+ * 客户端服务协议定义
+ */
 #define COMMON_RET						"RET"
 #define COMMON_TOTAL 					"TOTAL"
 #define COMMON_PAGE_INDEX 				"PAGEINDEX"
 #define COMMON_PAGE_SIZE 				"PAGESIZE"
-#define COMMON_PROTOCOL_TYPE			"TYPE"
-#define COMMON_PROTOCOL_TYPE_JSON		"JSON"
 
+/**
+ * 客户端检查更新
+ */
+#define CLIENT_UPDATE_URL				"URL"
+#define CLIENT_UPDATE_VERSION			"VERSION"
+
+/**
+ * 管理者服务器协议定义
+ */
 /**
  * 重新加载配置
  */
@@ -129,8 +146,10 @@ typedef enum ProtocolType {
  * 上传客户端文件到服务器
  */
 #define UPLOAD_CLIENT_FILE		"/UPLOAD_CLIENT_FILE"
-#define FILEPATH				"FILEPATH"
 
+/*
+ * 文件服务器协议
+ */
 #define FILEPATH_LOWER			"filepath"
 #define UPLOAD_FILE_LOWER		"upload_file"
 #define DEVICE_ID_LOWER			"device_id"
@@ -142,8 +161,6 @@ typedef enum ProtocolType {
  * 下载文件到客户端
  */
 #define DOWNLOAD_CLIENT_FILE	"/DOWNLOAD_CLIENT_FILE"
-#define URL						"URL"
-#define FILENAME				"FILENAME"
 
 /**
  * 踢掉客户端

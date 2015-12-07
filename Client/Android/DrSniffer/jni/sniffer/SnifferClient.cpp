@@ -87,6 +87,10 @@ void SnifferClient::HandleSnifferClientRunnable() {
 				);
 
 		if( ConnectServer() ) {
+			if( mpSnifferClientCallback != NULL ) {
+				mpSnifferClientCallback->OnConnected(this);
+			}
+
 			char deviceId[128] = {'\0'};
 			memset(deviceId, '\0', sizeof(deviceId));
 			list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
