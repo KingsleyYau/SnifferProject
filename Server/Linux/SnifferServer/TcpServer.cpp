@@ -631,6 +631,18 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 	int nZero = 0;
 	setsockopt(client, SOL_SOCKET, SO_SNDBUF, &nZero, sizeof(nZero));
 
+    /*deal with the tcp keepalive
+      iKeepAlive = 1 (check keepalive)
+      iKeepIdle = 600 (active keepalive after socket has idled for 10 minutes)
+      KeepInt = 60 (send keepalive every 1 minute after keepalive was actived)
+      iKeepCount = 3 (send keepalive 3 times before disconnect from peer)
+     */
+    int iKeepAlive = 1, iKeepIdle = 60, KeepInt = 20, iKeepCount = 3;
+    setsockopt(client, SOL_SOCKET, SO_KEEPALIVE, (void*)&iKeepAlive, sizeof(iKeepAlive));
+    setsockopt(client, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&iKeepIdle, sizeof(iKeepIdle));
+    setsockopt(client, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&KeepInt, sizeof(KeepInt));
+    setsockopt(client, IPPROTO_TCP, TCP_KEEPCNT, (void *)&iKeepCount, sizeof(iKeepCount));
+
 	char* ip = inet_ntoa(addr.sin_addr);
 
 //	Message *m = GetIdleMessageList()->PopFront();
