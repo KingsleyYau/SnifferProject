@@ -18,7 +18,7 @@
 
 #define RelaseFilePrefix				"/data/data/"
 #define RelaseFileLib					"/lib/"
-#define RelaseFileFile					"/cache/"
+#define RelaseFileFile					"/file/"
 #define SystemBin						"/system/bin/"
 #define ETC								"/etc/"
 

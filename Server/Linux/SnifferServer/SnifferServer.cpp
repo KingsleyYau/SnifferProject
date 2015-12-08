@@ -813,20 +813,6 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 						client->fd
 						);
 
-//				mDeviceIdMap.Lock();
-//				DeviceIdMap::iterator itr = mDeviceIdMap.Find(client->deviceId);
-//				if( itr == mDeviceIdMap.End() ) {
-//					// Insert
-//					mDeviceIdMap.Insert(client->deviceId, client);
-//
-//				} else {
-//					// Kick
-//					DeviceIdMap::iterator itr2 = mDeviceIdMap.Erase(client->deviceId);
-//					mClientTcpServer.Disconnect(tr2->second->fd);
-//
-//				}
-//				mDeviceIdMap.Unlock();
-
 			}break;
 			default:break;
 			}
@@ -1692,7 +1678,7 @@ int SnifferServer::UpdateClient(
 		string& result,
 		const string& clientId,
 		Message *m,
-		PROTOCOLTYPE ptType = HTML
+		PROTOCOLTYPE ptType
 		) {
 	int ret = -1;
 	LogManager::GetLogManager()->Log(
@@ -1708,6 +1694,8 @@ int SnifferServer::UpdateClient(
 			clientId.c_str(),
 			ptType
 			);
+
+	int iClientId = atoi(clientId.c_str());
 
 	mClientMap.Lock();
 	ClientMap::iterator itr = mClientMap.Find(iClientId);

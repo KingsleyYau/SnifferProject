@@ -27,7 +27,6 @@ using namespace std;
 
 typedef KSafeMap<int, Client*> ClientMap;
 typedef KSafeMap<int, DataHttpParser*> DataHttpParserMap;
-typedef KSafeMap<string, Client*> DeviceIdMap;
 
 // 外/内部服务交互会话
 typedef KSafeMap<int, Session*> Client2RequestMap;
@@ -250,11 +249,6 @@ private:
 	 * 在线客户端
 	 */
 	ClientMap mClientMap;
-
-	/**
-	 * 用DeviceId查找客户端
-	 */
-	DeviceIdMap mDeviceIdMap;
 
 	/*
 	 * 外/内部服务交互会话
