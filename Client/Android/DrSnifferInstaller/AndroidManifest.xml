@@ -21,7 +21,7 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-				<data android:host="MainActivity" android:scheme="org.kk.snifferinstaller" />
+				<data android:host="DefaultActivity" android:scheme="org.kk.snifferinstaller" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

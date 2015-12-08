@@ -32,7 +32,11 @@ public:
 	 * Implement from SnifferClientCallback
 	 */
 	void OnConnected(SnifferClient* client);
-	void OnRecvCommand(SnifferClient* client, const SCMD &scmd);
+	void OnDisConnected(SnifferClient* client);
+	void OnRecvCmdExcuteCommand(SnifferClient* client, int seq, const string& cmd);
+	void OnRecvCmdSnifferListDir(SnifferClient* client, int seq, const string& dir, int index, int size);
+	void OnRecvCmdSnifferUploadFile(SnifferClient* client, int seq, const string& filePath);
+	void OnRecvCmdSnifferDownloadFile(SnifferClient* client, int seq, const string& url, const string& filePath);
 
 	bool Run();
 
@@ -53,20 +57,9 @@ private:
 	void OnDownload(bool success, const string& filePath, RequestDownloadTask* task);
 
 	/**
-	 * 处理列目录
+	 * 获取文件类型
 	 */
-	void HandleGetClientDir(const SCMD &scmd);
 	string GetFileMode(const struct stat* statbuf);
-
-	/**
-	 * 处理上传文件
-	 */
-	void HandleUploadFile(const SCMD &scmd);
-
-	/**
-	 * 处理下载文件
-	 */
-	void HandleDownloadFile(const SCMD &scmd);
 
 	Sniffer mSniffer;
 	SnifferClient mSnifferClient;

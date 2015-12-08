@@ -26,35 +26,4 @@
         android:gravity="center"
         android:layout_centerVertical="true"/>
     
-    <LinearLayout android:id="@+id/skip"
-        android:layout_height="72dp"
-        android:layout_width="72dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp"
-        android:gravity="center"
-        android:clickable="true"
-        android:orientation="horizontal">
-        
-	    <TextView
-	        android:gravity="center"
-	        android:layout_height="wrap_content"
-	        android:layout_width="wrap_content"
-	        android:textSize="16sp"
-	        android:textStyle="bold"
-	        android:text=""/>
-	        
-	    <ImageView android:layout_height="wrap_content"
-	        android:layout_width="wrap_content"
-	        android:src="@drawable/ic_keyboard_arrow_right_white_18dp"
-	        android:layout_marginLeft="-4dp"
-	        android:layout_marginRight="-4dp"/>
-        
-    </LinearLayout>
-    
-    
-
-    
-    
-    
 </RelativeLayout>

@@ -13,10 +13,10 @@
 #include <signal.h>
 
 #include <string>
+#include <map>
 using namespace std;
 
 #include "SnifferServer.h"
-
 #define VERSION_STRING "Version : 1.0.0"
 
 string sConf = "";  // 配置文件
@@ -27,7 +27,6 @@ int main(int argc, char *argv[]) {
 	printf("############## Sniffer Server ############## \n");
 	printf("# %s \n", VERSION_STRING);
 	printf("# Build date : %s %s \n", __DATE__, __TIME__ );
-
 	srand(time(0));
 
 	/* Ignore SIGPIPE */

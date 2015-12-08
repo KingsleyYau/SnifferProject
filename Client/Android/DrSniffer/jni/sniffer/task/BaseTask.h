@@ -10,7 +10,7 @@
 
 #include "ITask.h"
 #include <SnifferCommandDef.h>
-#include <../../include/SinfferExecuteDef.h>
+#include <SinfferExecuteDef.h>
 
 #include <common/KLog.h>
 
@@ -32,15 +32,15 @@ public:
 
 	virtual void OnTaskFinish();
 
-	const SCMDH& GetSCMDH();
-	void SetSCMDH(const SCMDH& scmd);
+	int GetSeq();
+	void SetSeq(int seq);
 
 protected:
 	ITaskCallback* mpTaskCallback;
 
 	bool mbStop;
 
-	SCMDH mHeader;
+	int mSeq;
 };
 
 #endif /* BASETASK_H_ */

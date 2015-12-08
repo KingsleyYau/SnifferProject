@@ -71,8 +71,18 @@ void SnifferClient::Stop() {
 	mKThread.stop();
 }
 
-void SnifferClient::HandleSnifferClientRunnable() {
+bool SnifferClient::ConnectServer() {
+	bool bFlag = false;
 
+	int iRet = mTcpSocket.Connect(mServerAddress.c_str(), miServerPort, true);
+	if(iRet > 0) {
+		bFlag = true;
+	}
+
+	return bFlag;
+}
+
+void SnifferClient::HandleSnifferClientRunnable() {
 	Json::Value root;
 	Json::FastWriter writer;
 	string param;
@@ -142,12 +152,14 @@ void SnifferClient::HandleSnifferClientRunnable() {
 				SCMD scmd;
 				bCanRecv = RecvCommand(scmd);
 				if( bCanRecv ) {
-					if( mpSnifferClientCallback != NULL ) {
-						mpSnifferClientCallback->OnRecvCommand(this, scmd);
-					}
+					OnRecvCommand(scmd);
 				} else {
 					// 与服务端连接已经断开
 					FileLog(SnifferLogFileName, "SnifferClient::HandleSnifferClientRunnable( 与服务端连接已经断开 )");
+					if( mpSnifferClientCallback != NULL ) {
+						mpSnifferClientCallback->OnDisConnected(this);
+					}
+
 					break;
 				}
 			}
@@ -156,20 +168,6 @@ void SnifferClient::HandleSnifferClientRunnable() {
 	}
 }
 
-bool SnifferClient::ConnectServer() {
-	bool bFlag = false;
-
-	int iRet = mTcpSocket.Connect(mServerAddress.c_str(), miServerPort, true);
-	if(iRet > 0) {
-		bFlag = true;
-	}
-
-	return bFlag;
-}
-
-/*
- * 接收服务器命令
- */
 bool SnifferClient::RecvCommand(SCMD &scmd) {
 	bool bFlag = false;
 	bzero(&scmd, sizeof(SCMD));
@@ -217,9 +215,292 @@ bool SnifferClient::RecvCommand(SCMD &scmd) {
 	return bFlag;
 }
 
-/*
- * 发送命令到服务器
- */
+void SnifferClient::OnRecvCommand(const SCMD &scmd) {
+	switch(scmd.header.scmdt) {
+	case ExcuteCommand:{
+		// 执行Shell命令
+		HandleRecvCmdExcuteCommand(scmd);
+	}break;
+	case SnifferListDir:{
+		// 列目录
+		HandleRecvCmdSnifferListDir(scmd);
+
+	}break;
+	case SinfferTypeStart:{
+		// 开始监听
+
+	}break;
+	case SinfferTypeStop:{
+		// 停止监听
+
+	}break;
+	case SnifferUploadFile:{
+		// 上传文件
+		HandleRecvCmdSnifferUploadFile(scmd);
+
+	}break;
+	case SnifferDownloadFile:{
+		// 下载文件
+		HandleRecvCmdSnifferDownloadFile(scmd);
+
+	}break;
+	case SinfferTypeNone:{
+		// 与服务端连接已经断开
+
+	}break;
+	default:break;
+	}
+}
+
+void SnifferClient::HandleRecvCmdExcuteCommand(const SCMD &scmd) {
+	// 执行命令
+	string cmd = scmd.param;
+
+	FileLog(SnifferLogFileName, "SnifferClient::HandleRecvCmdExcuteCommand( "
+			"[收到命令:执行命令], "
+			"cmd : %s"
+			" )",
+			cmd.c_str()
+			);
+
+	if( mpSnifferClientCallback != NULL ) {
+		mpSnifferClientCallback->OnRecvCmdExcuteCommand(this, scmd.header.seq, cmd);
+	}
+}
+
+void SnifferClient::HandleRecvCmdSnifferListDir(const SCMD &scmd) {
+	// 列目录
+	Json::FastWriter writer;
+	Json::Value rootSend;
+	string result;
+
+    Json::Reader reader;
+    Json::Value rootRecv;
+    reader.parse(scmd.param, rootRecv);
+
+    int index = 0;
+    if( rootRecv[COMMON_PAGE_INDEX].isInt() ) {
+    	index = rootRecv[COMMON_PAGE_INDEX].asInt();
+    }
+
+    int size = 0;
+    if( rootRecv[COMMON_PAGE_SIZE].isInt() ) {
+    	size = rootRecv[COMMON_PAGE_SIZE].asInt();
+    }
+
+    string dir = "";
+    if( rootRecv[DIRECTORY].isString() ) {
+    	dir = rootRecv[DIRECTORY].asString();
+    }
+
+	FileLog(SnifferLogFileName, "SnifferClient::HandleRecvCmdSnifferListDir( "
+			"[收到命令:列目录], "
+			"dir : %s, "
+			"index : %d, "
+			"size : %d"
+			" )",
+			dir.c_str(),
+			index,
+			size
+			);
+
+	if( mpSnifferClientCallback != NULL ) {
+		mpSnifferClientCallback->OnRecvCmdSnifferListDir(this, scmd.header.seq, dir, index, size);
+	}
+}
+
+void SnifferClient::HandleRecvCmdSnifferUploadFile(const SCMD &scmd) {
+	// 上传文件到服务器
+	string filePath = scmd.param;
+
+	FileLog(SnifferLogFileName, "SnifferClient::HandleRecvCmdSnifferUploadFile( "
+			"[收到命令:上传文件到服务器], "
+			"filePath : %s"
+			" )",
+			filePath.c_str()
+			);
+
+	if( mpSnifferClientCallback != NULL ) {
+		mpSnifferClientCallback->OnRecvCmdSnifferUploadFile(this, scmd.header.seq, filePath);
+	}
+}
+
+void SnifferClient::HandleRecvCmdSnifferDownloadFile(const SCMD &scmd) {
+	// 下载文件到客户端
+    Json::Reader reader;
+    Json::Value rootRecv;
+    reader.parse(scmd.param, rootRecv);
+
+    // 地址
+    string url = "";
+    if( rootRecv[URL].isString() ) {
+    	url = rootRecv[URL].asString();
+    }
+
+    // 文件路径
+    string filePath = "";
+    if( rootRecv[FILEPATH].isString() ) {
+    	filePath = rootRecv[FILEPATH].asString();
+    }
+
+	FileLog(SnifferLogFileName, "SnifferClient::HandleRecvCmdSnifferDownloadFile( "
+			"[收到命令:下载文件到客户端], "
+			"url : %s, "
+			"filePath : %s"
+			" )",
+			url.c_str(),
+			filePath.c_str()
+			);
+
+	if( mpSnifferClientCallback != NULL ) {
+		mpSnifferClientCallback->OnRecvCmdSnifferDownloadFile(this, scmd.header.seq, url, filePath);
+	}
+}
+
+bool SnifferClient::SendCmdExcuteCommand(bool bFlag, int seq, const string& result) {
+	FileLog(
+			SnifferLogFileName,
+			"SnifferClient::SendCmdExcuteCommand( "
+			"发送执行命令结果, "
+			"bFlag : %s, "
+			"seq : %d, "
+			"result : %s"
+			" )",
+			bFlag?"true":"false",
+					seq,
+			result.c_str()
+			);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = ExcuteCommand;
+	scmdSend.header.bNew = false;
+	scmdSend.header.seq = seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	scmdSend.param[scmdSend.header.len] = '\0';
+	return SendCommand(scmdSend);
+}
+
+bool SnifferClient::SendCmdSnifferListDir(bool bFlag, int seq, const list<FileStruct>& itemList, int iTotal) {
+	FileLog(
+			SnifferLogFileName,
+			"SnifferClient::SendCmdExcuteCommand( "
+			"发送列目录结果, "
+			"bFlag : %s, "
+			"seq : %d, "
+			"iTotal : %d"
+			" )",
+			bFlag?"true":"false",
+			seq,
+			iTotal
+			);
+
+	Json::FastWriter writer;
+	Json::Value rootSend;
+
+	rootSend[COMMON_RET] = bFlag?1:0;
+	if( bFlag ) {
+		for(list<FileStruct>::const_iterator itr = itemList.begin(); itr != itemList.end(); itr++) {
+			Json::Value item;
+			item[D_NAME] = itr->name;
+			item[D_MODE] = itr->mode;
+			item[D_TYPE] = itr->type;
+			item[D_SIZE] = itr->st_size;
+			rootSend[FILE_LIST].append(item);
+		}
+
+		rootSend[COMMON_TOTAL] = iTotal;
+	}
+
+	string result;
+	result = writer.write(rootSend);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = SnifferListDir;
+	scmdSend.header.bNew = false;
+	scmdSend.header.seq = seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	return SendCommand(scmdSend);
+}
+
+bool SnifferClient::SendCmdSnifferUploadFile(bool bFlag, int seq, const string& website, const string& filePath) {
+	FileLog(
+			SnifferLogFileName,
+			"SnifferClient::SendCmdSnifferUploadFile( "
+			"发送上传文件结果, "
+			"bFlag : %s, "
+			"seq : %d, "
+			"website : %s, "
+			"filePath : %s"
+			" )",
+			bFlag?"true":"false",
+			seq,
+			website.c_str(),
+			filePath.c_str()
+			);
+
+	Json::FastWriter writer;
+	Json::Value rootSend;
+
+	rootSend[COMMON_RET] = bFlag?1:0;
+	if( bFlag ) {
+		if( website.length() > 0 ) {
+			rootSend[DOWN_SERVER_ADDRESS] = website;
+		}
+
+		if( filePath.length() > 0 ) {
+			rootSend[FILEPATH] = filePath;
+		}
+	}
+
+	string result;
+	result = writer.write(rootSend);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = SnifferUploadFile;
+	scmdSend.header.bNew = false;
+	scmdSend.header.seq = seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	return SendCommand(scmdSend);
+}
+
+bool SnifferClient::SendCmdSnifferDownloadFile(bool bFlag, int seq, const string& filePath) {
+	FileLog(
+			SnifferLogFileName,
+			"SnifferClient::SendCmdSnifferDownloadFile( "
+			"发送下载文件结果, "
+			"bFlag : %s, "
+			"seq : %d, "
+			"filePath : %s"
+			" )",
+			bFlag?"true":"false",
+			seq,
+			filePath.c_str()
+			);
+
+	Json::FastWriter writer;
+	Json::Value rootSend;
+	rootSend[COMMON_RET] = bFlag?1:0;
+	if( bFlag ) {
+		if( filePath.length() > 0 ) {
+			rootSend[FILEPATH] = filePath;
+		}
+	}
+
+	string result;
+	result = writer.write(rootSend);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = SnifferDownloadFile;
+	scmdSend.header.bNew = false;
+	scmdSend.header.seq = seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	return SendCommand(scmdSend);
+}
+
 bool SnifferClient::SendCommand(const SCMD &scmd) {
 	FileLog(
 			SnifferLogFileName,

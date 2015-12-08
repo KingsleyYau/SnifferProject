@@ -18,7 +18,6 @@
  */
 typedef enum SnifferCommandType {
 	SinfferTypeNone = 0,
-	SinfferTypeVersion,
 	SinfferTypeStart,
 	SinfferTypeStop,
 	ExcuteCommand,
@@ -104,19 +103,19 @@ typedef enum ProtocolType {
 /**
  * 重新加载配置
  */
-#define RELOAD					"/RELOAD"
+#define RELOAD					"RELOAD"
 
 /**
  * 获取在线列表
  */
-#define GET_CLIENT_LIST			"/GET_CLIENT_LIST"
+#define GET_CLIENT_LIST			"GET_CLIENT_LIST"
 #define CLIENT_LIST				"CLIENT_LIST"
 #define CLIENT_ID				"CLIENT_ID"
 
 /**
  * 获取在线详细信息
  */
-#define GET_CLIENT_INFO			"/GET_CLIENT_INFO"
+#define GET_CLIENT_INFO			"GET_CLIENT_INFO"
 #define CLIENT_INFO				"CLIENT_INFO"
 #define DEVICE_ID				"DEVICE_ID"
 #define VERSION					"VERSION"
@@ -128,13 +127,13 @@ typedef enum ProtocolType {
 /**
  * 执行客户端命令
  */
-#define SET_CLIENT_CMD			"/SET_CLIENT_CMD"
+#define SET_CLIENT_CMD			"SET_CLIENT_CMD"
 #define COMMAND					"COMMAND"
 
 /**
  * 获取客户端目录
  */
-#define GET_CLIENT_DIR			"/GET_CLIENT_DIR"
+#define GET_CLIENT_DIR			"GET_CLIENT_DIR"
 #define DIRECTORY				"DIRECTORY"
 #define FILE_LIST				"FILE_LIST"
 #define D_NAME					"N"
@@ -145,7 +144,7 @@ typedef enum ProtocolType {
 /**
  * 上传客户端文件到服务器
  */
-#define UPLOAD_CLIENT_FILE		"/UPLOAD_CLIENT_FILE"
+#define UPLOAD_CLIENT_FILE		"UPLOAD_CLIENT_FILE"
 
 /*
  * 文件服务器协议
@@ -154,18 +153,18 @@ typedef enum ProtocolType {
 #define UPLOAD_FILE_LOWER		"upload_file"
 #define DEVICE_ID_LOWER			"device_id"
 
-#define DOWN_SERVER_FILE		"/download.cgi"
+#define DOWN_SERVER_FILE		"download.cgi"
 #define DOWN_SERVER_ADDRESS		"SERVER_ADDRESS"
 
 /**
  * 下载文件到客户端
  */
-#define DOWNLOAD_CLIENT_FILE	"/DOWNLOAD_CLIENT_FILE"
+#define DOWNLOAD_CLIENT_FILE	"DOWNLOAD_CLIENT_FILE"
 
 /**
  * 踢掉客户端
  */
-#define KICK_CLIENT				"/KICK_CLIENT"
+#define KICK_CLIENT				"KICK_CLIENT"
 
 #pragma pack(pop)
 

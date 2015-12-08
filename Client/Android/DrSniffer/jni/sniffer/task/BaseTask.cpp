@@ -50,10 +50,10 @@ void BaseTask::OnTaskFinish() {
 	}
 }
 
-const SCMDH& BaseTask::GetSCMDH() {
-	return mHeader;
+int BaseTask::GetSeq() {
+	return mSeq;
 }
 
-void BaseTask::SetSCMDH(const SCMDH& scmdh) {
-	mHeader = scmdh;
+void BaseTask::SetSeq(int seq) {
+	mSeq = seq;
 }

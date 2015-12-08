@@ -142,7 +142,7 @@ bool DataHttpParser::ParseFirstLine(char* buffer) {
 				memcpy(path, temp, len);
 			}
 			path[len] = '\0';
-			mPath = path;
+			mPath = path + 1;
 //			transform(mPath.begin(), mPath.end(), mPath.begin(), ::toupper);
 		}break;
 		default:break;

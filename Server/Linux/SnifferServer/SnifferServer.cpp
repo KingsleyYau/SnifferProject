@@ -406,15 +406,6 @@ void SnifferServer::OnTimeoutMessage(TcpServer *ts, Message *m) {
 
 void SnifferServer::StateRunnableHandle() {
 	unsigned int iCount = 0;
-
-	unsigned int iTotal = 0;
-	double iSecondTotal = 0;
-
-	unsigned int iHit = 0;
-	double iSecondHit = 0;
-
-	double iResponed = 0;
-
 	unsigned int iStateTime = miStateTime;
 
 	while( IsRunning() ) {
@@ -588,6 +579,13 @@ bool SnifferServer::ReturnClientMsg2Request(
 					sm->len = strlen(sm->buffer);
 
 					mClientTcpInsideServer.SendMessageByQueue(sm);
+					mDataHttpParserMap.Lock();
+					DataHttpParserMap::iterator itr = mDataHttpParserMap.Find(sm->fd);
+					if( itr != mDataHttpParserMap.End() ) {
+						DataHttpParser* pDataHttpParser = itr->second;
+						pDataHttpParser->SetSendMaxSeq(sm->seq);
+					}
+					mDataHttpParserMap.Unlock();
 
 					bFlag = true;
 				}

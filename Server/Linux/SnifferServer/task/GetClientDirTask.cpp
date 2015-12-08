@@ -80,8 +80,9 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			result += mDir;
 			result += "\n";
 
-			char line[512];
-			string item = "";
+			char line[1024];
+			string href = "";
+			Arithmetic ari;
 
 		    Json::Reader reader;
 		    Json::Value rootRecv;
@@ -92,23 +93,23 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    	for( int i = 0; i < (int)rootRecv[FILE_LIST].size(); i++ ) {
 		    		dirItem = rootRecv[FILE_LIST].get(i, Json::Value::null);
 		    		if( dirItem[D_NAME].isString() ) {
-
 			    		if( dirItem[D_NAME].asString() != ".." ) {
 			    			// 上传按钮
 			    			result += "<a href=\"";
-			    			result += UPLOAD_CLIENT_FILE;
-			    			result += "?";
-			    			result += CLIENT_ID;
-			    			result += "=";
-			    			result += clientId;
-			    			result += "&";
-			    			result += FILEPATH;
-			    			result += "=";
-			    			result += mDir;
-			    			if( mDir.length() == 0 || mDir[mDir.length() -1] != '/' ) {
-			    				result += "/";
-			    			}
-			    			result += dirItem[D_NAME].asString();
+
+			    			href = UPLOAD_CLIENT_FILE;
+			    			href += "?";
+			    			href += CLIENT_ID;
+			    			href += "=";
+			    			href += clientId;
+			    			href += "&";
+			    			href += FILEPATH;
+			    			href += "=";
+			    			href += mDir;
+			    			href += dirItem[D_NAME].asString();
+			    			ari.encode_url(href.c_str(), href.length(), line);
+			    			result += line;
+
 			    			result += "\">";
 			    			result += "[上传]";
 			    			result += "</a>";
@@ -116,21 +117,22 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 
 			    			// 删除
 			    			result += "<a href=\"";
-			    			result += SET_CLIENT_CMD;
-			    			result += "?";
-			    			result += CLIENT_ID;
-			    			result += "=";
-			    			result += clientId;
-			    			result += "&";
-			    			result += COMMAND;
-			    			result += "=";
-			    			result += "rm -r ";
-							result += mDir;
-			    			if( mDir.length() == 0 || mDir[mDir.length() -1] != '/' ) {
-			    				result += "/";
-			    			}
-							result += dirItem[D_NAME].asString();
-							result += "&";
+
+			    			href = SET_CLIENT_CMD;
+			    			href += "?";
+			    			href += CLIENT_ID;
+			    			href += "=";
+			    			href += clientId;
+			    			href += "&";
+			    			href += COMMAND;
+			    			href += "=";
+			    			href += "rm -r \"";
+			    			href += mDir;
+			    			href += dirItem[D_NAME].asString();
+			    			href += "\"";
+			    			ari.encode_url(href.c_str(), href.length(), line);
+			    			result += line;
+
 							result += "\">";
 							result += "[删除]";
 							result += "</a>";
@@ -153,15 +155,15 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			    		if( dirItem[D_TYPE] == DT_DIR || dirItem[D_TYPE] == DT_LNK ) {
 			    			// 进入
 			    			result += "<a href=\"";
-			    			result += GET_CLIENT_DIR;
-			    			result += "?";
-			    			result += CLIENT_ID;
-			    			result += "=";
-			    			result += clientId;
-			    			result += "&";
-			    			result += DIRECTORY;
-			    			result += "=";
 
+			    			href = GET_CLIENT_DIR;
+			    			href += "?";
+							href += CLIENT_ID;
+							href += "=";
+							href += clientId;
+							href += "&";
+							href += DIRECTORY;
+							href += "=";
 			    			string dir = mDir;
 							if( dirItem[D_NAME].asString() == ".." ) {
 								if( dir.length() > 2 ) {
@@ -170,19 +172,21 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 										dir = mDir.substr(0, pos + 1);
 									}
 								}
-								result += dir;
+								href += dir;
 
 							} else {
-								result += dir;
-								result += dirItem[D_NAME].asString();
-								result += "/";
+								href += dir;
+								href += dirItem[D_NAME].asString();
+								href += "/";
 							}
-
-							result += "&";
-							result += COMMON_PAGE_SIZE;
-							result += "=";
+							href += "&";
+							href += COMMON_PAGE_SIZE;
+							href += "=";
 							sprintf(temp, "%d", mPageSize);
-							result += temp;
+							href += temp;
+							ari.encode_url(href.c_str(), href.length(), line);
+							result += line;
+
 							result += "\">";
 							result += dirItem[D_NAME].asString().c_str();
 							result += "</a>";
@@ -199,25 +203,29 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 
 	    	if( mPageIndex != 0 ) {
 				result += "<a href=\"";
-				result += GET_CLIENT_DIR;
-				result += "?";
-				result += CLIENT_ID;
-				result += "=";
-				result += clientId;
-				result += "&";
-				result += DIRECTORY;
-				result += "=";
-				result += mDir;
-				result += "&";
-				result += COMMON_PAGE_INDEX;
-				result += "=";
+
+				href = GET_CLIENT_DIR;
+				href += "?";
+				href += CLIENT_ID;
+				href += "=";
+				href += clientId;
+				href += "&";
+				href += DIRECTORY;
+				href += "=";
+				href += mDir;
+				href += "&";
+				href += COMMON_PAGE_INDEX;
+				href += "=";
 				sprintf(temp, "%d", mPageIndex - 1);
-				result += temp;
-				result += "&";
-				result += COMMON_PAGE_SIZE;
-				result += "=";
+				href += temp;
+				href += "&";
+				href += COMMON_PAGE_SIZE;
+				href += "=";
 				sprintf(temp, "%d", mPageSize);
-				result += temp;
+				href += temp;
+    			ari.encode_url(href.c_str(), href.length(), line);
+    			result += line;
+
 				result += "\">";
 				result += "[上一页]";
 				result += "</a> ";
@@ -227,25 +235,29 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    	int total = rootRecv[COMMON_TOTAL].asInt();
 			    if( (mPageIndex + 1) * mPageSize < total ) {
 					result += "<a href=\"";
-					result += GET_CLIENT_DIR;
-					result += "?";
-					result += CLIENT_ID;
-					result += "=";
-					result += clientId;
-					result += "&";
-					result += DIRECTORY;
-					result += "=";
-					result += mDir;
-					result += "&";
-					result += COMMON_PAGE_INDEX;
-					result += "=";
+
+					href = GET_CLIENT_DIR;
+					href += "?";
+					href += CLIENT_ID;
+					href += "=";
+					href += clientId;
+					href += "&";
+					href += DIRECTORY;
+					href += "=";
+					href += mDir;
+					href += "&";
+					href += COMMON_PAGE_INDEX;
+					href += "=";
 					sprintf(temp, "%d", mPageIndex + 1);
-					result += temp;
-					result += "&";
-					result += COMMON_PAGE_SIZE;
-					result += "=";
+					href += temp;
+					href += "&";
+					href += COMMON_PAGE_SIZE;
+					href += "=";
 					sprintf(temp, "%d", mPageSize);
-					result += temp;
+					href += temp;
+	    			ari.encode_url(href.c_str(), href.length(), line);
+	    			result += line;
+
 					result += "\">";
 					result += "[下一页]";
 					result += "</a>\n";
@@ -281,10 +293,9 @@ void GetClientDirTask::SetClientId(int clientId) {
 }
 
 void GetClientDirTask::SetDir(const string& dir) {
-	if( dir.length() > 0 ) {
-		mDir = dir;
-	} else {
-		mDir = "/";
+	mDir = dir;
+	if( mDir.length() == 0 || mDir[mDir.length() -1] != '/' ) {
+		mDir += "/";
 	}
 }
 
