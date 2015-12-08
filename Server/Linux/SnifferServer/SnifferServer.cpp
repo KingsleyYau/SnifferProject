@@ -812,6 +812,21 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 						(int)syscall(SYS_gettid),
 						client->fd
 						);
+
+//				mDeviceIdMap.Lock();
+//				DeviceIdMap::iterator itr = mDeviceIdMap.Find(client->deviceId);
+//				if( itr == mDeviceIdMap.End() ) {
+//					// Insert
+//					mDeviceIdMap.Insert(client->deviceId, client);
+//
+//				} else {
+//					// Kick
+//					DeviceIdMap::iterator itr2 = mDeviceIdMap.Erase(client->deviceId);
+//					mClientTcpServer.Disconnect(tr2->second->fd);
+//
+//				}
+//				mDeviceIdMap.Unlock();
+
 			}break;
 			default:break;
 			}
@@ -1650,6 +1665,73 @@ int SnifferServer::KickClient(
 			result += "<b>踢掉客户端已成功</b>\n";
 		} else {
 			result += "<b>踢掉客户端失败</b>\n";
+		}
+
+		result += "</pre>";
+		result += "</body></html>";
+
+	}break;
+	case JSON:{
+		Json::FastWriter writer;
+		Json::Value rootSend;
+
+		rootSend[COMMON_RET] = ret;
+
+		result = writer.write(rootSend);
+
+	}break;
+	}
+
+	return ret;
+}
+
+/**
+ * 更新客户端
+ */
+int SnifferServer::UpdateClient(
+		string& result,
+		const string& clientId,
+		Message *m,
+		PROTOCOLTYPE ptType = HTML
+		) {
+	int ret = -1;
+	LogManager::GetLogManager()->Log(
+			LOG_MSG,
+			"SnifferServer::UpdateClient( "
+			"tid : %d, "
+			"m->fd: [%d], "
+			"clientId : %s, "
+			"ptType : %d "
+			")",
+			(int)syscall(SYS_gettid),
+			m->fd,
+			clientId.c_str(),
+			ptType
+			);
+
+	mClientMap.Lock();
+	ClientMap::iterator itr = mClientMap.Find(iClientId);
+	if( itr != mClientMap.End() ) {
+		Client *client = (Client*)itr->second;
+		mClientTcpServer.Disconnect(client->fd);
+
+		Message* sm = mClientTcpServer.GetIdleMessageList()->PopFront();
+		if( sm != NULL ) {
+			ret = 1;
+		}
+
+	}
+	mClientMap.Unlock();
+
+	switch( ptType ) {
+	case HTML:{
+		result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
+		result += "<pre>";
+
+		if( ret == 1 ) {
+			result += "<b>发送更新客户端命令成功</b>\n";
+		} else {
+			result += "<b>发送更新客户端命令失败</b>\n";
 		}
 
 		result += "</pre>";

@@ -27,6 +27,7 @@ using namespace std;
 
 typedef KSafeMap<int, Client*> ClientMap;
 typedef KSafeMap<int, DataHttpParser*> DataHttpParserMap;
+typedef KSafeMap<string, Client*> DeviceIdMap;
 
 // 外/内部服务交互会话
 typedef KSafeMap<int, Session*> Client2RequestMap;
@@ -98,7 +99,7 @@ private:
 
 	/**
 	 * ###################################################
-	 * 外部服务器接口处理
+	 * 管理者服务器接口处理
 	 */
 
 	/**
@@ -174,6 +175,20 @@ private:
 			PROTOCOLTYPE ptType = HTML
 			);
 
+	/**
+	 * 更新客户端
+	 */
+	int UpdateClient(
+			string& result,
+			const string& clientId,
+			Message *m,
+			PROTOCOLTYPE ptType = HTML
+			);
+	/**
+	 * ###################################################
+	 * 管理者服务器接口处理
+	 */
+
 	TcpServer mClientTcpServer;
 	TcpServer mClientTcpInsideServer;
 
@@ -235,6 +250,11 @@ private:
 	 * 在线客户端
 	 */
 	ClientMap mClientMap;
+
+	/**
+	 * 用DeviceId查找客户端
+	 */
+	DeviceIdMap mDeviceIdMap;
 
 	/*
 	 * 外/内部服务交互会话
