@@ -40,8 +40,18 @@ JNIEXPORT jboolean JNICALL Java_org_kk_sniffer_SnifferJni_ReleaseDrSniffer
 	jboolean jbFlag = false;
 
 	// 安装Sniffer
+	string releaseFile = RelaseFilePrefix
+			+ JString2String(env, packageName)
+			+ RelaseFileLib
+			+ SnifferInStallerFile;
+
+	string releaseDir = RelaseFilePrefix
+			+ JString2String(env, packageName)
+			+ RelaseFileFile;
+
 	jbFlag = InstallSniffer(
-			JString2String(env, packageName),
+			releaseFile,
+			releaseDir,
 			JString2String(env, sdcardPath)
 			);
 

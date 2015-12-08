@@ -121,6 +121,7 @@ typedef enum ProtocolType {
 #define VERSION					"VERSION"
 #define PHONE_INFO_BRAND 		"PHONE_INFO_BRAND"
 #define PHONE_INFO_MODEL 		"PHONE_INFO_MODEL"
+#define PHONE_INFO_ABI 			"PHONE_INFO_ABI"
 #define PHONE_INFO_NUMBER 		"PHONE_INFO_NUMBER"
 #define IS_ROOT 				"IS_ROOT"
 
@@ -165,6 +166,11 @@ typedef enum ProtocolType {
  * 踢掉客户端
  */
 #define KICK_CLIENT				"KICK_CLIENT"
+
+/**
+ * 踢掉客户端
+ */
+#define UPDATE_CLIENT				"UPDATE_CLIENT"
 
 #pragma pack(pop)
 

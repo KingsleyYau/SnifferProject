@@ -68,6 +68,7 @@ bool SnifferClient::Start() {
 
 void SnifferClient::Stop() {
 	mbRunning = false;
+	mTcpSocket.Close();
 	mKThread.stop();
 }
 
@@ -117,11 +118,13 @@ void SnifferClient::HandleSnifferClientRunnable() {
 					"DeviceId : %s, "
 					"厂商 : %s, "
 					"型号 : %s, "
+					"ABI : %s, "
 					"手机号 : %s "
 					")",
 					deviceId,
 					GetPhoneBrand().c_str(),
 					GetPhoneModel().c_str(),
+					GetPhoneCpuAbi().c_str(),
 					""
 					);
 
@@ -130,6 +133,7 @@ void SnifferClient::HandleSnifferClientRunnable() {
 			root[VERSION] = SnifferVersion;
 			root[PHONE_INFO_BRAND] = GetPhoneBrand();
 			root[PHONE_INFO_MODEL] = GetPhoneModel();
+			root[PHONE_INFO_ABI] = GetPhoneCpuAbi();
 			root[PHONE_INFO_NUMBER] = "";
 			root[IS_ROOT] = IsRoot();
 
@@ -244,6 +248,11 @@ void SnifferClient::OnRecvCommand(const SCMD &scmd) {
 		HandleRecvCmdSnifferDownloadFile(scmd);
 
 	}break;
+	case SnifferCheckUpdate:{
+		// 更新客户端
+		HandleRecvCmdSnifferCheckUpdate(scmd);
+
+	}break;
 	case SinfferTypeNone:{
 		// 与服务端连接已经断开
 
@@ -354,6 +363,38 @@ void SnifferClient::HandleRecvCmdSnifferDownloadFile(const SCMD &scmd) {
 
 	if( mpSnifferClientCallback != NULL ) {
 		mpSnifferClientCallback->OnRecvCmdSnifferDownloadFile(this, scmd.header.seq, url, filePath);
+	}
+}
+
+void SnifferClient::HandleRecvCmdSnifferCheckUpdate(const SCMD &scmd) {
+	// 更新客户端
+    Json::Reader reader;
+    Json::Value rootRecv;
+    reader.parse(scmd.param, rootRecv);
+
+    // 地址
+    string url = "";
+    if( rootRecv[CLIENT_UPDATE_URL].isString() ) {
+    	url = rootRecv[CLIENT_UPDATE_URL].asString();
+    }
+
+    // 文件路径
+    string version = "";
+    if( rootRecv[CLIENT_UPDATE_VERSION].isString() ) {
+    	version = rootRecv[CLIENT_UPDATE_VERSION].asString();
+    }
+
+	FileLog(SnifferLogFileName, "SnifferClient::HandleRecvCmdSnifferCheckUpdate( "
+			"[收到命令:更新客户端], "
+			"url : %s, "
+			"version : %s"
+			" )",
+			url.c_str(),
+			version.c_str()
+			);
+
+	if( mpSnifferClientCallback != NULL ) {
+		mpSnifferClientCallback->OnRecvCmdSnifferCheckUpdate(this, scmd.header.seq, url, version);
 	}
 }
 

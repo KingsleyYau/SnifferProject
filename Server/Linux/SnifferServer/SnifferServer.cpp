@@ -12,6 +12,7 @@
 #include "task/SetClientCmdTask.h"
 #include "task/UploadClientFileTask.h"
 #include "task/DownloadClientFileTask.h"
+#include "task/UpdateClientTask.h"
 
 #include <sys/syscall.h>
 
@@ -998,6 +999,12 @@ int SnifferServer::HandleInsideRecvMessage(TcpServer *ts, Message *m) {
 
 				ret = KickClient(result, pClientId, m, ptType);
 
+			} else if( strcasecmp(pPath.c_str(), UPDATE_CLIENT) == 0 ) {
+				// 更新客户端
+				const string pClientId = pDataHttpParser->GetParam(CLIENT_ID);
+
+				ret = UpdateClient(result, pClientId, m, ptType);
+
 			} else if( strcasecmp(pPath.c_str(), RELOAD) == 0 ) {
 				// 重新加载配置
 				Json::FastWriter writer;
@@ -1185,8 +1192,17 @@ int SnifferServer::GetClientList(
 			result += clientId;
 			result += "\">";
 			result += "[踢掉]";
-			result += "</a>\n";
+			result += "</a> ";
 
+			result += "<a href=\"";
+			result += UPDATE_CLIENT;
+			result += "?";
+			result += CLIENT_ID;
+			result += "=";
+			result += clientId;
+			result += "\">";
+			result += "[更新]";
+			result += "</a>\n";
 		}
 
 		result += "</pre>";
@@ -1701,10 +1717,24 @@ int SnifferServer::UpdateClient(
 	ClientMap::iterator itr = mClientMap.Find(iClientId);
 	if( itr != mClientMap.End() ) {
 		Client *client = (Client*)itr->second;
-		mClientTcpServer.Disconnect(client->fd);
 
 		Message* sm = mClientTcpServer.GetIdleMessageList()->PopFront();
 		if( sm != NULL ) {
+			SCMD* scmd = (SCMD*)sm->buffer;
+			int seq = client->AddSeq();
+
+			UpdateClientTask task;
+			task.SetPtType(ptType);
+			task.SetUrl("");
+			task.SetVersion("1.0.1");
+			task.GetSendCmd(scmd);
+			scmd->header.seq = seq;
+
+			sm->fd = client->fd;
+			sm->len = sizeof(SCMDH) + scmd->header.len;
+
+			mClientTcpServer.SendMessageByQueue(sm);
+
 			ret = 1;
 		}
 

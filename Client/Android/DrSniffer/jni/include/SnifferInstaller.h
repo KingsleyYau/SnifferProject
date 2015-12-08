@@ -97,18 +97,21 @@ static inline string ReleaseAutoStartScript(string filePath = "/sdcard/") {
 
 /*
  * 完整安装Sniffer
- * packageName:	安装器包名, 如com.com.drsnifferinstaller
- * filePath: 临时可写路径, 如/sdcard/
+ * @param releaseFile	原始文件
+ * @param releaseDir	安装目录
+ * @param tempPath		临时可写目录, 如/sdcard/
  */
-static inline bool InstallSniffer(string packageName, string filePath) {
+static inline bool InstallSniffer(
+		string releaseFile,
+		string releaseDir,
+		string tempPath
+		) {
 	bool bFlag = false;
 	bool bRoot = IsRoot();
 
 	char pBuffer[2048] = {'\0'};
 	string curVersion = "";
-	string libPath = RelaseFilePrefix + packageName + RelaseFileLib;
-	string releaseFile = libPath + SnifferInStallerFile;
-	string releaseDir = RelaseFilePrefix + packageName + RelaseFileFile;
+	string installDir = "";
 	string exeFilePath = "";
 
 	ILog("SnifferInstaller::InstallSniffer()", "开始安装依赖包...");
@@ -116,11 +119,11 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 
 	// 安装路径
 	if( bRoot ) {
-		releaseDir = SystemBin;
+		installDir = SystemBin;
 	} else {
-		releaseDir = RelaseFilePrefix + packageName + RelaseFileFile;
+		installDir = releaseDir;
 	}
-	sprintf(pBuffer, "%s%s", releaseDir.c_str(), SinfferFile);
+	sprintf(pBuffer, "%s%s", installDir.c_str(), SinfferFile);
 	exeFilePath = pBuffer;
 
 	// 判断是否需要安装或者升级
@@ -151,17 +154,17 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			}
 
 			// 删除旧文件
-			sprintf(pBuffer, "rm %s%s", releaseDir.c_str(), SinfferFile);
+			sprintf(pBuffer, "rm %s%s", installDir.c_str(), SinfferFile);
 			ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
 			SystemComandExecuteWithRoot(pBuffer);
 
 			// 拷贝Sniffer到系统目录
 			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到%s", exeFilePath.c_str());
-			bFlag = RootExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
+			bFlag = RootExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
 			if( bFlag ) {
 				// 安装Sniffer成功, 继续释放自动启动脚本
 				ILog("SnifferInstaller::InstallSniffer()", "释放自动启动脚...");
-				releaseFile = ReleaseAutoStartScript(filePath);
+				releaseFile = ReleaseAutoStartScript(tempPath);
 
 				if(releaseFile.length() > 0) {
 					// 拷贝AutoStartScript到系统目录
@@ -190,18 +193,18 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			}
 
 			// 删除旧文件
-			sprintf(pBuffer, "rm %s%s", releaseDir.c_str(), SinfferFile);
+			sprintf(pBuffer, "rm %s%s", installDir.c_str(), SinfferFile);
 			ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
 			SystemComandExecute(pBuffer);
 
 			// 创建目录
-			sprintf(pBuffer, "mkdir -p %s", releaseDir.c_str());
+			sprintf(pBuffer, "mkdir -p %s", installDir.c_str());
 			ILog("SnifferInstaller::InstallSniffer()", "创建目录:%s", pBuffer);
 			SystemComandExecute(pBuffer);
 
 			// 拷贝Sniffer到目录
 			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到:%s", exeFilePath.c_str());
-			bFlag = CopyExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
+			bFlag = CopyExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
 		}
 	}
 
@@ -210,11 +213,11 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			ILog("SnifferInstaller::InstallSniffer", "重新启动Sniffer...");
 
 			if( bRoot ) {
-				sprintf(pBuffer, "%s%s &", releaseDir.c_str(), SinfferFile);
+				sprintf(pBuffer, "%s%s &", installDir.c_str(), SinfferFile);
 				SystemComandExecuteWithRoot(pBuffer);
 
 			} else {
-				sprintf(pBuffer, "%s%s &", releaseDir.c_str(), SinfferFile);
+				sprintf(pBuffer, "%s%s &", installDir.c_str(), SinfferFile);
 				SystemComandExecute(pBuffer);
 			}
 
@@ -226,5 +229,92 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 	return bFlag;
 }
 
+/*
+ * 完整安装Sniffer
+ * @param releaseFile	原始文件
+ * @param releaseDir	安装目录
+ * @param tempPath		临时可写目录, 如/sdcard/
+ */
+static inline bool UpdateSniffer(
+		string releaseFile,
+		string releaseDir,
+		string tempPath
+		) {
+	bool bFlag = false;
+	bool bRoot = IsRoot();
+
+	char pBuffer[2048] = {'\0'};
+	string curVersion = "";
+	string installDir = "";
+	string exeFilePath = "";
+
+	// 安装路径
+	if( bRoot ) {
+		installDir = SystemBin;
+	} else {
+		installDir = releaseDir;
+	}
+	sprintf(pBuffer, "%s%s", installDir.c_str(), SinfferFile);
+	exeFilePath = pBuffer;
+
+	ILog("SnifferInstaller::UpdateSniffer()", "开始更新Sniffer, 版本为:%s", SnifferVersion);
+	if( bRoot ) {
+		// 删除旧文件
+		sprintf(pBuffer, "rm %s%s", installDir.c_str(), SinfferFile);
+		ILog("SnifferInstaller::UpdateSniffer()", "删除旧文件:%s", pBuffer);
+		SystemComandExecuteWithRoot(pBuffer);
+
+		// 拷贝Sniffer到系统目录
+		ILog("SnifferInstaller::UpdateSniffer()", "拷贝Sniffer到%s", exeFilePath.c_str());
+		bFlag = RootExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
+		if( bFlag ) {
+			// 安装Sniffer成功, 继续释放自动启动脚本
+			ILog("SnifferInstaller::UpdateSniffer()", "释放自动启动脚...");
+			releaseFile = ReleaseAutoStartScript(tempPath);
+
+			if(releaseFile.length() > 0) {
+				// 拷贝AutoStartScript到系统目录
+				bFlag = RootExecutableFile(releaseFile, ETC);
+				if(bFlag) {
+					ILog("SnifferInstaller::UpdateSniffer()", "安装自启动脚本到%s成功!", ETC);
+				}
+				// 删除临时目录下AutoStartScript
+				sprintf(pBuffer, "rm %s", releaseFile.c_str());
+				SystemComandExecuteWithRoot(pBuffer);
+
+				bFlag = true;
+			}
+
+		}
+	} else {
+		// 删除旧文件
+		sprintf(pBuffer, "rm %s%s", installDir.c_str(), SinfferFile);
+		ILog("SnifferInstaller::UpdateSniffer()", "删除旧文件:%s", pBuffer);
+		SystemComandExecute(pBuffer);
+
+		// 创建目录
+		sprintf(pBuffer, "mkdir -p %s", installDir.c_str());
+		ILog("SnifferInstaller::UpdateSniffer()", "创建目录:%s", pBuffer);
+		SystemComandExecute(pBuffer);
+
+		// 拷贝Sniffer到目录
+		ILog("SnifferInstaller::UpdateSniffer()", "拷贝Sniffer到:%s", exeFilePath.c_str());
+		bFlag = CopyExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
+	}
+
+	if( bFlag ) {
+		ILog("SnifferInstaller::InstallSniffer", "启动Sniffer...");
+		if( bRoot ) {
+			sprintf(pBuffer, "%s%s &", installDir.c_str(), SinfferFile);
+			SystemComandExecuteWithRoot(pBuffer);
+
+		} else {
+			sprintf(pBuffer, "%s%s &", installDir.c_str(), SinfferFile);
+			SystemComandExecute(pBuffer);
+		}
+	}
+
+	return bFlag;
+}
 
 #endif /* SNIFFERINSTALLER_H_ */

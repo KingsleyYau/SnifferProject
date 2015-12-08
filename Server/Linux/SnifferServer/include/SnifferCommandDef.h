@@ -166,6 +166,11 @@ typedef enum ProtocolType {
  */
 #define KICK_CLIENT				"KICK_CLIENT"
 
+/**
+ * 踢掉客户端
+ */
+#define UPDATE_CLIENT				"UPDATE_CLIENT"
+
 #pragma pack(pop)
 
 #endif /* SNIFFERCOMMANDDEF_H_ */

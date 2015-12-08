@@ -29,47 +29,12 @@ void UpdateClientTask::GetSendCmd(SCMD* scmd) {
 
 	scmd->header.scmdt = SnifferCheckUpdate;
 	scmd->header.bNew = true;
-	scmd->header.len = mCommand.length();
-	memcpy(scmd->param, mCommand.c_str(), scmd->header.len);
+	scmd->header.len = result.length();
+	memcpy(scmd->param, result.c_str(), scmd->header.len);
 }
 
 bool UpdateClientTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 	bool bFalg = false;
-	if( buffer != NULL ) {
-		switch( mPtType ) {
-		case HTML: {
-			string result = "<html><head><title>客户端管理页面</title><meta http-equiv='Content-Type' content='text/html; charset=utf-8' /></head><body>";
-			result += "<pre>";
-
-		    result += "</pre>";
-		    result += "</body></html>";
-
-			snprintf(
-					buffer,
-					MAXLEN - 1,
-					"%s",
-					result.c_str()
-					);
-
-			len = strlen(buffer);
-
-		}break;
-		case JSON:{
-			Json::FastWriter writer;
-			Json::Value rootSend;
-
-			rootSend[COMMON_RET] = ret;
-			string result = writer.write(rootSend);
-
-			len = result.length();
-			memcpy(buffer, result.c_str(), len);
-
-		}break;
-		}
-
-		bFlag = true;
-	}
-
 	return bFalg;
 }
 

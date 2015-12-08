@@ -38,6 +38,7 @@ public:
 	virtual void OnRecvCmdSnifferListDir(SnifferClient* client, int seq, const string& dir, int index, int size) = 0;
 	virtual void OnRecvCmdSnifferUploadFile(SnifferClient* client, int seq, const string& filePath) = 0;
 	virtual void OnRecvCmdSnifferDownloadFile(SnifferClient* client, int seq, const string& url, const string& filePath) = 0;
+	virtual void OnRecvCmdSnifferCheckUpdate(SnifferClient* client, int seq, const string& url, const string& version) = 0;
 
 };
 class SnifferClientRunnable;
@@ -111,6 +112,10 @@ private:
 	 * 解析下载文件
 	 */
 	void HandleRecvCmdSnifferDownloadFile(const SCMD &scmd);
+	/**
+	 * 更新客户端
+	 */
+	void HandleRecvCmdSnifferCheckUpdate(const SCMD &scmd);
 	/*###################### 解析接收命令  ######################*/
 
 	SnifferClientCallback* mpSnifferClientCallback;

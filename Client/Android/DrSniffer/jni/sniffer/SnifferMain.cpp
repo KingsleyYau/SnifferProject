@@ -144,6 +144,30 @@ void SnifferMain::OnRecvCmdSnifferDownloadFile(SnifferClient* client, int seq, c
 	}
 }
 
+void SnifferMain::OnRecvCmdSnifferCheckUpdate(SnifferClient* client, int seq, const string& url, const string& version) {
+	// 更新客户端
+	bool bUpdate = version.compare(SnifferVersion) >= 0;
+	if( bUpdate ) {
+		string sniffer_update = SinfferFileUpdateDir;
+		sniffer_update += SinfferFileUpdate;
+		MakeDir(SinfferFileUpdateDir);
+
+		string sniffer_url = "http://drsniffer.wicp.net:9875/download.cgi?filepath=/update/";
+		sniffer_url += GetPhoneCpuAbi();
+		sniffer_url += "/";
+		sniffer_url += SinfferFile;
+
+		RequestUpdateTask* task = new RequestUpdateTask();
+		task->SetTaskCallback(this);
+		task->SetCallback(this);
+		task->SetSeq(seq);
+		task->SetParam(sniffer_url, sniffer_update);
+		if( !task->Start() ) {
+
+		}
+	}
+}
+
 bool SnifferMain::Run() {
 	FileLog(SnifferLogFileName, "SnifferMain::Run()");
 
@@ -207,6 +231,46 @@ void SnifferMain::OnDownload(bool success, const string& filePath, RequestDownlo
 			);
 
 	mSnifferClient.SendCmdSnifferDownloadFile(success, task->GetSeq(), filePath);
+}
+
+void SnifferMain::OnUpdateFinish(bool success, const string& filePath, RequestUpdateTask* task) {
+	FileLog(SnifferLogFileName,
+			"SnifferMain::OnUpdateFinish( "
+			"success : %s, "
+			"filePath : %s, "
+			"task : %p "
+			")",
+			success?"true":"false",
+			filePath.c_str(),
+			task
+			);
+
+	//获取当前程序绝对路径
+	char file[4096];
+	int cnt = readlink("/proc/self/exe", file, 4096);
+	if( cnt >= 0 ) {
+		string dir = file;
+		if( dir.length() > 1 ) {
+			string::size_type pos = dir.find_last_of("/", dir.length() - 2);
+			if( pos != string::npos ) {
+				dir = dir.substr(0, pos + 1);
+			}
+		}
+
+		FileLog(SnifferLogFileName,
+				"SnifferMain::OnUpdateFinish( "
+				"file : %s, "
+				"dir : %s "
+				")",
+				file,
+				dir.c_str()
+				);
+
+		if( UpdateSniffer(filePath, dir, "/sdcard/") ) {
+			mSnifferClient.Stop();
+			exit(0);
+		}
+	}
 }
 
 string SnifferMain::GetFileMode(const struct stat* statbuf) {

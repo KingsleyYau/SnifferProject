@@ -22,6 +22,8 @@
 #define SystemBin						"/system/bin/"
 #define ETC								"/etc/"
 
+#define SinfferFileUpdateDir			"/sdcard/tmp/"
+#define SinfferFileUpdate 				"sniffer_update"
 #define SinfferFile 					"sniffer"
 #define SinfferVersionString 			"sniffer version "
 #define SnifferVersion 					"1.0.1"

@@ -11,19 +11,24 @@
 #include "Sniffer.h"
 #include "SnifferClient.h"
 
+#include <SnifferInstaller.h>
+
 #include <RequestUploadTask.h>
 #include <RequestDownloadTask.h>
+#include <RequestUpdateTask.h>
 
 #include <httpclient/HttpRequestHostManager.h>
 #include <httpclient/HttpRequestManager.h>
 
+#include <common/CommonFunc.h>
 #include <common/command.h>
 #include <json/json/json.h>
 
 class SnifferMain : public SnifferClientCallback,
 					public ITaskCallback,
 					public IRequestUploadCallback,
-					public IRequestDownloadCallback {
+					public IRequestDownloadCallback,
+					public IRequestUpdateCallback {
 public:
 	SnifferMain();
 	virtual ~SnifferMain();
@@ -37,6 +42,7 @@ public:
 	void OnRecvCmdSnifferListDir(SnifferClient* client, int seq, const string& dir, int index, int size);
 	void OnRecvCmdSnifferUploadFile(SnifferClient* client, int seq, const string& filePath);
 	void OnRecvCmdSnifferDownloadFile(SnifferClient* client, int seq, const string& url, const string& filePath);
+	void OnRecvCmdSnifferCheckUpdate(SnifferClient* client, int seq, const string& url, const string& version);
 
 	bool Run();
 
@@ -55,6 +61,11 @@ private:
 	 * Implement from IRequestDownloadCallback
 	 */
 	void OnDownload(bool success, const string& filePath, RequestDownloadTask* task);
+
+	/**
+	 * Implement from IRequestUpdateCallback
+	 */
+	void OnUpdateFinish(bool success, const string& filePath, RequestUpdateTask* task);
 
 	/**
 	 * 获取文件类型
