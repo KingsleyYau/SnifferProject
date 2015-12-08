@@ -194,6 +194,11 @@ static inline bool InstallSniffer(string packageName, string filePath) {
 			ILog("SnifferInstaller::InstallSniffer()", "删除旧文件:%s", pBuffer);
 			SystemComandExecute(pBuffer);
 
+			// 创建目录
+			sprintf(pBuffer, "mkdir -p %s", releaseDir.c_str());
+			ILog("SnifferInstaller::InstallSniffer()", "创建目录:%s", pBuffer);
+			SystemComandExecute(pBuffer);
+
 			// 拷贝Sniffer到目录
 			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到:%s", exeFilePath.c_str());
 			bFlag = CopyExecutableFile(releaseFile, releaseDir.c_str(), SinfferFile);
