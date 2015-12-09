@@ -1771,7 +1771,7 @@ int SnifferServer::UpdateClient(
 			UpdateClientTask task;
 			task.SetPtType(ptType);
 			task.SetUrl(url);
-			task.SetVersion("1.0.3");
+			task.SetVersion("1.0.4");
 			task.GetSendCmd(scmd, seq);
 
 			sm->fd = client->fd;

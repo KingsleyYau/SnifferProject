@@ -41,11 +41,11 @@ SnifferMain::~SnifferMain() {
 }
 
 void SnifferMain::OnConnected(SnifferClient* client) {
-	mRequestScreenCapUpdateTask.Start();
+//	mRequestScreenCapUpdateTask.Start();
 }
 
 void SnifferMain::OnDisConnected(SnifferClient* client) {
-	mRequestScreenCapUpdateTask.Stop();
+//	mRequestScreenCapUpdateTask.Stop();
 }
 
 void SnifferMain::OnRecvCmdExcuteCommand(SnifferClient* client, int seq, const string& cmd) {
