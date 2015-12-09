@@ -26,7 +26,7 @@ ITaskCallback* BaseTask::GetTaskCallback() {
 }
 
 bool BaseTask::Start() {
-	FileLog("httprequest", "BaseTask::Start( this : %p, mbStop : %s )", this, mbStop?"true":"false");
+	FileLog(SnifferLogFileName, "BaseTask::Start( this : %p, mbStop : %s )", this, mbStop?"true":"false");
 	bool bFlag = !mbStop;
 	if( !bFlag ) {
 		OnTaskFinish();
@@ -35,7 +35,7 @@ bool BaseTask::Start() {
 }
 
 void BaseTask::Stop() {
-	FileLog("httprequest", "BaseTask::Stop( this : %p )", this);
+	FileLog(SnifferLogFileName, "BaseTask::Stop( this : %p )", this);
 	mbStop = true;
 }
 
@@ -44,7 +44,7 @@ void BaseTask::Reset() {
 }
 
 void BaseTask::OnTaskFinish() {
-	FileLog("httprequest", "BaseTask::OnTaskFinish( this : %p )", this);
+	FileLog(SnifferLogFileName, "BaseTask::OnTaskFinish( this : %p )", this);
 	if( mpTaskCallback != NULL ) {
 		mpTaskCallback->OnTaskFinish(this);
 	}

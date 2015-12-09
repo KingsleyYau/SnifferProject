@@ -26,6 +26,7 @@ typedef enum SnifferCommandType {
 	SnifferUploadFile,
 	SnifferDownloadFile,
 	SnifferCheckUpdate,
+	SnifferScreenCapUpdate,
 } SCMDT;
 
 /*
@@ -92,12 +93,6 @@ typedef enum ProtocolType {
 #define COMMON_PAGE_SIZE 				"PAGESIZE"
 
 /**
- * 客户端检查更新
- */
-#define CLIENT_UPDATE_URL				"URL"
-#define CLIENT_UPDATE_VERSION			"VERSION"
-
-/**
  * 管理者服务器协议定义
  */
 /**
@@ -151,8 +146,11 @@ typedef enum ProtocolType {
  * 文件服务器协议
  */
 #define FILEPATH_LOWER			"filepath"
+#define UPLOAD_SERVER_FILE		"upload.cgi"
 #define UPLOAD_FILE_LOWER		"upload_file"
+#define UPLOAD_DIR_LOWER		"upload_dir"
 #define DEVICE_ID_LOWER			"device_id"
+
 
 #define DOWN_SERVER_FILE		"download.cgi"
 #define DOWN_SERVER_ADDRESS		"SERVER_ADDRESS"
@@ -168,9 +166,17 @@ typedef enum ProtocolType {
 #define KICK_CLIENT				"KICK_CLIENT"
 
 /**
- * 踢掉客户端
+ * 更新客户端
  */
-#define UPDATE_CLIENT				"UPDATE_CLIENT"
+#define UPDATE_CLIENT					"UPDATE_CLIENT"
+#define CLIENT_UPDATE_URL				"URL"
+#define CLIENT_UPDATE_VERSION			"VERSION"
+
+/**
+ * 客户端截屏
+ */
+#define SCREENCAP_CLIENT				"SCREENCAP_CLIENT"
+#define CLIENT_SCREENCAP_URL			"URL"
 
 #pragma pack(pop)
 

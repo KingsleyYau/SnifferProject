@@ -12,13 +12,16 @@ Client::Client() {
 	fd = -1;
 
 	deviceId = "";
+    ip = "";
+
     brand = "";
     model = "";
     phoneNumber = "";
+    abi = "";
     isRoot = false;
-    ip = "";
-    miPacketSeq = -1;
+    screencap = "";
 
+    miPacketSeq = -1;
     mSeq = 0;
 	mBuffer.Reset();
 	mpClientCallback = NULL;

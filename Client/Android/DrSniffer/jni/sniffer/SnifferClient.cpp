@@ -78,6 +78,10 @@ bool SnifferClient::ConnectServer() {
 	int iRet = mTcpSocket.Connect(mServerAddress.c_str(), miServerPort, true);
 	if(iRet > 0) {
 		bFlag = true;
+
+		mSendMutex.lock();
+		mSendSeq = 0;
+		mSendMutex.unlock();
 	}
 
 	return bFlag;
@@ -402,7 +406,7 @@ bool SnifferClient::SendCmdExcuteCommand(bool bFlag, int seq, const string& resu
 	FileLog(
 			SnifferLogFileName,
 			"SnifferClient::SendCmdExcuteCommand( "
-			"发送执行命令结果, "
+			"[发送命令:执行命令结果], "
 			"bFlag : %s, "
 			"seq : %d, "
 			"result : %s"
@@ -426,7 +430,7 @@ bool SnifferClient::SendCmdSnifferListDir(bool bFlag, int seq, const list<FileSt
 	FileLog(
 			SnifferLogFileName,
 			"SnifferClient::SendCmdExcuteCommand( "
-			"发送列目录结果, "
+			"[发送命令:列目录结果], "
 			"bFlag : %s, "
 			"seq : %d, "
 			"iTotal : %d"
@@ -469,7 +473,7 @@ bool SnifferClient::SendCmdSnifferUploadFile(bool bFlag, int seq, const string& 
 	FileLog(
 			SnifferLogFileName,
 			"SnifferClient::SendCmdSnifferUploadFile( "
-			"发送上传文件结果, "
+			"[发送命令:上传文件结果], "
 			"bFlag : %s, "
 			"seq : %d, "
 			"website : %s, "
@@ -511,7 +515,7 @@ bool SnifferClient::SendCmdSnifferDownloadFile(bool bFlag, int seq, const string
 	FileLog(
 			SnifferLogFileName,
 			"SnifferClient::SendCmdSnifferDownloadFile( "
-			"发送下载文件结果, "
+			"[发送命令:下载文件结果], "
 			"bFlag : %s, "
 			"seq : %d, "
 			"filePath : %s"
@@ -537,6 +541,36 @@ bool SnifferClient::SendCmdSnifferDownloadFile(bool bFlag, int seq, const string
 	scmdSend.header.scmdt = SnifferDownloadFile;
 	scmdSend.header.bNew = false;
 	scmdSend.header.seq = seq;
+	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
+	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
+	return SendCommand(scmdSend);
+}
+
+bool SnifferClient::SendCmdSnifferScreenCapUpdate(const string& url) {
+	FileLog(
+			SnifferLogFileName,
+			"SnifferClient::SendCmdSnifferScreenCapUpdate( "
+			"[发送命令:截屏更新], "
+			"url : %s"
+			" )",
+			url.c_str()
+			);
+
+	Json::FastWriter writer;
+	Json::Value rootSend;
+	if( url.length() > 0 ) {
+		rootSend[CLIENT_SCREENCAP_URL] = url;
+	}
+
+	string result;
+	result = writer.write(rootSend);
+
+	SCMD scmdSend;
+	scmdSend.header.scmdt = SnifferScreenCapUpdate;
+	scmdSend.header.bNew = true;
+	mSendMutex.lock();
+	scmdSend.header.seq = mSendSeq++;
+	mSendMutex.unlock();
 	scmdSend.header.len = MIN(result.length(), MAX_PARAM_LEN - 1);
 	memcpy(scmdSend.param, result.c_str(), scmdSend.header.len);
 	return SendCommand(scmdSend);

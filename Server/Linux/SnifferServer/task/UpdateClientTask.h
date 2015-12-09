@@ -15,7 +15,7 @@ public:
 	UpdateClientTask();
 	virtual ~UpdateClientTask();
 
-	void GetSendCmd(SCMD* scmd);
+	void GetSendCmd(SCMD* scmd, int seq);
 	bool GetReturnData(SCMD* scmd, char* buffer, int& len);
 
 	void SetUrl(const string& url);

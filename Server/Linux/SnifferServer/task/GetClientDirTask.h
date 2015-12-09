@@ -17,7 +17,7 @@ public:
 	GetClientDirTask();
 	virtual ~GetClientDirTask();
 
-	void GetSendCmd(SCMD* scmd);
+	void GetSendCmd(SCMD* scmd, int seq);
 	bool GetReturnData(SCMD* scmd, char* buffer, int& len);
 
 	void SetDir(const string& dir);

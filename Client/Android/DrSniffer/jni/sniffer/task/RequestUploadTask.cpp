@@ -9,7 +9,7 @@
 
 RequestUploadTask::RequestUploadTask() {
 	// TODO Auto-generated constructor stub
-	mUrl = "/upload.cgi";
+	mUrl = UPLOAD_SERVER_FILE;
 	mpCallback = NULL;
 	mbDir = false;
 	mfilePath = "";
@@ -75,8 +75,20 @@ void RequestUploadTask::SetParam(
 	}
 
 	if( filePath.length() > 0 ) {
-		mHttpEntiy.AddFile(UPLOAD_FILE_LOWER, filePath, "image/jpg");
 		mfilePath = filePath;
+
+		// 文件
+		mHttpEntiy.AddFile(UPLOAD_FILE_LOWER, filePath, "image/jpg");
+
+		// 目录名
+		string dir;
+		string::size_type pos = filePath.find_last_of("/");
+		if( pos != string::npos ) {
+			dir = filePath.substr(0, pos + 1);
+			if( dir.length() > 0 ) {
+				mHttpEntiy.AddContent(UPLOAD_DIR_LOWER, dir);
+			}
+		}
 	}
 
 	mbDir = bDir;

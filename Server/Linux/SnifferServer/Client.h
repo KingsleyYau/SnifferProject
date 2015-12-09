@@ -42,11 +42,14 @@ public:
 	int fd;
 	string deviceId;
 	string version;
+    string ip;
+
     string brand;
     string model;
     string phoneNumber;
-    string ip;
+    string abi;
     bool isRoot;
+    string screencap;
 
 private:
     Buffer mBuffer;

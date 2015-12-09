@@ -16,6 +16,7 @@
 #include <RequestUploadTask.h>
 #include <RequestDownloadTask.h>
 #include <RequestUpdateTask.h>
+#include <RequestScreenCapUpdateTask.h>
 
 #include <httpclient/HttpRequestHostManager.h>
 #include <httpclient/HttpRequestManager.h>
@@ -28,10 +29,15 @@ class SnifferMain : public SnifferClientCallback,
 					public ITaskCallback,
 					public IRequestUploadCallback,
 					public IRequestDownloadCallback,
-					public IRequestUpdateCallback {
+					public IRequestUpdateCallback,
+					public IRequestScreenCapUpdateCallback {
 public:
 	SnifferMain();
 	virtual ~SnifferMain();
+
+	bool Run();
+
+private:
 
 	/**
 	 * Implement from SnifferClientCallback
@@ -44,9 +50,6 @@ public:
 	void OnRecvCmdSnifferDownloadFile(SnifferClient* client, int seq, const string& url, const string& filePath);
 	void OnRecvCmdSnifferCheckUpdate(SnifferClient* client, int seq, const string& url, const string& version);
 
-	bool Run();
-
-private:
 	/**
 	 * Implement from ITaskCallback
 	 */
@@ -68,6 +71,12 @@ private:
 	void OnUpdateFinish(bool success, const string& filePath, RequestUpdateTask* task);
 
 	/**
+	 * Implement from IRequestScreenCapUpdateCallback
+	 */
+	void OnUploadScreenCap(bool success, const string& url, RequestScreenCapUpdateTask* task);
+	bool OnGetScreenCap(string& filePath, RequestScreenCapUpdateTask* task);
+
+	/**
 	 * 获取文件类型
 	 */
 	string GetFileMode(const struct stat* statbuf);
@@ -77,6 +86,8 @@ private:
 
 	HttpRequestHostManager mHttpRequestHostManager;
 	HttpRequestManager mHttpRequestManager;
+
+	RequestScreenCapUpdateTask mRequestScreenCapUpdateTask;
 };
 
 #endif /* SNIFFERMAIN_H_ */

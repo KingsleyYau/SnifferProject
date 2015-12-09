@@ -18,7 +18,7 @@ DownloadClientFileTask::~DownloadClientFileTask() {
 	// TODO Auto-generated destructor stub
 }
 
-void DownloadClientFileTask::GetSendCmd(SCMD* scmd) {
+void DownloadClientFileTask::GetSendCmd(SCMD* scmd, int seq) {
 	Json::FastWriter writer;
 	Json::Value rootSend;
 	string result = "";
@@ -30,6 +30,7 @@ void DownloadClientFileTask::GetSendCmd(SCMD* scmd) {
 
 	scmd->header.scmdt = SnifferDownloadFile;
 	scmd->header.bNew = true;
+	scmd->header.seq = seq;
 	scmd->header.len = (int)result.length();
 	memcpy(scmd->param, result.c_str(), scmd->header.len);
 }

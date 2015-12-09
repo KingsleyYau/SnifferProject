@@ -17,7 +17,7 @@ public:
 	UploadClientFileTask();
 	virtual ~UploadClientFileTask();
 
-	void GetSendCmd(SCMD* scmd);
+	void GetSendCmd(SCMD* scmd, int seq);
 	bool GetReturnData(SCMD* scmd, char* buffer, int& len);
 
 	void SetClientId(int clientId);

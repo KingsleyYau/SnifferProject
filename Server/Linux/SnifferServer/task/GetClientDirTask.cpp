@@ -19,7 +19,7 @@ GetClientDirTask::~GetClientDirTask() {
 	// TODO Auto-generated destructor stub
 }
 
-void GetClientDirTask::GetSendCmd(SCMD* scmd) {
+void GetClientDirTask::GetSendCmd(SCMD* scmd, int seq) {
 	Json::FastWriter writer;
 	Json::Value rootSend;
 	string result = "";
@@ -36,6 +36,7 @@ void GetClientDirTask::GetSendCmd(SCMD* scmd) {
 
 	scmd->header.scmdt = SnifferListDir;
 	scmd->header.bNew = true;
+	scmd->header.seq = seq;
 	scmd->header.len = (int)result.length();
 	memcpy(scmd->param, result.c_str(), scmd->header.len);
 }
@@ -89,6 +90,12 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 		    reader.parse(scmd->param, rootRecv);
 
 		    if( rootRecv[FILE_LIST].isArray() ) {
+
+				result += "文件总数: ";
+				sprintf(temp, "%d", rootRecv[COMMON_TOTAL].asInt());
+				result += temp;
+				result += "\n\n";
+
 		    	Json::Value dirItem;
 		    	for( int i = 0; i < (int)rootRecv[FILE_LIST].size(); i++ ) {
 		    		dirItem = rootRecv[FILE_LIST].get(i, Json::Value::null);

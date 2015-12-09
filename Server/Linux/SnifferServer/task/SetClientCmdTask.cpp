@@ -16,9 +16,10 @@ SetClientCmdTask::~SetClientCmdTask() {
 	// TODO Auto-generated destructor stub
 }
 
-void SetClientCmdTask::GetSendCmd(SCMD* scmd) {
+void SetClientCmdTask::GetSendCmd(SCMD* scmd, int seq) {
 	scmd->header.scmdt = ExcuteCommand;
 	scmd->header.bNew = true;
+	scmd->header.seq = seq;
 	scmd->header.len = mCommand.length();
 	memcpy(scmd->param, mCommand.c_str(), scmd->header.len);
 }

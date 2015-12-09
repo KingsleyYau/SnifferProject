@@ -17,9 +17,10 @@ UploadClientFileTask::~UploadClientFileTask() {
 	// TODO Auto-generated destructor stub
 }
 
-void UploadClientFileTask::GetSendCmd(SCMD* scmd) {
+void UploadClientFileTask::GetSendCmd(SCMD* scmd, int seq) {
 	scmd->header.scmdt = SnifferUploadFile;
 	scmd->header.bNew = true;
+	scmd->header.seq = seq;
 	scmd->header.len = (int)mFilePath.length();
 	memcpy(scmd->param, mFilePath.c_str(), scmd->header.len);
 }
