@@ -83,6 +83,7 @@ void RequestScreenCapUpdateTask::Stop() {
 	mHttpRequest.StopRequest(false);
 	mThread.stop();
 	BaseTask::Stop();
+	BaseTask::Reset();
 }
 
 bool RequestScreenCapUpdateTask::IsFinishOK() {

@@ -146,7 +146,9 @@ void SnifferClient::HandleSnifferClientRunnable() {
 			bzero(&scmd, sizeof(SCMD));
 			scmd.header.scmdt = SnifferTypeClientInfo;
 			scmd.header.bNew = true;
-			scmd.header.seq = seq++;
+			mSendMutex.lock();
+			scmd.header.seq = mSendSeq++;
+			mSendMutex.unlock();
 			scmd.header.len = MIN(param.length(), MAX_PARAM_LEN - 1);
 			memcpy(scmd.param, param.c_str(), param.length());
 			scmd.param[scmd.header.len] = '\0';
