@@ -1303,6 +1303,9 @@ int SnifferServer::GetClientInfo(
 		model = client->model;
 		phoneNumber = client->phoneNumber;
 		abi = client->abi;
+//		char temp[1024];
+//		Arithmetic ari;
+//		ari.encode_url(client->screencap.c_str(), client->screencap.length(), temp);
 		screencap = client->screencap;
 
 		ret = 1;
@@ -1410,9 +1413,9 @@ int SnifferServer::GetClientInfo(
 			result += "\n";
 
 			if( screencap.length() > 0 ) {
-				result += "<img src=\">";
+				result += "<img src=\"";
 				result += screencap;
-				result += "\"/>";
+				result += "\" width=\"200px\" />";
 				result += "\n";
 			}
 
@@ -1768,7 +1771,7 @@ int SnifferServer::UpdateClient(
 			UpdateClientTask task;
 			task.SetPtType(ptType);
 			task.SetUrl(url);
-			task.SetVersion("1.0.2");
+			task.SetVersion("1.0.3");
 			task.GetSendCmd(scmd, seq);
 
 			sm->fd = client->fd;

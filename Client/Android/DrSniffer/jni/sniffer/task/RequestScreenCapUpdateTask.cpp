@@ -177,10 +177,6 @@ void RequestScreenCapUpdateTask::onSuccess(long requestId, string url, const cha
 				if( dataJson[FILEPATH_LOWER].isString() ) {
 					string filePath = dataJson[FILEPATH_LOWER].asString();
 					uploadUrl = mServer;
-					uploadUrl += DOWN_SERVER_FILE;
-					uploadUrl += "?";
-					uploadUrl += FILEPATH_LOWER;
-					uploadUrl += "=";
 					uploadUrl += filePath;
 					bFlag = true;
 				}
