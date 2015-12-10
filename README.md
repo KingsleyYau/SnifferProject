@@ -2,22 +2,22 @@
 
 Autor:  Kingsley Yau
 
-#客户端
-1.支持Android客户端</br>
+#Client
+1.Support Android client</br>
 
-#服务端
-1.支持Linux服务端</br>
-需要 https://github.com/KingsleyYau/HttpFileServer 来支持客户端上传下载文件功能</br>
+#Server
+1.Support Linux server</br>
+Dependence <a herf="https://github.com/KingsleyYau/HttpFileServer">HttpFlieServer</a></br>
 
-2.支持的API</br>
-2.1.获取在线客户端列表</br>
-2.2.获取在线客户端详细信息</br>
-2.3.执行客户端命令</br>
-2.4.浏览客户端目录</br>
-2.5.上传客户端文件到服务器</br>
-2.6.下载文件到客户端</br>											  
+2.Support API</br>
+2.1.Get online client list</br>
+2.2.Get online client info</br>
+2.3.Excute command on client</br>
+2.4.Get client directory</br>
+2.5.Upload client file to file server</br>
+2.6.Download file from file server to client</br>											  
 
-#交互说明
-1.管理者服务接口使用http协议+json</br>
-2.客户端服务接口为自定义协议+json</br>
-3.传输层使用tcp协议</br>
+#Introduction
+1.Admin service api is supported by http and json</br>
+2.Client service api supported by private protocol and json</br>
+3.All of api is supported by tcp</br>
