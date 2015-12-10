@@ -7,7 +7,7 @@ Autor:  Kingsley Yau
 
 #Server
 1.Support Linux server</br>
-Dependence <a herf="https://github.com/KingsleyYau/HttpFileServer">HttpFlieServer</a></br>
+Dependence <a href="https://github.com/KingsleyYau/HttpFileServer">HttpFlieServer</a></br>
 
 2.Support API</br>
 2.1.Get online client list</br>
