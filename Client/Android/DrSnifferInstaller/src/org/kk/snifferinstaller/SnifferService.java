@@ -8,14 +8,17 @@ public class SnifferService extends Service{
 	
 	@Override
 	public void onCreate() {
+		super.onCreate();
 	}
 	
 	@Override
-	public void onStart(Intent intent, int startId){
+	public void onStart(Intent intent, int startId) {
 	}
 	
 	@Override
 	public void onDestroy() {
+		startService(new Intent(this, SnifferService.class));
+		super.onDestroy();
 	}
 	
 	@Override

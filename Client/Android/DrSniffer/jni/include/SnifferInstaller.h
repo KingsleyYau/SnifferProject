@@ -132,7 +132,7 @@ static inline bool InstallSniffer(
 
 	ILog("SnifferInstaller::InstallSniffer()", "%s当前版本:(%s) 安装包版本:(%s)", SinfferFile, curVersion.c_str(), SnifferVersion);
 	bool bUpdate = curVersion.compare(SnifferVersion) >= 0;
-	bUpdate = false;
+//	bUpdate = false;
 	if( bUpdate ) {
 		// 不需要升级
 		ILog("SnifferInstaller::InstallSniffer()", "不需要升级!");
