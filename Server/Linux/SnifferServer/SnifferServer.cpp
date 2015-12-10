@@ -797,6 +797,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 
 		        client->deviceId = rootRecv[DEVICE_ID].asString();
 		        client->version = rootRecv[VERSION].asString();
+		        client->cwd = rootRecv[CWD].asString();
 
 		        client->brand = rootRecv[PHONE_INFO_BRAND].asString();
 		        client->model = rootRecv[PHONE_INFO_MODEL].asString();
@@ -1539,7 +1540,7 @@ int SnifferServer::GetClientDir(
 		GetClientDirTask* task = new GetClientDirTask();
 		task->SetPtType(ptType);
 		task->SetClientId(iClientId);
-		task->SetDir(directory);
+		task->SetDir(directory, client->cwd);
 
 		if( pageIndex.length() > 0 ) {
 			task->SetPageIndex(atoi(pageIndex.c_str()));

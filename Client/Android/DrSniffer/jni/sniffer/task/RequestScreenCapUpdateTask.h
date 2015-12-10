@@ -44,7 +44,7 @@ public:
 			const string& path
 			);
 
-	void HandleScreenCapRunnable();
+	void HandleTaskRunnable();
 
 	// Implement from BaseTask
 	bool Start();
@@ -69,7 +69,7 @@ protected:
 
 	KThread mThread;
 	KCond mCond;
-	ScreenCapRunnable* mpScreenCapRunnable;
+	ScreenCapRunnable* mpTaskRunnable;
 	HttpRequest mHttpRequest;
 
 };

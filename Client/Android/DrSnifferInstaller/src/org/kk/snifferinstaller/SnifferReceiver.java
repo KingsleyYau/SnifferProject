@@ -25,15 +25,14 @@ public class SnifferReceiver extends BroadcastReceiver {
 		
 		if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
 			// 解除锁屏
+			Intent intentPushService = new Intent(context, SnifferService.class);
+			context.startService(intentPushService);
+			
 	        final String packageName = context.getPackageName(); 
-	        
-	        new Thread() {
-	        	@Override
-				public void run(){
-	            	String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-	        		jni.ReleaseDrSniffer(packageName, sdcardPath);
-	        	}
-	        }.start();
+			
+        	String sdcardPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+    		jni.ReleaseDrSniffer(packageName, sdcardPath);
+    		
 		}
 	}
 }

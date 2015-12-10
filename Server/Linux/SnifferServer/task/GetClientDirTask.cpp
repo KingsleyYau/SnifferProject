@@ -11,6 +11,7 @@ GetClientDirTask::GetClientDirTask() {
 	// TODO Auto-generated constructor stub
 	mClientId = 0;
 	mDir = "/";
+	mClientPath = "";
 	mPageIndex = 0;
 	mPageSize = 20;
 }
@@ -75,6 +76,10 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 			result += "\" />";
 			result += "<input type=\"submit\" value=\"下载到此目录\"/>";
 			result += "</form>";
+			result += "\n";
+
+			result += "程序路径: ";
+			result += mClientPath;
 			result += "\n";
 
 			result += "当前路径: ";
@@ -299,11 +304,13 @@ void GetClientDirTask::SetClientId(int clientId) {
 	mClientId = clientId;
 }
 
-void GetClientDirTask::SetDir(const string& dir) {
+void GetClientDirTask::SetDir(const string& dir, const string& clientPath) {
 	mDir = dir;
 	if( mDir.length() == 0 || mDir[mDir.length() -1] != '/' ) {
 		mDir += "/";
 	}
+
+	mClientPath = clientPath;
 }
 
 void GetClientDirTask::SetPageIndex(int pageIndex) {

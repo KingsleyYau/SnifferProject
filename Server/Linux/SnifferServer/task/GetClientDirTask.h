@@ -20,7 +20,7 @@ public:
 	void GetSendCmd(SCMD* scmd, int seq);
 	bool GetReturnData(SCMD* scmd, char* buffer, int& len);
 
-	void SetDir(const string& dir);
+	void SetDir(const string& dir, const string& clientPath);
 	void SetClientId(int clientId);
 	void SetPageIndex(int pageIndex);
 	void SetPageSize(int pageSize);
@@ -28,6 +28,7 @@ public:
 private:
 	int mClientId;
 	string mDir;
+	string mClientPath;
 	int mPageIndex;
 	int mPageSize;
 };

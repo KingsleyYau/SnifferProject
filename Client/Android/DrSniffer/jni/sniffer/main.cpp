@@ -22,13 +22,13 @@ int main(int argc, char** argv) {
 	}
 
 	int uid = 0, gid = 0;
-	if(setgid(gid) || setuid(uid)) {
+	if( ( setgid(gid) < 0 ) || ( setuid(uid) < 0 ) ) {
 		ELog("sniffer", "权限不够, 部分功能可能缺失!");
 //		return 0;
 	}
 
 	if( !MountSystem() ) {
-		ELog("sniffer", "重新挂载/system失败, 日志文件可能无法保存!");
+		ELog("sniffer", "重新挂载/system失败, 部分功能可能缺失!");
 	}
 
 	KLog::SetLogDirectory("/sdcard/sniffer/");

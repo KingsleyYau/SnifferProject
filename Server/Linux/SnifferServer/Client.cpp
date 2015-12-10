@@ -13,6 +13,7 @@ Client::Client() {
 
 	deviceId = "";
     ip = "";
+    cwd = "";
 
     brand = "";
     model = "";

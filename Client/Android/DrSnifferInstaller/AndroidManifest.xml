@@ -26,6 +26,9 @@
             </intent-filter>
         </activity>
         
+        <service android:name="SnifferService">"
+        </service>
+        
        	<receiver android:name="SnifferReceiver">
 	    	<intent-filter android:priority="90000">
 	        	<action android:name="android.intent.action.USER_PRESENT" />

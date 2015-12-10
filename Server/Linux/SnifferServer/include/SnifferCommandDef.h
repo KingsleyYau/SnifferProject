@@ -114,6 +114,7 @@ typedef enum ProtocolType {
 #define CLIENT_INFO				"CLIENT_INFO"
 #define DEVICE_ID				"DEVICE_ID"
 #define VERSION					"VERSION"
+#define CWD 					"CWD"
 #define PHONE_INFO_BRAND 		"PHONE_INFO_BRAND"
 #define PHONE_INFO_MODEL 		"PHONE_INFO_MODEL"
 #define PHONE_INFO_ABI 			"PHONE_INFO_ABI"

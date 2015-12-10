@@ -114,6 +114,12 @@ void SnifferClient::HandleSnifferClientRunnable() {
 				GetMD5String(info.mac.c_str(), deviceId);
 			}
 
+			// 获取当前程序绝对路径
+			char file[4096] = {'\0'};
+			int cnt = readlink("/proc/self/exe", file, 4096);
+			if( cnt >= 0 ) {
+			}
+
 			// 连接上服务端, 发送手机型号/手机号
 			FileLog(
 					SnifferLogFileName,
@@ -135,6 +141,7 @@ void SnifferClient::HandleSnifferClientRunnable() {
 			root.clear();
 			root[DEVICE_ID] = deviceId;
 			root[VERSION] = SnifferVersion;
+			root[CWD] = file;
 			root[PHONE_INFO_BRAND] = GetPhoneBrand();
 			root[PHONE_INFO_MODEL] = GetPhoneModel();
 			root[PHONE_INFO_ABI] = GetPhoneCpuAbi();

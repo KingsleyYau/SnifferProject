@@ -43,6 +43,7 @@ public:
 	string deviceId;
 	string version;
     string ip;
+    string cwd;
 
     string brand;
     string model;

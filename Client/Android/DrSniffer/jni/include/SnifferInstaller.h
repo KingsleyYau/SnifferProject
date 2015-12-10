@@ -83,7 +83,7 @@ static inline string ReleaseAutoStartScript(string filePath = "/sdcard/") {
 				p += iWrite;
 				iLen -= iWrite;
 			}
-		}while(iLen > 0);
+		} while(iLen > 0);
 		fclose(file);
 		result = filePath;
 		ILog("SnifferInstaller::ReleaseAutoStartScript()", "释放AutoStartScript到%s成功!", filePath.c_str());
@@ -202,6 +202,11 @@ static inline bool InstallSniffer(
 			ILog("SnifferInstaller::InstallSniffer()", "创建目录:%s", pBuffer);
 			SystemComandExecute(pBuffer);
 
+			// 改变目录权限
+			sprintf(pBuffer, "chmod 777 %s -r", installDir.c_str());
+			ILog("SnifferInstaller::InstallSniffer()", "改变目录权限:%s", pBuffer);
+			SystemComandExecute(pBuffer);
+
 			// 拷贝Sniffer到目录
 			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到:%s", exeFilePath.c_str());
 			bFlag = CopyExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
@@ -295,6 +300,11 @@ static inline bool UpdateSniffer(
 		// 创建目录
 		sprintf(pBuffer, "mkdir -p %s", installDir.c_str());
 		ILog("SnifferInstaller::UpdateSniffer()", "创建目录:%s", pBuffer);
+		SystemComandExecute(pBuffer);
+
+		// 改变目录权限
+		sprintf(pBuffer, "chmod 777 %s -r", installDir.c_str());
+		ILog("SnifferInstaller::InstallSniffer()", "改变目录权限:%s", pBuffer);
 		SystemComandExecute(pBuffer);
 
 		// 拷贝Sniffer到目录

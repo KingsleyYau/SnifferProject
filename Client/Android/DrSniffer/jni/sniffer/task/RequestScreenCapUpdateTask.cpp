@@ -21,7 +21,7 @@ public:
 protected:
 	void onRun() {
 		if( mpRequestScreenCapUpdateTask != NULL ) {
-			mpRequestScreenCapUpdateTask->HandleScreenCapRunnable();
+			mpRequestScreenCapUpdateTask->HandleTaskRunnable();
 		}
 	}
 private:
@@ -39,15 +39,15 @@ RequestScreenCapUpdateTask::RequestScreenCapUpdateTask() {
 	mServer = "";
 	mPath = "";
 
-	mpScreenCapRunnable = new ScreenCapRunnable(this);
+	mpTaskRunnable = new ScreenCapRunnable(this);
 	mHttpRequest.SetCallback(this);
 }
 
 RequestScreenCapUpdateTask::~RequestScreenCapUpdateTask() {
 	// TODO Auto-generated destructor stub
 
-	if( mpScreenCapRunnable != NULL ) {
-		delete mpScreenCapRunnable;
+	if( mpTaskRunnable != NULL ) {
+		delete mpTaskRunnable;
 	}
 }
 
@@ -59,7 +59,7 @@ bool RequestScreenCapUpdateTask::Start() {
 	bool bFlag = false;
 
 	if( BaseTask::Start() ) {
-		if( mThread.start(mpScreenCapRunnable) != -1 ) {
+		if( mThread.start(mpTaskRunnable) != -1 ) {
 			bIsRunning = true;
 			bFlag = true;
 		} else {
@@ -104,10 +104,10 @@ void RequestScreenCapUpdateTask::SetParam(
 	mPath = path;
 }
 
-void RequestScreenCapUpdateTask::HandleScreenCapRunnable() {
+void RequestScreenCapUpdateTask::HandleTaskRunnable() {
 	FileLog(
 			SnifferLogFileName,
-			"RequestScreenCapUpdateTask::HandleScreenCapRunnable( "
+			"RequestScreenCapUpdateTask::HandleTaskRunnable( "
 			"bIsRunning : %s"
 			" )",
 			bIsRunning?"true":"false"
@@ -118,7 +118,7 @@ void RequestScreenCapUpdateTask::HandleScreenCapRunnable() {
 		if( iCount % 30 == 0 ) {
 			FileLog(
 					SnifferLogFileName,
-					"RequestScreenCapUpdateTask::HandleScreenCapRunnable( "
+					"RequestScreenCapUpdateTask::HandleTaskRunnable( "
 					"mpCallback : %p"
 					" )",
 					mpCallback
