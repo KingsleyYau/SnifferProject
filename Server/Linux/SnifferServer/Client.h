@@ -10,10 +10,12 @@
 
 #include "SnifferCommandDef.h"
 #include "LogManager.h"
+#include "MessageList.h"
 
 #include <common/Arithmetic.hpp>
 #include <common/Buffer.h>
 #include <common/KCond.h>
+#include <common/KSafeMap.h>
 
 #include <string>
 using namespace std;
@@ -25,6 +27,8 @@ public:
 	virtual void OnParseCmd(Client* client, SCMD* scmd) = 0;
 };
 
+typedef KSafeMap<int, Message*> MessageMap;
+
 class Client {
 public:
 	Client();
@@ -35,8 +39,11 @@ public:
 	/**
 	 * 解析数据
 	 */
-	int ParseData(char* buffer, int len, int iPacketSeq);
+	int ParseData(Message* m);
 
+	/**
+	 * 增加发送协议包序列号
+	 */
 	int AddSeq();
 
 	int fd;
@@ -53,13 +60,37 @@ public:
     string screencap;
 
 private:
-    Buffer mBuffer;
-    int mSeq;
-    KMutex mKMutex;
+    int ParseDataNoCache(Message* m);
+
+    void ParseMessageInCache();
+
+    /**
+     * 组包成功回调
+     */
     ClientCallback* mpClientCallback;
 
-    int miPacketSeq;
-    KCond mPacketSeqCond;
+    /**
+     * 多线程组包/解包互斥锁
+     */
+    KMutex mKMutex;
+
+    /**
+     * 未组成协议包的临时buffer
+     */
+    Buffer mBuffer;
+
+    /**
+     * 已经发送的协议包序列号
+     */
+    int miPacketSendSeq;
+
+    /**
+     * 需要接收的数据包序列号
+     */
+    int miDataPacketRecvSeq;
+
+	MessageList mIdleMessageList;
+	MessageMap mMessageMap;
 };
 
 #endif /* CLIENT_H_ */

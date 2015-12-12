@@ -159,7 +159,7 @@ static inline bool InstallSniffer(
 			SystemComandExecuteWithRoot(pBuffer);
 
 			// 拷贝Sniffer到系统目录
-			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到%s", exeFilePath.c_str());
+			ILog("SnifferInstaller::InstallSniffer()", "拷贝%s到%s", SinfferFile, exeFilePath.c_str());
 			bFlag = RootExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
 			if( bFlag ) {
 				// 安装Sniffer成功, 继续释放自动启动脚本
@@ -208,14 +208,14 @@ static inline bool InstallSniffer(
 			SystemComandExecute(pBuffer);
 
 			// 拷贝Sniffer到目录
-			ILog("SnifferInstaller::InstallSniffer()", "拷贝Sniffer到:%s", exeFilePath.c_str());
+			ILog("SnifferInstaller::InstallSniffer()", "拷贝%s到:%s", SinfferFile, exeFilePath.c_str());
 			bFlag = CopyExecutableFile(releaseFile, installDir.c_str(), SinfferFile);
 		}
 	}
 
 	if( bFlag ) {
 		if( GetProcessPid(exeFilePath) == -1 ) {
-			ILog("SnifferInstaller::InstallSniffer", "重新启动Sniffer...");
+			ILog("SnifferInstaller::InstallSniffer", "重新启动%s...", SinfferFile);
 
 			if( bRoot ) {
 				sprintf(pBuffer, "%s%s &", installDir.c_str(), SinfferFile);
@@ -227,7 +227,7 @@ static inline bool InstallSniffer(
 			}
 
 		} else {
-			ILog("SnifferInstaller::InstallSniffer", "Sniffer正在运行, 不需要重启...");
+			ILog("SnifferInstaller::InstallSniffer", "%s正在运行, 不需要重启...", SinfferFile);
 		}
 	}
 

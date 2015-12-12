@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXLEN 8192
+#define MAX_BUFFER_LEN 8192
 typedef struct Buffer {
 	int		len;
 	char	buffer[MAXLEN];

@@ -22,48 +22,214 @@ Client::Client() {
     isRoot = false;
     screencap = "";
 
-    miPacketSeq = -1;
-    mSeq = 0;
-	mBuffer.Reset();
+    mBuffer.Reset();
+
+    miPacketSendSeq = 0;
+    miDataPacketRecvSeq = 0;
+
 	mpClientCallback = NULL;
+
+	for(int i = 0; i < 4; i++) {
+		/* create idle buffers */
+		Message *m = new Message();
+		mIdleMessageList.PushBack(m);
+	}
 }
 
 Client::~Client() {
 	// TODO Auto-generated destructor stub
+	while( true ) {
+		Message* m = mIdleMessageList.PopFront();
+		if( m != NULL ) {
+			delete m;
+		} else {
+			break;
+		}
+	}
 }
 
 void Client::SetClientCallback(ClientCallback* pClientCallback) {
 	mpClientCallback = pClientCallback;
 }
 
-int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
+int Client::ParseData(Message* m)  {
 	int ret = 0;
+
+	char* buffer = m->buffer;
+	int len = m->len;
+	int seq = m->seq;
 
 	LogManager::GetLogManager()->Log(
 			LOG_STAT,
 			"Client::ParseData( "
 			"tid : %d, "
-			"miPacketSeq : %d, "
-			"iPacketSeq : %d "
+			"[收到客户端数据包], "
+			"miDataPacketRecvSeq : %d, "
+			"seq : %d "
 			")",
 			(int)syscall(SYS_gettid),
-			miPacketSeq,
-			iPacketSeq
+			miDataPacketRecvSeq,
+			seq
 			);
 
-	while( miPacketSeq != iPacketSeq -1 ) {
-		mPacketSeqCond.lock();
-		mPacketSeqCond.wait();
-		mPacketSeqCond.unlock();
+	if( miDataPacketRecvSeq != seq ) {
+		// 收到客户端乱序数据包
+		LogManager::GetLogManager()->Log(
+				LOG_STAT,
+				"Client::ParseData( "
+				"tid : %d, "
+				"[收到客户端乱序的数据包] "
+				")"
+				);
+
+		// 缓存到队列
+		Message* mc = mIdleMessageList.PopFront();
+		if( mc != NULL ) {
+			LogManager::GetLogManager()->Log(
+					LOG_STAT,
+					"Client::ParseData( "
+					"tid : %d, "
+					"[缓存客户端乱序的数据包到队列] "
+					")"
+					);
+
+			memcpy(mc->buffer, buffer, len);
+			mc->len = len;
+			mMessageMap.Insert(seq, mc);
+
+			ret = 0;
+
+		} else {
+			LogManager::GetLogManager()->Log(
+					LOG_STAT,
+					"Client::ParseData( "
+					"tid : %d, "
+					"[客户端没有缓存空间] "
+					")"
+					);
+			ret = -1;
+		}
+
+	} else {
+		// 收到客户端顺序的数据包
+		LogManager::GetLogManager()->Log(
+				LOG_STAT,
+				"Client::ParseData( "
+				"tid : %d, "
+				"[收到客户端顺序的数据包] "
+				")",
+				(int)syscall(SYS_gettid)
+				);
+
+		ret = 1;
 	}
 
-	mKMutex.lock();
+	// 开始解析数据包
+	if( ret == 1 ) {
+		LogManager::GetLogManager()->Log(
+				LOG_STAT,
+				"Client::ParseData( "
+				"tid : %d, "
+				"[开始解析客户端当前数据包] "
+				")",
+				(int)syscall(SYS_gettid)
+				);
+
+		// 解当前数据包
+		ret = ParseDataNoCache(m);
+		if( ret != -1 ) {
+			miDataPacketRecvSeq++;
+
+			LogManager::GetLogManager()->Log(
+					LOG_STAT,
+					"Client::ParseData( "
+					"tid : %d, "
+					"[开始解析客户端缓存数据包] "
+					")",
+					(int)syscall(SYS_gettid)
+					);
+
+			// 解析缓存数据包
+			MessageMap::iterator itr;
+			while( true ) {
+				itr = mMessageMap.Find(miDataPacketRecvSeq);
+				if( itr != mMessageMap.End() ) {
+					// 找到对应缓存包
+					LogManager::GetLogManager()->Log(
+							LOG_STAT,
+							"Client::ParseData( "
+							"tid : %d, "
+							"[找到对应缓存包], "
+							"miDataPacketRecvSeq : %d "
+							")",
+							(int)syscall(SYS_gettid),
+							miDataPacketRecvSeq
+							);
+
+					Message* mc = itr->second;
+					ret = ParseDataNoCache(mc);
+
+					mIdleMessageList.PushBack(mc);
+					mMessageMap.Erase(miDataPacketRecvSeq);
+
+					if( ret != -1 ) {
+						miDataPacketRecvSeq++;
+
+					} else {
+						break;
+					}
+
+				} else {
+					// 找不到对应缓存包
+					LogManager::GetLogManager()->Log(
+							LOG_STAT,
+							"Client::ParseData( "
+							"tid : %d, "
+							"[找不到对应缓存包]"
+							")",
+							(int)syscall(SYS_gettid)
+							);
+					break;
+				}
+			}
+		}
+	}
+
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"Client::ParseData( "
+			"tid : %d, "
+			"[解析客户端数据包完成], "
+			"ret : %d "
+			")",
+			(int)syscall(SYS_gettid),
+			ret
+			);
+
+	return ret;
+}
+
+int Client::ParseDataNoCache(Message* m) {
+	int ret = 0;
+
+	char* buffer = m->buffer;
+	int len = m->len;
+
+	LogManager::GetLogManager()->Log(
+			LOG_STAT,
+			"Client::ParseDataNoCache( "
+			"tid : %d, "
+			"miDataPacketRecvSeq : %d "
+			")",
+			(int)syscall(SYS_gettid),
+			miDataPacketRecvSeq
+			);
 
 	int recvLen = (len < MAXLEN - mBuffer.len)?len:(MAXLEN - mBuffer.len);
 	if( recvLen > 0 ) {
 		LogManager::GetLogManager()->Log(
 				LOG_STAT,
-				"Client::ParseData( "
+				"Client::ParseDataNoCache( "
 				"tid : %d, "
 				"mBuffer.len : %d, "
 				"recvLen : %d "
@@ -77,16 +243,6 @@ int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
 		mBuffer.len += recvLen;
 	}
 
-	LogManager::GetLogManager()->Log(
-			LOG_STAT,
-			"Client::ParseData( "
-			"tid : %d, "
-			"mBuffer.len : %d "
-			")",
-			(int)syscall(SYS_gettid),
-			mBuffer.len
-			);
-
 	// 解析命令头
 	while(mBuffer.len >= sizeof(SCMDH)) {
 		// 头部已经收够
@@ -94,7 +250,7 @@ int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
 
 		LogManager::GetLogManager()->Log(
 				LOG_STAT,
-				"Client::ParseData( "
+				"Client::ParseDataNoCache( "
 				"tid : %d, "
 				"header->scmdt : %d, "
 				"header->len : %d, "
@@ -117,7 +273,7 @@ int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
 
 			LogManager::GetLogManager()->Log(
 					LOG_STAT,
-					"Client::ParseData( "
+					"Client::ParseDataNoCache( "
 					"tid : %d, "
 					"scmd->param : \n%s "
 					")",
@@ -125,28 +281,19 @@ int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
 					scmd.param
 					);
 
+			// 组成协议包成功, 回调
 			if( mpClientCallback != NULL ) {
 				mpClientCallback->OnParseCmd(this, &scmd);
 			}
 
 			// 替换数据
 			mBuffer.len -= sizeof(SCMDH) + header->len;
-
-			LogManager::GetLogManager()->Log(
-					LOG_STAT,
-					"Client::ParseData( "
-					"tid : %d, "
-					"mBuffer.len : %d "
-					")",
-					(int)syscall(SYS_gettid),
-					mBuffer.len
-					);
-
 			if( mBuffer.len > 0 ) {
 				memcpy(mBuffer.buffer, mBuffer.buffer + sizeof(SCMDH) + header->len, mBuffer.len);
 			}
 
 			ret = 1;
+
 		} else {
 			break;
 		}
@@ -162,21 +309,13 @@ int Client::ParseData(char* buffer, int len, int iPacketSeq)  {
 			ret
 			);
 
-	miPacketSeq++;
-
-	mKMutex.unlock();
-
-	mPacketSeqCond.lock();
-	mPacketSeqCond.broadcast();
-	mPacketSeqCond.unlock();
-
 	return ret;
 }
 
 int Client::AddSeq() {
 	int seq;
 	mKMutex.lock();
-	seq = mSeq++;
+	seq = miPacketSendSeq++;
 	mKMutex.unlock();
 	return seq;
 }

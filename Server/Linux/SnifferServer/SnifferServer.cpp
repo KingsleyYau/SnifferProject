@@ -741,7 +741,10 @@ int SnifferServer::HandleRecvMessage(TcpServer *ts, Message *m) {
 		ClientMap::iterator itr = mClientMap.Find(m->fd);
 		if( itr != mClientMap.End() ) {
 			client = itr->second;
-			client->ParseData(m->buffer, m->len, m->seq);
+			ret = client->ParseData(m);
+			if( ret == -1 ) {
+				mClientTcpServer.Disconnect(client->fd);
+			}
 		}
 		mClientMap.Unlock();
 	}

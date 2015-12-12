@@ -23,6 +23,8 @@
 #include <list>
 using namespace std;
 
+//#define MAX_BUFFER_LEN 4096
+
 typedef struct Message {
 	int		fd;
 	int 	len;
@@ -31,7 +33,7 @@ typedef struct Message {
 	unsigned int 	starttime;
 	unsigned int	totaltime;
 	int		type;
-	char	buffer[MAXLEN];
+	char	buffer[MAX_BUFFER_LEN];
 	char    bitBuffer[128];
 	ev_io *wr;
 	ev_io *ww;

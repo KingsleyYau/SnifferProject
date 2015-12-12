@@ -43,11 +43,11 @@ int main(int argc, char** argv) {
 
 	int uid = 0, gid = 0;
 	if( ( setgid(gid) < 0 ) || ( setuid(uid) < 0 ) ) {
+		FileLog(SnifferLogFileName, "uid:%d", getuid());
 		FileLog(SnifferLogFileName, "权限不够, 部分功能可能缺失!");
 	}
-	FileLog(SnifferLogFileName, "uid:%d", getuid());
 
-	if( !MountSystem() ) {
+	if( IsRoot() && !MountSystem() ) {
 		FileLog(SnifferLogFileName, "重新挂载/system失败, 部分功能可能缺失!");
 	}
 
