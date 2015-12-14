@@ -59,6 +59,8 @@ int Client::ParseData(Message* m)  {
 	int len = m->len;
 	int seq = m->seq;
 
+	mKMutex.lock();
+
 	LogManager::GetLogManager()->Log(
 			LOG_STAT,
 			"Client::ParseData( "
@@ -205,6 +207,8 @@ int Client::ParseData(Message* m)  {
 			(int)syscall(SYS_gettid),
 			ret
 			);
+
+	mKMutex.unlock();
 
 	return ret;
 }

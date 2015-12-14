@@ -106,13 +106,15 @@ void SnifferClient::HandleSnifferClientRunnable() {
 				mpSnifferClientCallback->OnConnected(this);
 			}
 
+			string imei = GetPhoneIMEI();
 			char deviceId[128] = {'\0'};
-			memset(deviceId, '\0', sizeof(deviceId));
-			list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
-			if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
-				IpAddressNetworkInfo info = *(infoList.begin());
-				GetMD5String(info.mac.c_str(), deviceId);
-			}
+			GetMD5String(imei.c_str(), deviceId);
+//			memset(deviceId, '\0', sizeof(deviceId));
+//			list<IpAddressNetworkInfo> infoList = IPAddress::GetNetworkInfoList();
+//			if( infoList.size() > 0 && infoList.begin() != infoList.end() ) {
+//				IpAddressNetworkInfo info = *(infoList.begin());
+//				GetMD5String(info.mac.c_str(), deviceId);
+//			}
 
 			// 获取当前程序绝对路径
 			char file[4096] = {'\0'};

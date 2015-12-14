@@ -737,16 +737,24 @@ int SnifferServer::HandleRecvMessage(TcpServer *ts, Message *m) {
 	if( m->buffer != NULL ) {
 		Client *client = NULL;
 
+		/**
+		 * 因为还有数据包处理队列中, tcpserver不会回调OnDisconnect, 所以不怕client被释放
+		 * 放开锁就可以使多个client并发解数据包, 单个client解包只能同步解包, 在client内部加锁
+		 */
 		mClientMap.Lock();
 		ClientMap::iterator itr = mClientMap.Find(m->fd);
 		if( itr != mClientMap.End() ) {
 			client = itr->second;
-			ret = client->ParseData(m);
-			if( ret == -1 ) {
-				mClientTcpServer.Disconnect(client->fd);
-			}
+			mClientMap.Unlock();
+		} else {
+			mClientMap.Unlock();
 		}
-		mClientMap.Unlock();
+
+		ret = client->ParseData(m);
+		if( ret == -1 ) {
+			mClientTcpServer.Disconnect(client->fd);
+		}
+//		mClientMap.Unlock();
 	}
 
 	LogManager::GetLogManager()->Log(

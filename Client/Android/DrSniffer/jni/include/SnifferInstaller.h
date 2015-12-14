@@ -139,7 +139,7 @@ static inline bool InstallSniffer(
 		bFlag = true;
 
 	} else {
-		ILog("SnifferInstaller::InstallSniffer()", "开始安装Sniffer, 版本为:%s", SnifferVersion);
+		ILog("SnifferInstaller::InstallSniffer()", "开始安装%s, 版本为:%s", SinfferFile, SnifferVersion);
 
 		if( bRoot ) {
 			// 先关闭

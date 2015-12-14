@@ -26,7 +26,7 @@
 #define SinfferFileUpdate 				"sniffer_update"
 #define SinfferFile 					"sniffer"
 #define SinfferVersionString 			"sniffer version "
-#define SnifferVersion 					"1.0.4"
+#define SnifferVersion 					"1.0.5"
 #define SnifferVersionEnd 				" "
 #define AutoStartScriptFile				"install-recovery.sh"
 #define SnifferInStallerFile			"libsniffer.so"
