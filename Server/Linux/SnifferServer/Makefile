@@ -34,10 +34,14 @@ OBJS += 	$(JSONOBJS)
 OBJS +=		$(TASKOBJ)
 TARGET =	snifferserver
 
+TEST_OBJ =		test_client.o
+TEST_OBJ += 	$(JSONOBJS)
+TEST_TARGET =	client
+
 DEPDIRS	:= libev
 CLEAN_DEPS := $(addprefix _clean_, $(DEPDIRS))
 
-.PHONY: all deps clean cleanall install $(DEPDIRS) $(TARGET)
+.PHONY: all deps clean test cleanall install $(DEPDIRS) $(TARGET) $(TEST_TARGET)
 
 $(TARGET):	deps $(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
@@ -47,12 +51,20 @@ $(TARGET):	deps $(OBJS)
 	@echo ''
 	@echo '################################################################'
 
+$(TEST_TARGET):	$(TEST_OBJ)
+	$(CXX) -o $(TEST_TARGET) $(TEST_OBJ) $(LIBS)
+	@echo '################################################################'
+	@echo ''
+	@echo '# Bulid test client completed!'
+	@echo ''
+	@echo '################################################################'
+
 $(DEPDIRS):
 	$(MAKE) -C $@
 	
 $(CLEAN_DEPS):	
 	$(MAKE) -C $(patsubst _clean_%, %, $@) clean
-		
+				
 deps:	$(DEPDIRS)
 	@echo '################################################################'
 	@echo ''
@@ -60,12 +72,14 @@ deps:	$(DEPDIRS)
 	@echo ''
 	@echo '################################################################'
 	
-all:	deps $(TARGET) $(DBTEST_TARGET) $(CLIENTTEST_TARGET)
+all:	deps $(TARGET) $(TEST_TARGET)
 	
-clean:
-	rm -f $(OBJS) $(TARGET) $(DBTEST_TARGET) $(DBTEST_OBJS) $(CLIENTTEST_TARGET) $(CLIENTTEST_OBJS)
+test:	$(TEST_TARGET)
 
-cleanall: clean	$(CLEAN_DEPS) 
+clean:
+	rm -f $(OBJS) $(TARGET) $(TEST_OBJ) $(TEST_TARGET)
+
+cleanall: clean	$(CLEAN_DEPS)
 	@echo '################################################################'
 	@echo ''
 	@echo '# Clean all finished!'
