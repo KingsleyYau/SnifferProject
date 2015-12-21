@@ -45,7 +45,7 @@ int DataHttpParser::ParseData(char* buffer, int len) {
 	}
 
 //	if( !mbReceiveHeaderFinish ) {
-//		int recvLen = (len < MAXLEN - mHeaderIndex)?len:MAXLEN - mHeaderIndex;
+//		int recvLen = (len < MAX_BUFFER_LEN - mHeaderIndex)?len:MAX_BUFFER_LEN - mHeaderIndex;
 //		if( recvLen > 0 ) {
 //			memcpy(mHeaderBuffer + mHeaderIndex, buffer, recvLen);
 //			mHeaderIndex += recvLen;

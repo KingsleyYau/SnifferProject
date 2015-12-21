@@ -48,6 +48,7 @@ public:
 	void OnRecvMessage(TcpServer *ts, Message *m);
 	void OnSendMessage(TcpServer *ts, Message *m);
 	void OnDisconnect(TcpServer *ts, int fd);
+	void OnClose(TcpServer *ts, int fd);
 	void OnTimeoutMessage(TcpServer *ts, Message *m);
 
 	void StateRunnableHandle();
@@ -226,7 +227,6 @@ private:
 	 * 统计请求
 	 */
 	unsigned int mTotal;
-	unsigned int mHit;
 	unsigned int mResponed;
 	KMutex mCountMutex;
 

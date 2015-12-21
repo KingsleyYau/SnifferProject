@@ -10,6 +10,7 @@
 Client::Client() {
 	// TODO Auto-generated constructor stub
 	fd = -1;
+	isOnline = false;
 
 	deviceId = "";
     ip = "";
@@ -38,6 +39,7 @@ Client::Client() {
 
 Client::~Client() {
 	// TODO Auto-generated destructor stub
+
 	while( true ) {
 		Message* m = mIdleMessageList.PopFront();
 		if( m != NULL ) {
@@ -229,7 +231,7 @@ int Client::ParseDataNoCache(Message* m) {
 			miDataPacketRecvSeq
 			);
 
-	int recvLen = (len < MAXLEN - mBuffer.len)?len:(MAXLEN - mBuffer.len);
+	int recvLen = (len < MAX_BUFFER_LEN - mBuffer.len)?len:(MAX_BUFFER_LEN - mBuffer.len);
 	if( recvLen > 0 ) {
 		LogManager::GetLogManager()->Log(
 				LOG_STAT,

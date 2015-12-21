@@ -100,7 +100,7 @@ bool LogManager::Log(LOG_LEVEL nLevel, const char *format, ...) {
 //			lm->Reset();
 //			va_list	agList;
 //			va_start(agList, format);
-//			vsnprintf(lm->buffer, MAXLEN - 1, format, agList);
+//			vsnprintf(lm->buffer, MAX_BUFFER_LEN - 1, format, agList);
 //			va_end(agList);
 //			mLogMessageList.PushBack(lm);
 //			return true;
@@ -138,7 +138,7 @@ bool LogManager::Log(LOG_LEVEL nLevel, const char *format, ...) {
             char *p = lm->buffer;
             va_list	agList;
             va_start(agList, format);
-            vsnprintf(p, MAXLEN, format, agList);
+            vsnprintf(p, MAX_BUFFER_LEN, format, agList);
             va_end(agList);
 
             strcat(lm->buffer, "\n");

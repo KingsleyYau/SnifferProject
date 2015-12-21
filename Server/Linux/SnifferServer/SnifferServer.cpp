@@ -48,7 +48,6 @@ SnifferServer::SnifferServer() {
 	miDebugMode = 0;
 	miLogLevel = 0;
 
-	mHit = 0;
 	mResponed = 0;
 	mTotal = 0;
 
@@ -108,12 +107,6 @@ void SnifferServer::Run() {
 			miLogLevel,
 			mLogDir.c_str()
 			);
-
-//	bool bFlag = false;
-
-	mTotal = 0;
-	mHit = 0;
-	mResponed = 0;
 
 	/* inside server */
 	mClientTcpInsideServer.SetTcpServerObserver(this);
@@ -250,6 +243,49 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 	if( ts == &mClientTcpServer ) {
 		// 客户端下线
 		mClientMap.Lock();
+		ClientMap::iterator itr = mClientMap.Find(fd);
+		Client* client = itr->second;
+		if( client != NULL ) {
+			// 标记下线
+			client->isOnline = false;
+		}
+		mClientMap.Unlock();
+
+		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+				"tid : %d, "
+				"fd : [%d], "
+				"[客户端下线] "
+				")",
+				(int)syscall(SYS_gettid),
+				fd
+				);
+
+	} else if( ts == &mClientTcpInsideServer ) {
+	}
+
+	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+			"tid : %d, "
+			"fd : [%d], "
+			"end "
+			")",
+			(int)syscall(SYS_gettid),
+			fd
+			);
+}
+
+void SnifferServer::OnClose(TcpServer *ts, int fd) {
+	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
+			"tid : %d, "
+			"fd : [%d], "
+			"start "
+			")",
+			(int)syscall(SYS_gettid),
+			fd
+			);
+
+	if( ts == &mClientTcpServer ) {
+		// 客户端下线
+		mClientMap.Lock();
 		ClientMap::iterator itr = mClientMap.Erase(fd);
 
 		Client* client = itr->second;
@@ -261,10 +297,10 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 
 		mClientMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
 				"tid : %d, "
 				"fd : [%d], "
-				"[客户端下线] "
+				"[客户端下线, 所有数据包处理完成] "
 				")",
 				(int)syscall(SYS_gettid),
 				fd
@@ -284,7 +320,7 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 		}
 		mDataHttpParserMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[管理者请求结束] "
@@ -295,7 +331,7 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 
 	}
 
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
 			"tid : %d, "
 			"fd : [%d], "
 			"end "
@@ -318,9 +354,16 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 	if( &mClientTcpServer == ts ) {
 		// 客户端服务请求
 		HandleRecvMessage(ts, m);
+
+		mCountMutex.lock();
+		mTotal++;
+		mResponed += GetTickCount() - m->starttime;
+		mCountMutex.unlock();
+
 	} else if( &mClientTcpInsideServer == ts ){
 		// 管理者服务请求
 		HandleInsideRecvMessage(ts, m);
+
 	}
 
 	LogManager::GetLogManager()->Log(
@@ -409,6 +452,10 @@ void SnifferServer::StateRunnableHandle() {
 	unsigned int iCount = 0;
 	unsigned int iStateTime = miStateTime;
 
+	unsigned int iTotal = 0;
+	double iSecondTotal = 0;
+	double iResponed = 0;
+
 	while( IsRunning() ) {
 		if ( iCount < iStateTime ) {
 			iCount++;
@@ -416,7 +463,40 @@ void SnifferServer::StateRunnableHandle() {
 		} else {
 			iCount = 0;
 
+			iCount = 0;
+			iSecondTotal = 0;
+			iResponed = 0;
+
+			mCountMutex.lock();
+			iTotal = mTotal;
+
+			if( iStateTime != 0 ) {
+				iSecondTotal = 1.0 * iTotal / iStateTime;
+			}
+			if( iTotal != 0 ) {
+				iResponed = 1.0 * mResponed / iTotal;
+			}
+
+			mTotal = 0;
+			mResponed = 0;
+			mCountMutex.unlock();
+
+			LogManager::GetLogManager()->Log(LOG_WARNING,
+					"SnifferServer::StateRunnable( "
+					"tid : %d, "
+					"过去%u秒共收到%u个请求, "
+					"平均收到%.1lf个/秒, "
+					"平均响应时间%.1lf毫秒/个"
+					")",
+					(int)syscall(SYS_gettid),
+					iStateTime,
+					iTotal,
+					iSecondTotal,
+					iResponed
+					);
+
 			iStateTime = miStateTime;
+
 		}
 		sleep(1);
 	}
@@ -563,13 +643,13 @@ bool SnifferServer::ReturnClientMsg2Request(
 
 				Message* sm = mClientTcpInsideServer.GetIdleMessageList()->PopFront();
 				if( sm != NULL ) {
-					char buffer[MAXLEN] = {'\0'};
+					char buffer[MAX_BUFFER_LEN] = {'\0'};
 					int len;
 					task->GetReturnData(scmd, buffer, len);
 
 					snprintf(
 							sm->buffer,
-							MAXLEN - 1,
+							MAX_BUFFER_LEN - 1,
 							"HTTP/1.1 200 OK\r\nContext-Length:%d\r\n\r\n%s",
 							len,
 							buffer
@@ -694,7 +774,7 @@ bool SnifferServer::CloseSessionByClient(Client* client) {
 
 				snprintf(
 						sm->buffer,
-						MAXLEN - 1,
+						MAX_BUFFER_LEN - 1,
 						"HTTP/1.1 200 OK\r\nContext-Length:%d\r\n\r\n%s",
 						(int)param.length(),
 						param.c_str()
@@ -738,7 +818,7 @@ int SnifferServer::HandleRecvMessage(TcpServer *ts, Message *m) {
 		Client *client = NULL;
 
 		/**
-		 * 因为还有数据包处理队列中, tcpserver不会回调OnDisconnect, 所以不怕client被释放
+		 * 因为还有数据包处理队列中, tcpserver不会回调OnClose, 所以不怕client被释放
 		 * 放开锁就可以使多个client并发解数据包, 单个client解包只能同步解包, 在client内部加锁
 		 */
 		mClientMap.Lock();
@@ -903,7 +983,7 @@ int SnifferServer::HandleTimeoutMessage(TcpServer *ts, Message *m) {
 
 		string param = writer.write(rootSend);
 
-		snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 200 ok\r\nContext-Length:%d\r\n\r\n%s",
+		snprintf(sm->buffer, MAX_BUFFER_LEN - 1, "HTTP/1.1 200 ok\r\nContext-Length:%d\r\n\r\n%s",
 				(int)param.length(), param.c_str());
 		sm->len = strlen(sm->buffer);
 
@@ -1069,7 +1149,7 @@ int SnifferServer::HandleInsideRecvMessage(TcpServer *ts, Message *m) {
 			sm->fd = m->fd;
 			sm->wr = m->wr;
 
-			snprintf(sm->buffer, MAXLEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n",
+			snprintf(sm->buffer, MAX_BUFFER_LEN - 1, "HTTP/1.1 %d %s\r\nContext-Length:%d\r\n\r\n",
 					code,
 					reason,
 					(int)result.length()
@@ -1105,7 +1185,7 @@ int SnifferServer::HandleInsideRecvMessage(TcpServer *ts, Message *m) {
 				sm->fd = m->fd;
 				sm->wr = m->wr;
 
-				snprintf(sm->buffer, MAXLEN - 1, "%s", result.c_str() + iSendBodyLen);
+				snprintf(sm->buffer, MAX_BUFFER_LEN - 1, "%s", result.c_str() + iSendBodyLen);
 				sm->len = strlen(sm->buffer);
 
 				iSendBodyLen += sm->len;

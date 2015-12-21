@@ -7,7 +7,7 @@
 
 #ifndef IDATAPARSER_H_
 #define IDATAPARSER_H_
-
+#pragma pack(1)
 class IDataParser {
 public:
 	/*
@@ -16,5 +16,5 @@ public:
 	virtual int ParseData(char* buffer, int len) = 0;
 	virtual ~IDataParser(){};
 };
-
+#pragma pack()
 #endif /* IDATAPARSER_H_ */

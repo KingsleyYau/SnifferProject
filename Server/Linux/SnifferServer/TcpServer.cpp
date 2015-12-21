@@ -772,7 +772,7 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 			return;
 		}
 
-		int ret = recv(fd, buffer, MAXLEN - 1, 0);
+		int ret = recv(fd, buffer, MAX_BUFFER_LEN - 1, 0);
 		if( ret > 0 ) {
 			*(buffer + ret) = '\0';
 			LogManager::GetLogManager()->Log(
@@ -808,7 +808,7 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 				GetHandleMessageList()->PushBack(m);
 			}
 
-			if( ret != MAXLEN - 1 ) {
+			if( ret != MAX_BUFFER_LEN - 1 ) {
 				break;
 			}
 		} else if( ret == 0 ) {
@@ -1125,6 +1125,11 @@ void TcpServer::CloseSocketIfNeedByHandleThread(int fd) {
 							(int)syscall(SYS_gettid),
 							fd
 							);
+
+			if( mpTcpServerObserver != NULL ) {
+				mpTcpServerObserver->OnClose(this, fd);
+			}
+
 			close(fd);
 		}
 	}
@@ -1205,6 +1210,7 @@ void TcpServer::OnDisconnect(int fd, Message *m) {
 					fd,
 					mpHandlingMessageCount[fd]
 					);
+
 	if( mpHandlingMessageCount[fd] == 0 ) {
 		LogManager::GetLogManager()->Log(
 						LOG_MSG,
@@ -1218,9 +1224,16 @@ void TcpServer::OnDisconnect(int fd, Message *m) {
 						fd,
 						mpHandlingMessageCount[fd]
 						);
+
+		if( mpTcpServerObserver != NULL ) {
+			mpTcpServerObserver->OnClose(this, fd);
+		}
+
 		close(fd);
+
 	} else {
 		mpCloseRecv[fd] = true;
+
 	}
 	mCloseMutex.unlock();
 

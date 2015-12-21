@@ -47,6 +47,7 @@ public:
 	int AddSeq();
 
 	int fd;
+	bool isOnline;
 	string deviceId;
 	string version;
     string ip;
@@ -91,6 +92,7 @@ private:
 
 	MessageList mIdleMessageList;
 	MessageMap mMessageMap;
+
 };
 
 #endif /* CLIENT_H_ */

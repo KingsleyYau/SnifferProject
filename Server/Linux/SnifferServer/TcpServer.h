@@ -47,6 +47,7 @@ public:
 	virtual void OnRecvMessage(TcpServer *ts, Message *m) = 0;
 	virtual void OnSendMessage(TcpServer *ts, Message *m) = 0;
 	virtual void OnDisconnect(TcpServer *ts, int fd) = 0;
+	virtual void OnClose(TcpServer *ts, int fd) = 0;
 	virtual void OnTimeoutMessage(TcpServer *ts, Message *m) = 0;
 };
 class TcpServer {

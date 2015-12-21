@@ -9,9 +9,16 @@
 #ifndef _INC_STRINGHANDLE_
 #define _INC_STRINGHANDLE_
 
-#include <ctype.h>
 #include "Arithmetic.hpp"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+
 #include <list>
+#include <vector>
 using namespace std;
 class StringHandle {
 public:
@@ -35,6 +42,23 @@ public:
 	static list<string> split(string str, string pattern) {
 	    string::size_type pos;
 	    list<string> result;
+	    str += pattern;
+	    string::size_type size = str.size();
+
+	    for(string::size_type i = 0; i < size; i++) {
+	        pos = str.find(pattern, i);
+	        if( pos < size ) {
+	            string s = str.substr(i, pos - i);
+	            result.push_back(s);
+	            i = pos + pattern.size() - 1;
+	        }
+	    }
+	    return result;
+	}
+
+	static vector<string> splitWithVector(string str, string pattern) {
+	    string::size_type pos;
+	    vector<string> result;
 	    str += pattern;
 	    string::size_type size = str.size();
 

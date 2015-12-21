@@ -280,7 +280,7 @@ bool GetClientDirTask::GetReturnData(SCMD* scmd, char* buffer, int& len) {
 
 			snprintf(
 					buffer,
-					MAXLEN - 1,
+					MAX_BUFFER_LEN - 1,
 					"%s",
 					result.c_str()
 					);
