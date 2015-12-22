@@ -730,7 +730,6 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 	/* something can be recv here */
 	int fd = w->fd;
 
-	unsigned long start = GetTickCount();
 	do {
 		Message *m = GetIdleMessageList()->PopFront();
 		if( m == NULL ) {
@@ -848,7 +847,6 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 			}
 		}
 	} while( true );
-//	AddRecvTime(GetTickCount() - start);
 
 	LogManager::GetLogManager()->Log(
 			LOG_STAT,
@@ -921,8 +919,6 @@ void TcpServer::SendMessageImmediately(Message *m) {
 	int len = m->len;
 	int index = 0;
 	int fd = m->fd;
-
-	unsigned int start = GetTickCount();
 
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
@@ -1000,8 +996,6 @@ void TcpServer::SendMessageImmediately(Message *m) {
 			}
 		}
 	} while(true);
-
-//	AddSendTime(GetTickCount() - start);
 
 	CloseSocketIfNeedByHandleThread(m->fd);
 
@@ -1220,17 +1214,6 @@ void TcpServer::OnRecvMessage(Message *m) {
 	Arithmetic ari;
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
-			"TcpServer::OnRecvMessage( "
-			"tid : %d, "
-			"m->fd : [%d] "
-			")",
-			(int)syscall(SYS_gettid),
-			m->fd,
-			m->len
-			);
-
-	LogManager::GetLogManager()->Log(
-			LOG_STAT,
 			"TcpServer::OnRecvMessage( "
 			"tid : %d, "
 			"m->fd : [%d], "
