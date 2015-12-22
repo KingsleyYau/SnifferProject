@@ -105,8 +105,8 @@ private:
 	void StopEvio(ev_io *w);
 	void CloseSocketIfNeedByHandleThread(int fd);
 
-	void AddRecvTime(unsigned long time);
-	void AddSendTime(unsigned long time);
+//	void AddRecvTime(unsigned long time);
+//	void AddSendTime(unsigned long time);
 
 	void LockWatcherList();
 	void UnLockWatcherList();
@@ -170,21 +170,6 @@ private:
 	struct ev_loop *mLoop;
 
 	TcpServerObserver *mpTcpServerObserver;
-
-	/**
-	 * 总接收包时间
-	 */
-	unsigned int mTotalRecvTime;
-
-	/**
-	 * 总发送包时间
-	 */
-	unsigned int mTotalSendTime;
-
-	/**
-	 * 总时间
-	 */
-	unsigned int mTotalTime;
 
 	/**
 	 * 接收队列大小

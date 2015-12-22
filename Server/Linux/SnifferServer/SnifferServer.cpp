@@ -162,7 +162,7 @@ bool SnifferServer::Reload() {
 			mClientTcpServer.SetHandleSize(miTimeout * miMaxQueryPerThread);
 
 			LogManager::GetLogManager()->Log(
-					LOG_WARNING,
+					LOG_MSG,
 					"SnifferServer::Reload( "
 					"miPort : %d, "
 					"miMaxClient : %d, "
@@ -203,12 +203,15 @@ bool SnifferServer::OnAccept(TcpServer *ts, int fd, char* ip) {
 		client->SetClientCallback(this);
 		client->fd = fd;
 		client->ip = ip;
+		client->isOnline = true;
 
 		mClientMap.Lock();
 		mClientMap.Insert(fd, client);
 		mClientMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnAccept( "
+		LogManager::GetLogManager()->Log(
+				LOG_MSG,
+				"SnifferServer::OnAccept( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[客户端上线] "
@@ -217,7 +220,9 @@ bool SnifferServer::OnAccept(TcpServer *ts, int fd, char* ip) {
 				fd
 				);
 	} else if( ts == &mClientTcpInsideServer ) {
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnAccept( "
+		LogManager::GetLogManager()->Log(
+				LOG_MSG,
+				"SnifferServer::OnAccept( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[管理者请求开始] "
@@ -231,15 +236,6 @@ bool SnifferServer::OnAccept(TcpServer *ts, int fd, char* ip) {
 }
 
 void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
-			"tid : %d, "
-			"fd : [%d], "
-			"start "
-			")",
-			(int)syscall(SYS_gettid),
-			fd
-			);
-
 	if( ts == &mClientTcpServer ) {
 		// 客户端下线
 		mClientMap.Lock();
@@ -251,7 +247,9 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 		}
 		mClientMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
+		LogManager::GetLogManager()->Log(
+				LOG_MSG,
+				"SnifferServer::OnDisconnect( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[客户端下线] "
@@ -261,28 +259,12 @@ void SnifferServer::OnDisconnect(TcpServer *ts, int fd) {
 				);
 
 	} else if( ts == &mClientTcpInsideServer ) {
+
 	}
 
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnDisconnect( "
-			"tid : %d, "
-			"fd : [%d], "
-			"end "
-			")",
-			(int)syscall(SYS_gettid),
-			fd
-			);
 }
 
 void SnifferServer::OnClose(TcpServer *ts, int fd) {
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
-			"tid : %d, "
-			"fd : [%d], "
-			"start "
-			")",
-			(int)syscall(SYS_gettid),
-			fd
-			);
-
 	if( ts == &mClientTcpServer ) {
 		// 客户端下线
 		mClientMap.Lock();
@@ -297,7 +279,9 @@ void SnifferServer::OnClose(TcpServer *ts, int fd) {
 
 		mClientMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
+		LogManager::GetLogManager()->Log(
+				LOG_MSG,
+				"SnifferServer::OnClose( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[客户端下线, 所有数据包处理完成] "
@@ -320,7 +304,9 @@ void SnifferServer::OnClose(TcpServer *ts, int fd) {
 		}
 		mDataHttpParserMap.Unlock();
 
-		LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
+		LogManager::GetLogManager()->Log(
+				LOG_MSG,
+				"SnifferServer::OnClose( "
 				"tid : %d, "
 				"fd : [%d], "
 				"[管理者请求结束] "
@@ -331,26 +317,9 @@ void SnifferServer::OnClose(TcpServer *ts, int fd) {
 
 	}
 
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnClose( "
-			"tid : %d, "
-			"fd : [%d], "
-			"end "
-			")",
-			(int)syscall(SYS_gettid),
-			fd
-			);
 }
 
 void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
-	LogManager::GetLogManager()->Log(LOG_STAT, "SnifferServer::OnRecvMessage( "
-			"tid : %d, "
-			"m->fd : [%d], "
-			"start "
-			")",
-			(int)syscall(SYS_gettid),
-			m->fd
-			);
-
 	if( &mClientTcpServer == ts ) {
 		// 客户端服务请求
 		HandleRecvMessage(ts, m);
@@ -366,30 +335,9 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 
 	}
 
-	LogManager::GetLogManager()->Log(
-			LOG_STAT,
-			"SnifferServer::OnRecvMessage( "
-			"tid : %d, "
-			"m->fd : [%d], "
-			"end "
-			")",
-			(int)syscall(SYS_gettid),
-			m->fd
-			);
 }
 
 void SnifferServer::OnSendMessage(TcpServer *ts, Message *m) {
-	LogManager::GetLogManager()->Log(
-			LOG_STAT,
-			"SnifferServer::OnSendMessage( "
-			"tid : %d, "
-			"m->fd : [%d], "
-			"start "
-			")",
-			(int)syscall(SYS_gettid),
-			m->fd
-			);
-
 	if( ts == &mClientTcpInsideServer ) {
 		mDataHttpParserMap.Lock();
 		DataHttpParserMap::iterator itr = mDataHttpParserMap.Find(m->fd);
@@ -397,7 +345,7 @@ void SnifferServer::OnSendMessage(TcpServer *ts, Message *m) {
 			DataHttpParser* pDataHttpParser = itr->second;
 			if( pDataHttpParser->IsFinishSeq(m->seq) ) {
 				LogManager::GetLogManager()->Log(
-						LOG_STAT,
+						LOG_MSG,
 						"SnifferServer::OnSendMessage( "
 						"tid : %d, "
 						"m->fd : [%d], "
@@ -413,39 +361,21 @@ void SnifferServer::OnSendMessage(TcpServer *ts, Message *m) {
 		mDataHttpParserMap.Unlock();
 	}
 
-	LogManager::GetLogManager()->Log(
-			LOG_STAT,
-			"SnifferServer::OnSendMessage( "
-			"tid : %d, "
-			"m->fd : [%d], "
-			"end )",
-			(int)syscall(SYS_gettid),
-			m->fd
-			);
 }
 
 void SnifferServer::OnTimeoutMessage(TcpServer *ts, Message *m) {
 	LogManager::GetLogManager()->Log(
-			LOG_STAT,
+			LOG_MSG,
 			"SnifferServer::OnTimeoutMessage( "
 			"tid : %d, "
-			"m->fd : [%d], "
-			"start )",
+			"m->fd : [%d] "
+			")",
 			(int)syscall(SYS_gettid),
 			m->fd
 			);
 
 	HandleTimeoutMessage(ts, m);
 
-	LogManager::GetLogManager()->Log(
-			LOG_STAT,
-			"SnifferServer::OnTimeoutMessage( "
-			"tid : %d, "
-			"m->fd : [%d], "
-			"end )",
-			(int)syscall(SYS_gettid),
-			m->fd
-			);
 }
 
 void SnifferServer::StateRunnableHandle() {
@@ -481,7 +411,8 @@ void SnifferServer::StateRunnableHandle() {
 			mResponed = 0;
 			mCountMutex.unlock();
 
-			LogManager::GetLogManager()->Log(LOG_WARNING,
+			LogManager::GetLogManager()->Log(
+					LOG_WARNING,
 					"SnifferServer::StateRunnable( "
 					"tid : %d, "
 					"过去%u秒共收到%u个请求, "
@@ -520,6 +451,10 @@ bool SnifferServer::SendRequestMsg2Client(
 			);
 
 	bool bFlag = false;
+
+	if( !client->isOnline ) {
+		return bFlag;
+	}
 
 	Message* sm = mClientTcpServer.GetIdleMessageList()->PopFront();
 	if( sm != NULL ) {
@@ -629,7 +564,7 @@ bool SnifferServer::ReturnClientMsg2Request(
 			if( task != NULL ) {
 				// 会话中存在对应的命令号
 				LogManager::GetLogManager()->Log(
-						LOG_STAT,
+						LOG_MSG,
 						"SnifferServer::ReturnClientMsg2Request( "
 						"tid : %d, "
 						"client->fd : [%d], "
@@ -675,7 +610,7 @@ bool SnifferServer::ReturnClientMsg2Request(
 
 			} else {
 				LogManager::GetLogManager()->Log(
-						LOG_STAT,
+						LOG_MSG,
 						"SnifferServer::ReturnClientMsg2Request( "
 						"tid : %d, "
 						"client->fd : [%d], "
@@ -693,7 +628,7 @@ bool SnifferServer::ReturnClientMsg2Request(
 
 		} else {
 			LogManager::GetLogManager()->Log(
-					LOG_STAT,
+					LOG_MSG,
 					"SnifferServer::ReturnClientMsg2Request( "
 					"tid : %d, "
 					"client->fd : [%d], "
@@ -805,8 +740,7 @@ int SnifferServer::HandleRecvMessage(TcpServer *ts, Message *m) {
 			LOG_MSG,
 			"SnifferServer::HandleRecvMessage( "
 			"tid : %d, "
-			"m->fd: [%d], "
-			"start "
+			"m->fd: [%d] "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd
@@ -837,17 +771,6 @@ int SnifferServer::HandleRecvMessage(TcpServer *ts, Message *m) {
 //		mClientMap.Unlock();
 	}
 
-	LogManager::GetLogManager()->Log(
-			LOG_MSG,
-			"SnifferServer::HandleRecvMessage( "
-			"tid : %d, "
-			"m->fd: [%d], "
-			"end "
-			")",
-			(int)syscall(SYS_gettid),
-			m->fd
-			);
-
 	return ret;
 }
 
@@ -855,20 +778,10 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 	bool bFlag = false;
 
 	if( client != NULL && scmd != NULL ) {
-		LogManager::GetLogManager()->Log(
-				LOG_STAT,
-				"SnifferServer::OnParseCmd( "
-				"tid : %d, "
-				"client->fd: [%d] "
-				")",
-				(int)syscall(SYS_gettid),
-				client->fd
-				);
-
 		if( scmd->header.bNew ) {
 			// 客户端发起命令
 			LogManager::GetLogManager()->Log(
-					LOG_STAT,
+					LOG_MSG,
 					"SnifferServer::OnParseCmd( "
 					"tid : %d, "
 					"client->fd: [%d], "
@@ -932,7 +845,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 		} else {
 			// 客户端返回命令
 			LogManager::GetLogManager()->Log(
-					LOG_STAT,
+					LOG_MSG,
 					"SnifferServer::OnParseCmd( "
 					"tid : %d, "
 					"client->fd: [%d], "

@@ -8,6 +8,7 @@
 
 #include <SnifferCommandDef.h>
 
+#include <common/Arithmetic.hpp>
 #include <json/json/json.h>
 
 #include <stdio.h>
@@ -80,7 +81,6 @@ bool Send(int client, int i) {
 	char buffer[1024];
 
 	Json::Value root;
-	sprintf(buffer, "client_%d", i);
 	root[DEVICE_ID] = "";
 	root[VERSION] = "1.0.0";
 	root[CWD] = "/";
@@ -111,6 +111,8 @@ bool Send(int client, int i) {
 }
 
 bool Connect(int i) {
+	bool bFlag = false;
+
 	struct sockaddr_in mAddr;
 	bzero(&mAddr, sizeof(mAddr));
 	mAddr.sin_family = AF_INET;
@@ -122,7 +124,7 @@ bool Connect(int i) {
 	int mClient;
 	if ((mClient = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		printf("# buffer( Create socket error ) \n");
-		return false;
+		return bFlag;
 	}
 
 	setsockopt(mClient, IPPROTO_TCP, TCP_NODELAY, (const char *)&iFlag, sizeof(iFlag));
@@ -142,12 +144,12 @@ bool Connect(int i) {
 //				break;
 //			}
 //		}
+		bFlag = true;
 	} else {
 		printf("# Connnect( connnect fail ) \n");
-		return false;
 	}
 
 	close(mClient);
-	printf("# Connnect( exit ) \n");
-	return true;
+//	printf("# Connnect( exit ) \n");
+	return bFlag;
 }

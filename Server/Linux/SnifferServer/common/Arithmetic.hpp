@@ -40,7 +40,7 @@ public:
     
     size_t ChangeCharset(char* outbuf, size_t outbytes, const char* inbuf, const char* fromcode, const char* tocode, bool conv_begin = true);
 
-    static string AsciiToHexWithSep(const char* data, int i_in_len);
+    string AsciiToHexWithSep(const char* data, int i_in_len);
 
 protected:
     void encipher(void* aData, const void* aKey);
