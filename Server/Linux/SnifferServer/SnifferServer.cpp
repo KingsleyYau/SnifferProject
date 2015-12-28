@@ -331,6 +331,18 @@ void SnifferServer::OnRecvMessage(TcpServer *ts, Message *m) {
 
 	} else if( &mClientTcpInsideServer == ts ){
 		// 管理者服务请求
+		LogManager::GetLogManager()->Log(
+				LOG_MSG,
+				"SnifferServer::OnRecvMessage( "
+				"tid : %d, "
+				"fd : [%d], "
+				"buffer : [\n%s\n] "
+				")",
+				(int)syscall(SYS_gettid),
+				m->fd,
+				m->buffer
+				);
+
 		HandleInsideRecvMessage(ts, m);
 
 	}
@@ -784,7 +796,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 					LOG_MSG,
 					"SnifferServer::OnParseCmd( "
 					"tid : %d, "
-					"client->fd: [%d], "
+					"fd : [%d], "
 					"[客户端发起命令] "
 					")",
 					(int)syscall(SYS_gettid),
@@ -796,7 +808,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 
 			switch (scmd->header.scmdt) {
 			case SnifferTypeClientInfo: {
-				// 获取手机号和手机型号返回
+				// 客户端发送设备信息
 		        reader.parse(scmd->param, rootRecv);
 
 		        client->deviceId = rootRecv[DEVICE_ID].asString();
@@ -814,7 +826,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 						"SnifferServer::OnParseCmd( "
 						"tid : %d, "
 						"fd : [%d], "
-						"[获取手机号和手机型号返回] "
+						"[客户端发送设备信息] "
 						")",
 						(int)syscall(SYS_gettid),
 						client->fd
@@ -848,7 +860,7 @@ void SnifferServer::OnParseCmd(Client* client, SCMD* scmd) {
 					LOG_MSG,
 					"SnifferServer::OnParseCmd( "
 					"tid : %d, "
-					"client->fd: [%d], "
+					"fd : [%d], "
 					"[客户端返回命令] "
 					")",
 					(int)syscall(SYS_gettid),

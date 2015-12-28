@@ -588,9 +588,10 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 					w->fd
 					);
 			continue;
+
 		} else {
 			LogManager::GetLogManager()->Log(
-					LOG_STAT,
+					LOG_WARNING,
 					"TcpServer::Accept_Callback( "
 					"tid : %d, "
 					"fd : [%d], "
@@ -693,10 +694,12 @@ void TcpServer::Accept_Callback(ev_io *w, int revents) {
 					);
 			Disconnect(client);
 			OnDisconnect(client, NULL);
+
 		}
 	} else {
 		Disconnect(client);
 		OnDisconnect(client, NULL);
+
 	}
 
 	LogManager::GetLogManager()->Log(
@@ -807,6 +810,7 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 			if( ret != MAX_BUFFER_LEN - 1 ) {
 				break;
 			}
+
 		} else if( ret == 0 ) {
 			LogManager::GetLogManager()->Log(
 					LOG_STAT,
@@ -819,6 +823,7 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 					fd);
 			OnDisconnect(fd, m);
 			break;
+
 		} else {
 			if(errno == EAGAIN || errno == EWOULDBLOCK) {
 				LogManager::GetLogManager()->Log(
@@ -831,6 +836,7 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 						);
 				GetIdleMessageList()->PushBack(m);
 				break;
+
 			} else {
 				LogManager::GetLogManager()->Log(
 						LOG_STAT,
@@ -844,6 +850,7 @@ void TcpServer::Recv_Callback(ev_io *w, int revents) {
 						);
 				OnDisconnect(fd, m);
 				break;
+
 			}
 		}
 	} while( true );
@@ -920,17 +927,18 @@ void TcpServer::SendMessageImmediately(Message *m) {
 	int index = 0;
 	int fd = m->fd;
 
+	Arithmetic ari;
 	LogManager::GetLogManager()->Log(
 			LOG_MSG,
 			"TcpServer::SendMessageImmediately( "
 			"tid : %d, "
 			"fd : [%d], "
-			"message ( len : %d ) : [\n%s\n]"
+			"buffer( len : %d ) : [\n%s\n]"
 			")",
 			(int)syscall(SYS_gettid),
 			fd,
-			m->len,
-			buffer + index
+			len,
+			ari.AsciiToHexWithSep(buffer, len).c_str()
 			);
 	do {
 		int ret = send(fd, buffer + index, len - index, 0);
@@ -1217,7 +1225,7 @@ void TcpServer::OnRecvMessage(Message *m) {
 			"TcpServer::OnRecvMessage( "
 			"tid : %d, "
 			"m->fd : [%d], "
-			"message( len : %d ) : [\n%s\n] "
+			"buffer( len : %d ) : [\n%s\n] "
 			")",
 			(int)syscall(SYS_gettid),
 			m->fd,
