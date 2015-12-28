@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 	printf("############## client ############## \n");
 	Parse(argc, argv);
 	srand(time(0));
-	int i = 1;
+	int i = 0;
 	bool bFlag = true;
 
 	while( i < iTotal && bFlag ) {
@@ -81,7 +81,7 @@ bool Send(int client, int i) {
 	char buffer[1024];
 
 	Json::Value root;
-	root[DEVICE_ID] = "";
+	root[DEVICE_ID] = "123456";
 	root[VERSION] = "1.0.0";
 	root[CWD] = "/";
 	root[PHONE_INFO_BRAND] = "breand";
@@ -127,8 +127,19 @@ bool Connect(int i) {
 		return bFlag;
 	}
 
-	setsockopt(mClient, IPPROTO_TCP, TCP_NODELAY, (const char *)&iFlag, sizeof(iFlag));
+	// 重用socket
+	iFlag = 1;
+	setsockopt(mClient, IPPROTO_TCP, TCP_NODELAY, &iFlag, sizeof(iFlag));
 	setsockopt(mClient, SOL_SOCKET, SO_REUSEADDR, &iFlag, sizeof(iFlag));
+
+	// 禁止timewait
+	struct linger so_linger;
+	so_linger.l_onoff = true;
+	so_linger.l_linger = 0;
+	setsockopt(mClient, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
+
+	int iBuffSize = 0;
+	setsockopt(mClient, SOL_SOCKET, SO_SNDBUF, &iBuffSize, sizeof(iBuffSize));
 
 	if( connect(mClient, (struct sockaddr *)&mAddr, sizeof(mAddr)) != -1 ) {
 		printf("# Connnect( connect ok fd : %d ) \n", mClient);
@@ -146,7 +157,7 @@ bool Connect(int i) {
 //		}
 		bFlag = true;
 	} else {
-		printf("# Connnect( connnect fail ) \n");
+		printf("# Connnect( connnect fail, error : %d ) \n", errno);
 	}
 
 	close(mClient);

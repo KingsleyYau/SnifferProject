@@ -219,6 +219,7 @@ bool SnifferServer::OnAccept(TcpServer *ts, int fd, char* ip) {
 				(int)syscall(SYS_gettid),
 				fd
 				);
+
 	} else if( ts == &mClientTcpInsideServer ) {
 		LogManager::GetLogManager()->Log(
 				LOG_MSG,
@@ -284,7 +285,7 @@ void SnifferServer::OnClose(TcpServer *ts, int fd) {
 				"SnifferServer::OnClose( "
 				"tid : %d, "
 				"fd : [%d], "
-				"[客户端下线, 所有数据包处理完成] "
+				"[断开连接, 所有数据包处理完成] "
 				")",
 				(int)syscall(SYS_gettid),
 				fd
